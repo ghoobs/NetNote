@@ -37,3 +37,30 @@ Agenda Items:
  > These points bellow from the template are not applicable: 
  > Presentation of the current app to TA (? min )
  > Approval of last minutes - Did everyone read the minutes from the previous meeting ? (? min ) 
+
+Post-meeting 1 notes (minute taker): 
+
+- *Main focus assignment*
+  - teamwork is the back-bone of the course, the result of this will by design be the web-application.
+  - We have to work on both front-end and back-end equally, to avoid inequality.
+- *Knockout criteria*
+  - tasks that have to be done per week, found in bright space.
+  - this is the bare minimum, should be more realistically
+- *Code of conduct*
+  - Deadline next week friday, will discuss and write this next week
+  - Should contain various things related to teamwork/communication/goals
+- *Grading*
+  - Always check rubric, work by it, keep it in mind at all times.
+  - Goal of everyone is max grade, for this we will ensure solid foundation of the project and consistent teamwork and communication.
+- *Learning*
+  - Reading Java effects doc, fxml and about general concepts throughout the project, to ensure equal knowledge
+  - At first, we will divide tasks based on strengths, but we will learn from each other through feedback. 
+- *Checkstyle*
+  - General requirements for all classes, less strict than IP, but consistent and fair.
+  - Look at existing check style and follow equal structure.
+  - Javadoc for everything, we can auto generate that for the most part, as this is not AI it counts towards line goals.
+- *Unit testing*
+  - For max grade we should also test front-end (80% total line coverage for last year).
+  - We can get away with lower testing on parts of front-end by aiming for near 100% line coverage in back-end.
+- *General things*
+  - Generative AI can be used, but have to be cited properly, might not account for test line coverage, and does not count towards line goals.
