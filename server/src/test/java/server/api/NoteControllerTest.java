@@ -1,0 +1,87 @@
+package server.api;
+
+import commons.Note;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class NoteControllerTest {
+
+    private TestNoteRepository testNoteRepository;
+
+    private NoteController noteController;
+
+    @BeforeEach
+    void setUp() {
+        testNoteRepository = new TestNoteRepository();
+        noteController = new NoteController(testNoteRepository);
+    }
+
+    void putData(){
+        noteController.addNote(new Note("Title", "Contents"));
+    }
+
+    @Test
+    void getAllBasic() {
+        noteController.addNote(new Note("Title", "Contents"));
+        assertEquals(noteController.getAll(), List.of(new Note("Title", "Contents")));
+    }
+
+    @Test
+    void getAllAdvanced() {
+        noteController.addNote(new Note("Title", "Contents"));
+        noteController.addNote(new Note("Title2", "Contents2"));
+        assertTrue(noteController.getAll().stream().map(x -> x.title).anyMatch(x -> x.equals("Title")));
+
+        assertTrue(noteController.getAll().stream().map(x -> x.title).anyMatch(x -> x.equals("Title2")));
+    }
+    @Test
+    void getById() {
+        Note note = new Note("Title", "Contents");
+        noteController.addNote(note);
+        var id = note.id;
+        System.out.println(note.id);
+        System.out.println(noteController.getAll().stream().map(x->x.id).collect(Collectors.toList()));
+        assertEquals(noteController.getById(id).getBody(), note);
+    }
+
+    @Test
+    void getAllNames() {
+        noteController.addNote(new Note("Title", "Contents"));
+        noteController.addNote(new Note("Title2", "Contents2"));
+        noteController.addNote(new Note("Title3", "Contents3"));
+        assertTrue(noteController.getAllNames().contains("Title"));
+        assertTrue(noteController.getAllNames().contains("Title2"));
+        assertTrue(noteController.getAllNames().contains("Title3"));
+    }
+
+    @Test
+    void getAllIds() {
+        List<Note> notes = new ArrayList<>();
+        notes.add(new Note("Title1", "Contents1"));
+        notes.add(new Note("Title2", "Contents2"));
+        notes.add(new Note("Title3", "Contents3"));
+        for (Note note : notes) {
+            noteController.addNote(note);
+        }
+        Set<Long> ids = notes.stream().map(x->x.id).collect(Collectors.toSet());
+        assertEquals(new HashSet<>(noteController.getAllIds()), ids);
+    }
+
+    @Test
+    void addNote() {
+        Note note = new Note("Title", "Contents");
+        Note note2 = new Note("Title2", "Contents2");
+        noteController.addNote(note);
+        noteController.addNote(note2);
+        assertTrue(noteController.getAll().contains(note));
+        assertTrue(noteController.getAll().contains(note2));
+    }
+}
