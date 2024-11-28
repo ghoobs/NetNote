@@ -3,6 +3,7 @@ package server.api;
 import commons.Note;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -83,5 +84,15 @@ class NoteControllerTest {
         noteController.addNote(note2);
         assertTrue(noteController.getAll().contains(note));
         assertTrue(noteController.getAll().contains(note2));
+    }
+
+    @Test
+    void addNull(){
+        assertEquals(noteController.addNote(new Note(null,null)), ResponseEntity.badRequest().build());
+    }
+
+    @Test
+    void getNotAvailable(){
+        assertEquals(noteController.getById(1), ResponseEntity.notFound().build());
     }
 }
