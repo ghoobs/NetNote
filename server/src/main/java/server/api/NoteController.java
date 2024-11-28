@@ -69,7 +69,7 @@ public class NoteController {
     @GetMapping("id/{id}")
     public ResponseEntity<Note> getById(@PathVariable("id") long id){
         if (id < 0 || !notes.existsById(id))
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(notes.findById(id).get());
     }
