@@ -16,12 +16,6 @@
 		<version.jfx>23.0.1</version.jfx>
 	</properties>
 	<!-- JavaFX markdown -->
-	<repositories>
-		<repository>
-			<id>jpro-sandec-repository</id>
-			<url>https://sandec.jfrog.io/artifactory/repo/</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -75,9 +69,9 @@
 
 		<!-- JavaFX markdown -->
 		<dependency>
-			<groupId>one.jpro.platform</groupId>
-			<artifactId>jpro-mdfx</artifactId>
-			<version>0.5.0</version>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-all</artifactId>
+			<version>0.64.8</version>
 		</dependency>
 
 		<!-- test -->
