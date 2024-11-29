@@ -1,4 +1,5 @@
 package commons;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -9,6 +10,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * Note class.
  * Data oriented for database usage.
  */
+// Entity needed for Spring to be able to create a Database
+@Entity
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -16,6 +19,10 @@ public class Note {
 
     public String title;
     public String text;
+
+    // Needed for Spring to initialize an object
+    // Otherwise the runtime throws an error
+    private Note(){}
 
     /**
      * Instantiates a new Note with a title and text.
