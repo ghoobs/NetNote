@@ -29,6 +29,7 @@ public class MarkdownPreviewCtrl {
         Platform.runLater(()-> {
             MutableDataSet options = new MutableDataSet();
 
+            // enable the extensions to make the markdown a bit more useful
             options.set(Parser.EXTENSIONS, Arrays.asList(
                     TablesExtension.create(),
                     StrikethroughExtension.create(),
@@ -37,12 +38,22 @@ public class MarkdownPreviewCtrl {
                     SuperscriptExtension.create(),
                     FootnoteExtension.create()
             ));
+            // to avoid the stupid default behaviour where a new line doesn't always add a new line
             options.set(HtmlRenderer.SOFT_BREAK, "<br />\n");
 
+            // parse options
             Parser parser = Parser.builder(options).build();
+
+            // create the html renderer
             HtmlRenderer renderer = HtmlRenderer.builder(options).build();
+
+            // parse the markdown contents
             Node document = parser.parse(noteContents.getText());
+
+            // convert the markdown to HTML
             String html = renderer.render(document);
+
+            // finally, display the HTML
             markdownView.getEngine().loadContent(html);
         });
     }
