@@ -2,6 +2,7 @@ package server.api;
 
 import java.util.List;
 
+import commons.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,7 @@ import server.database.NoteRepository;
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
-    
+
     private final NoteRepository notes;
 
     /**
@@ -72,6 +73,18 @@ public class NoteController {
             return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(notes.findById(id).get());
+    }
+
+    /**
+     * Get a list of all pairs of titles + ids.
+     *
+     * @return the list
+     */
+    @GetMapping("/list")
+    public List<Pair<String, Long>> getAllNamesIds(){
+        return getAll().stream()
+                .map(note -> new Pair<String, Long>(note.title, note.id))
+                .toList();
     }
 
     /**

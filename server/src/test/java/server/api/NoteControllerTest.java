@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Note;
+import commons.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,15 @@ class NoteControllerTest {
         System.out.println(note.id);
         System.out.println(noteController.getAll().stream().map(x->x.id).collect(Collectors.toList()));
         assertEquals(noteController.getById(id).getBody(), note);
+    }
+
+    @Test
+    void getAllNamesIds(){
+        Note note = new Note("Title", "Contents");
+        Pair<String, Long> pair = new Pair<>(note.title, note.id);
+        noteController.addNote(note);
+
+        assertTrue(noteController.getAllNamesIds().contains(pair));
     }
 
     @Test
