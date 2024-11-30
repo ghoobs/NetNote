@@ -3,12 +3,7 @@ package server.api;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import commons.Note;
 
@@ -32,7 +27,7 @@ import server.database.NoteRepository;
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
-    
+
     private final NoteRepository notes;
 
     /**
@@ -40,21 +35,21 @@ public class NoteController {
      *
      * @param repo the repo
      */
-    public NoteController(NoteRepository repo){
+    public NoteController(NoteRepository repo) {
         this.notes = repo;
     }
 
 
     /**
      * this returns all the Notes in complete form
-     *
+     * <p>
      * Probably not what you want (Just the names and ids)
-     *
+     * <p>
      * return All Notes with all Contents
      *
      * @return all the notes
      */
-    @GetMapping(path = {"","/"})
+    @GetMapping(path = {"", "/"})
     public List<Note> getAll() {
         return notes.findAll();
     }
@@ -67,7 +62,7 @@ public class NoteController {
      * @return the by id
      */
     @GetMapping("id/{id}")
-    public ResponseEntity<Note> getById(@PathVariable("id") long id){
+    public ResponseEntity<Note> getById(@PathVariable("id") long id) {
         if (id < 0 || !notes.existsById(id))
             return ResponseEntity.notFound().build();
 
@@ -80,7 +75,7 @@ public class NoteController {
      * @return the list
      */
     @GetMapping("/names")
-    public List<String> getAllNames(){
+    public List<String> getAllNames() {
         return getAll().stream().map(note -> note.title).toList();
     }
 
@@ -91,7 +86,7 @@ public class NoteController {
      * @return the list
      */
     @GetMapping("/ids")
-    public List<Long> getAllIds(){
+    public List<Long> getAllIds() {
         return getAll().stream().map(note -> note.id).toList();
     }
 
@@ -101,15 +96,34 @@ public class NoteController {
      * @param noteAdding the note adding
      * @return the response entity
      */
-    @PostMapping(path = { "", "/" })
-    public ResponseEntity<Note> addNote(@RequestBody Note noteAdding){
+    @PostMapping(path = {"", "/"})
+    public ResponseEntity<Note> addNote(@RequestBody Note noteAdding) {
 
-        if (noteAdding.text==null || noteAdding.title == null)
+        if (noteAdding.text == null || noteAdding.title == null)
             return ResponseEntity.badRequest().build();
 
         Note savedNote = notes.save(noteAdding);
         return ResponseEntity.ok(savedNote);
     }
 
+    /**
+     * Updates an existing note in the database.
+     * @param id          the ID of the note to be updated
+     * @param updatedNote the {@link Note} object containing the updated title and content
+     * @return a ResponseEntity containing the updated object if the operation is successful,
+     *         or a ResponseEntity with a bad request status if the note does not exist
+     */
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note updatedNote) {
+        if (!notes.existsById(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+        Note existingNote = notes.findById(id).get();
+        existingNote.title = updatedNote.title;
+        existingNote.text = updatedNote.text;
+        notes.save(existingNote);
+        return ResponseEntity.ok(existingNote);
+    }
 
 }
