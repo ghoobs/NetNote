@@ -1,4 +1,5 @@
 package commons;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,9 +21,14 @@ public class Note {
     public String title;
     public String text;
 
+    /**
+     * Instantiates a new Note
+     * Needed for Spring
+     */
     // Needed for Spring to initialize an object
     // Otherwise the runtime throws an error
-    private Note(){}
+    public Note() {
+    }
 
     /**
      * Instantiates a new Note with a title and text.
@@ -37,6 +43,7 @@ public class Note {
 
     /**
      * Compares two Notes
+     *
      * @param obj other
      * @return true if the contents are equal
      */
@@ -47,6 +54,7 @@ public class Note {
 
     /**
      * Generates a hash code
+     *
      * @return a unique integer based off the contents of this Note
      */
     @Override
@@ -56,6 +64,7 @@ public class Note {
 
     /**
      * A preview of the contents of this note
+     *
      * @return title of the Note and a part of the contents
      */
     @Override
@@ -70,13 +79,64 @@ public class Note {
         if (text.isEmpty()) {
             builder += "*No contents*";
         } else {
-            String[] lines =  text.split("\\n");
-            String block =lines[0];
+            String[] lines = text.split("\\n");
+            String block = lines[0];
             builder += block.substring(0, Math.min(30, block.length()));
             if (text.length() >= 30 || lines.length > 1) {
                 builder += "...";
             }
         }
-        return builder ;
+        return builder;
     }
+
+    /**
+     * Getter for the note's title
+     *
+     * @return String of the note title.
+     */
+
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Getter for the note's text
+     *
+     * @return String of the note's text.
+     */
+
+    public String getText() {
+        return text;
+    }
+
+    /**
+     * Getter for the note's id
+     *
+     * @return long of the note's id.
+     */
+
+    public long getId() {
+        return id;
+    }
+
+    /**
+     * Setter for the note's text
+     *
+     * @param text String of the new text.
+     */
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    /**
+     * Setter for the note's title
+     *
+     * @param title String of the new title.
+     */
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
 }
