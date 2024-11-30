@@ -25,7 +25,7 @@ public class MyModule implements Module {
     @Override
     public void configure(Binder binder) {
         //binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
-        binder.bind(Main2Ctrl.class).in(Scopes.SINGLETON);
+        binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
         //binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
         binder.bind(NoteOverviewCtrl.class).in(Scopes.SINGLETON);
         //binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
