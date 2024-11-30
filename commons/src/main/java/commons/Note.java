@@ -40,15 +40,6 @@ public class Note {
         this.title = title;
         this.text = text;
     }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getText() {
-        return text;
-    }
-
     /**
      * Compares two Notes
      *
