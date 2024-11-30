@@ -1,6 +1,8 @@
 package server.api;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ import server.database.NoteRepository;
  * Optional until we have agreed on the list ->
  * /api/notes/names : List of names of notes
  * /api/notes/ids : List of ids of notes
+ * /api/notes/search
  */
 @RestController
 @RequestMapping("/api/notes")
@@ -88,6 +91,21 @@ public class NoteController {
     @GetMapping("/ids")
     public List<Long> getAllIds() {
         return getAll().stream().map(note -> note.id).toList();
+    }
+
+    /**
+     * Search through notes using a keyword/string
+     * Is case-insensitive to allow for more keywords
+     * @param keyword the keyword used to search through the notes
+     * @return the notes that have the keyword in title or contents
+     */
+    @GetMapping("/search")
+    public List<Note> searchNotes(@RequestParam String keyword){
+            List<Note> allNotes = notes.findAll();
+            return allNotes.stream()
+                    .filter(note -> note.getTitle().toLowerCase().contains(keyword.toLowerCase())
+                            || note.getText().toLowerCase().contains(keyword.toLowerCase()))
+                    .collect(Collectors.toList());
     }
 
     /**
