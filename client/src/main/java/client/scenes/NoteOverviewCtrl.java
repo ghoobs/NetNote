@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils2 server;
-    private final Main2Ctrl mainCtrl;
+    private final MainCtrl mainCtrl;
     private ObservableList<Note> data;
     @FXML
     private ListView<Note> listNotes;
@@ -44,7 +44,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
 
     @Inject
-    public NoteOverviewCtrl(ServerUtils2 server, Main2Ctrl mainCtrl) {
+    public NoteOverviewCtrl(ServerUtils2 server, MainCtrl mainCtrl) {
         this.server = server;
         this.mainCtrl = mainCtrl;
     }
