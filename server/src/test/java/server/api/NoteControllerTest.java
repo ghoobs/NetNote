@@ -105,4 +105,30 @@ class NoteControllerTest {
     void getNotAvailable(){
         assertEquals(noteController.getById(1), ResponseEntity.notFound().build());
     }
+
+    @Test
+    void searchNotesContents() {
+        Note note1 = new Note("Title1", "1");
+        Note note2 = new Note("Title2", "2");
+        Note note3 = new Note("Title3", "3");
+        noteController.addNote(note1);
+        noteController.addNote(note2);
+        noteController.addNote(note3);
+
+        List<Note> searchedNotes = noteController.searchNotes("2");
+        assertEquals(1, searchedNotes.size());
+        assertTrue(searchedNotes.contains(note2));
+    }
+
+    @Test
+    void searchNotesTitle() {
+        Note note1 = new Note("Title", "1");
+        Note note2 = new Note("Title", "2");
+        noteController.addNote(note1);
+        noteController.addNote(note2);
+
+        List<Note> searchedNotes = noteController.searchNotes("Title");
+        assertEquals(2, searchedNotes.size());
+        assertTrue(searchedNotes.contains(note1) && searchedNotes.contains(note2));
+    }
 }

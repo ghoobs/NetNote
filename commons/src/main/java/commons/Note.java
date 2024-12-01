@@ -40,7 +40,6 @@ public class Note {
         this.title = title;
         this.text = text;
     }
-
     /**
      * Compares two Notes
      *
