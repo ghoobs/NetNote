@@ -51,6 +51,7 @@ public class Note {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
 
+
     /**
      * Generates a hash code
      *
