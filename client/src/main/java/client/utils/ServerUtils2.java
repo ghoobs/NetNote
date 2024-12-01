@@ -5,6 +5,7 @@ import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
+import org.checkerframework.checker.units.qual.C;
 import org.glassfish.jersey.client.ClientConfig;
 
 import java.io.BufferedReader;
@@ -98,6 +99,14 @@ public class ServerUtils2 {
                 .target(SERVER).path("api/notes/" + note.getId()) // Endpoint for updating a note
                 .request(APPLICATION_JSON) //
                 .put(Entity.entity(note, APPLICATION_JSON), Note.class);
+    }
+
+    public List<Note> searchNotes(String keyword) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/notes/search")
+                .queryParam("keyword", keyword)
+                .request(APPLICATION_JSON)
+                .get(new GenericType<List<Note>>() {});
     }
 
 }

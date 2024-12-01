@@ -14,7 +14,10 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 
 import java.net.URL;
+//import java.util.Arrays;
+//import java.util.List;
 import java.util.ResourceBundle;
+//import java.util.stream.Collectors;
 
 public class NoteOverviewCtrl implements Initializable {
 
@@ -24,7 +27,7 @@ public class NoteOverviewCtrl implements Initializable {
     @FXML
     private ListView<Note> listNotes;
     @FXML
-    private TextArea noteWriting;
+    TextArea noteWriting;
     @FXML
     private TextField titleWriting;
     @FXML
@@ -35,6 +38,12 @@ public class NoteOverviewCtrl implements Initializable {
     private Button editButton;
     @FXML
     private Button addButton;
+//    @FXML
+//    private TextField searchBar;
+//    @FXML
+//    private Button searchButton;
+//    @FXML
+//    private Button deleteButton;
 
     /**
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
@@ -66,7 +75,17 @@ public class NoteOverviewCtrl implements Initializable {
         noteWriting.setEditable(false);
         titleWriting.setEditable(false);
         listNotes.setOnMouseClicked(this::onNoteClicked);
+
+//        searchButton.setOnAction(event -> searchNotes());
         refresh();
+    }
+
+    /**
+     * Displays the note adding scene to create a new note
+     */
+
+    public void addNote() {
+        mainCtrl.showAdd();
     }
 
     /**
@@ -74,7 +93,7 @@ public class NoteOverviewCtrl implements Initializable {
      * If an error occurs during the server update, an error alert is displayed.
      */
 
-    public void addNote() {
+    public void addingNote() {
         Note newNote = new Note("New Note", "");
         try {
             server.addNote(newNote);
@@ -96,11 +115,19 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
+     * Displays the note saving scene to save the current note
+     */
+
+    public void saveNote() {
+        mainCtrl.showSave();
+    }
+
+    /**
      * Saves changes made to the selected note and updates the server when the "Save" button is clicked.
      * Ensures the note is set to non-editable mode after saving.
      */
 
-    public void saveNote() {
+    public void savingNote() {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
         if (noteSelected != null) {
             noteSelected.setText(noteWriting.getText());
@@ -118,13 +145,23 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Enables editing mode for the currently selected note when the "Edit" button is clicked.
+     * Displays the note editing scene to start editing the note
      */
 
     public void editNote() {
+        mainCtrl.showEdit();
+    }
+
+
+    /**
+     * Enables editing mode for the currently selected note when the "Edit" button is clicked.
+     */
+
+    public void editingNote() {
         noteWriting.setEditable(true);
         titleWriting.setEditable(true);
     }
+
 
     /**
      * Handles note selection in the list and displays the selected note's details.
@@ -151,5 +188,4 @@ public class NoteOverviewCtrl implements Initializable {
         data = FXCollections.observableList(notes);
         listNotes.setItems(data);
     }
-
 }
