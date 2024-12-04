@@ -2,6 +2,7 @@ package server.api;
 
 import commons.Note;
 import commons.Pair;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class NoteControllerTest {
 
+    //If you implement
     private TestNoteRepository testNoteRepository;
 
     private NoteController noteController;
@@ -130,5 +132,29 @@ class NoteControllerTest {
         List<Note> searchedNotes = noteController.searchNotes("Title");
         assertEquals(2, searchedNotes.size());
         assertTrue(searchedNotes.contains(note1) && searchedNotes.contains(note2));
+    }
+
+
+    @Test
+    void deleteNotesTest(){
+
+
+        Note note1 = new Note("Title", "1");
+        Note note2 = new Note("Title", "2");
+
+        noteController.addNote(note1);
+        noteController.addNote(note2);
+
+        assertEquals(ResponseEntity.notFound().build(), noteController.delete((long) 100));
+        assertEquals(ResponseEntity.ok().build(), noteController.delete((long)0));
+
+
+
+        assertEquals(note2, noteController.getById(1).getBody());
+
+
+
+        assertEquals(ResponseEntity.notFound().build(), noteController.getById((long)0));
+
     }
 }

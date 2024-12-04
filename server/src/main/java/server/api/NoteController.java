@@ -44,6 +44,18 @@ public class NoteController {
     }
 
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Note> delete(@PathVariable("id") Long id){
+
+        if (!notes.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        notes.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+
     /**
      * this returns all the Notes in complete form
      * <p>
