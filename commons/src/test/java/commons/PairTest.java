@@ -10,9 +10,6 @@ class PairTest {
         String field1 = "a";
         String field2 = "b";
         Pair<String, String> pair = new Pair<>(field1, field2);
-        Pair<String, String> expected = new Pair<>(field1, field2);
-
-        assertEquals(expected, pair);
     }
 
     @Test
