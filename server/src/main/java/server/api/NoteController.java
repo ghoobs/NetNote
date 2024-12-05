@@ -162,10 +162,9 @@ public class NoteController {
         if (!notes.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
-        Note existingNote = notes.findById(id).get();
+        Note existingNote = notes.getReferenceById(id);
         existingNote.title = updatedNote.title;
         existingNote.text = updatedNote.text;
-        notes.save(existingNote);
         return ResponseEntity.ok(existingNote);
     }
 

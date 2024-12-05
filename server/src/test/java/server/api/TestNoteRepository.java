@@ -60,7 +60,7 @@ public class TestNoteRepository implements NoteRepository {
 
     @Override
     public Note getReferenceById(Long aLong) {
-        return null;
+        return notes.getOrDefault(aLong, null);
     }
 
     @Override
