@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.web.WebView?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.MarkdownPreviewCtrl">
+    <SplitPane orientation="HORIZONTAL">
+        <TextArea fx:id="noteContents" onKeyTyped="#updateMarkdown"/>
+        <WebView fx:id="markdownView"/>
+    </SplitPane>
+</AnchorPane>

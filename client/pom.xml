@@ -15,6 +15,7 @@
 		<version.jersey>3.1.9</version.jersey>
 		<version.jfx>23.0.1</version.jfx>
 	</properties>
+	<!-- JavaFX markdown -->
 
 	<dependencies>
 		<dependency>
@@ -64,6 +65,13 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-web</artifactId>
 			<version>${version.jfx}</version>
+		</dependency>
+
+		<!-- JavaFX markdown -->
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-all</artifactId>
+			<version>0.64.8</version>
 		</dependency>
 
 		<!-- test -->
