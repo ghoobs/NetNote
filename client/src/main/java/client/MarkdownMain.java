@@ -15,9 +15,9 @@
  */
 package client;
 
-import client.scenes.AddQuoteCtrl;
+import client.scenes.AddCtrl;
 import client.scenes.MarkdownPreviewCtrl;
-import client.scenes.QuoteOverviewCtrl;
+import client.scenes.NoteOverviewCtrl;
 import client.utils.ServerUtils;
 import com.google.inject.Injector;
 import javafx.application.Application;
