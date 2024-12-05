@@ -28,3 +28,26 @@
 - Planned meeting duration != actual duration ? Where/why did you mis - estimate? (1 min)
 - Question round : Does anyone have anything to add before the meeting closes? (1 min)
 - Closure (1 min)
+
+
+### Minute Taker notes
+
+- Announcment from TA (**5 mins**)
+    - The knockout criteria from week 4 and week 5 are merged
+    - There are additional criteria for each week
+    - Week 4: Buddy check
+    - Week 5: Tasks and planning
+- Points on the project (**6 mins**)
+    - Brief discussion on how MD links are going to be possible
+    - Discussion on adding collections
+    - Bugs: It appears that big contents are not saved
+- Information from TA (**2 mins 30 secs**)
+    - For max grade issues and merge requests must be connected
+    - Information on how it is supposed to be done
+- Future additions (**5 mins**)
+    - Completing the MD
+    - Accesibility settings (e.g. Keyboard shortcuts)
+    - Eventual role switch
+    - Adding new issues
+- Showing the Product (**3 mins**)
+- Brief discussion on the design of alerts (**1 min**)
