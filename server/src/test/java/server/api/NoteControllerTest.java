@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NoteControllerTest {
 
+    //If you implement
     private TestNoteRepository testNoteRepository;
 
     private NoteController noteController;
@@ -26,7 +28,7 @@ class NoteControllerTest {
         noteController = new NoteController(testNoteRepository);
     }
 
-    void putData(){
+    void putData() {
         noteController.addNote(new Note("Title", "Contents"));
     }
 
@@ -44,18 +46,19 @@ class NoteControllerTest {
 
         assertTrue(noteController.getAll().stream().map(x -> x.title).anyMatch(x -> x.equals("Title2")));
     }
+
     @Test
     void getById() {
         Note note = new Note("Title", "Contents");
         noteController.addNote(note);
         var id = note.id;
         System.out.println(note.id);
-        System.out.println(noteController.getAll().stream().map(x->x.id).collect(Collectors.toList()));
+        System.out.println(noteController.getAll().stream().map(x -> x.id).collect(Collectors.toList()));
         assertEquals(noteController.getById(id).getBody(), note);
     }
 
     @Test
-    void getAllNamesIds(){
+    void getAllNamesIds() {
         Note note = new Note("Title", "Contents");
         Pair<String, Long> pair = new Pair<>(note.title, note.id);
         noteController.addNote(note);
@@ -82,7 +85,7 @@ class NoteControllerTest {
         for (Note note : notes) {
             noteController.addNote(note);
         }
-        Set<Long> ids = notes.stream().map(x->x.id).collect(Collectors.toSet());
+        Set<Long> ids = notes.stream().map(x -> x.id).collect(Collectors.toSet());
         assertEquals(new HashSet<>(noteController.getAllIds()), ids);
     }
 
@@ -97,12 +100,12 @@ class NoteControllerTest {
     }
 
     @Test
-    void addNull(){
-        assertEquals(noteController.addNote(new Note(null,null)), ResponseEntity.badRequest().build());
+    void addNull() {
+        assertEquals(noteController.addNote(new Note(null, null)), ResponseEntity.badRequest().build());
     }
 
     @Test
-    void getNotAvailable(){
+    void getNotAvailable() {
         assertEquals(noteController.getById(1), ResponseEntity.notFound().build());
     }
 
@@ -130,5 +133,47 @@ class NoteControllerTest {
         List<Note> searchedNotes = noteController.searchNotes("Title");
         assertEquals(2, searchedNotes.size());
         assertTrue(searchedNotes.contains(note1) && searchedNotes.contains(note2));
+    }
+
+
+    @Test
+    void deleteNotesTest() {
+
+
+        Note note1 = new Note("Title", "1");
+        Note note2 = new Note("Title", "2");
+
+        noteController.addNote(note1);
+        noteController.addNote(note2);
+
+        assertEquals(ResponseEntity.notFound().build(), noteController.delete((long) 100));
+        assertEquals(ResponseEntity.ok().build(), noteController.delete((long) 0));
+
+
+        assertEquals(note2, noteController.getById(1).getBody());
+
+
+        assertEquals(ResponseEntity.notFound().build(), noteController.getById((long) 0));
+
+    }
+
+
+    @Test
+    void editNotesTest(){
+
+        Note note1 = new Note("Title", "1");
+        Note note2 = new Note("Title", "2");
+
+        noteController.addNote(note1);
+        noteController.addNote(note2);
+
+        assertEquals(note2 , noteController.getById(1).getBody());
+
+        var updatedNote = new Note("Title2", "2");
+
+
+        updatedNote = noteController.updateNote(1,updatedNote).getBody();
+
+        assertEquals(updatedNote, noteController.getById(1).getBody());
     }
 }

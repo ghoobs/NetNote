@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Note;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,15 +9,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery;
 import server.database.NoteRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 public class TestNoteRepository implements NoteRepository {
 
-    private final ArrayList<Note> notes = new ArrayList<>();
-
+    private final HashMap<Long, Note> notes = new HashMap<>();
+    private int counter = 0;
 
 
     @Override
@@ -56,12 +55,12 @@ public class TestNoteRepository implements NoteRepository {
 
     @Override
     public Note getById(Long aLong) {
-        return notes.get(Math.toIntExact( aLong));
+        return notes.getOrDefault(aLong, null);
     }
 
     @Override
     public Note getReferenceById(Long aLong) {
-        return null;
+        return notes.getOrDefault(aLong, null);
     }
 
     @Override
@@ -81,7 +80,7 @@ public class TestNoteRepository implements NoteRepository {
 
     @Override
     public List<Note> findAll() {
-        return notes;
+        return notes.values().stream().toList();
     }
 
     @Override
@@ -91,20 +90,23 @@ public class TestNoteRepository implements NoteRepository {
 
     @Override
     public <S extends Note> S save(S entity) {
-        entity.id = notes.size();
-        notes.add(entity);
-        return (S) entity;
+        entity.id = counter++;
+        notes.put(entity.id, entity);
+        return entity;
     }
 
     @Override
     public Optional<Note> findById(Long aLong) {
-        return notes.get(Math.toIntExact(aLong))==null?Optional.empty():Optional.of(notes.get(Math.toIntExact(aLong)));
+        if (notes.containsKey(aLong)) {
+            return Optional.of(notes.get(aLong));
+        }
+        return Optional.empty();
     }
+
 
     @Override
     public boolean existsById(Long aLong) {
-        System.out.println(notes.size());
-        return aLong>=0 && aLong<notes.size();
+        return notes.containsKey(aLong);
     }
 
     @Override
@@ -114,6 +116,8 @@ public class TestNoteRepository implements NoteRepository {
 
     @Override
     public void deleteById(Long aLong) {
+
+        notes.remove(aLong);
 
     }
 

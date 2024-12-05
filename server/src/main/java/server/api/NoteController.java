@@ -44,6 +44,18 @@ public class NoteController {
     }
 
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Note> delete(@PathVariable("id") Long id){
+
+        if (!notes.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        notes.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+
     /**
      * this returns all the Notes in complete form
      * <p>
@@ -150,10 +162,9 @@ public class NoteController {
         if (!notes.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
-        Note existingNote = notes.findById(id).get();
+        Note existingNote = notes.getReferenceById(id);
         existingNote.title = updatedNote.title;
         existingNote.text = updatedNote.text;
-        notes.save(existingNote);
         return ResponseEntity.ok(existingNote);
     }
 
