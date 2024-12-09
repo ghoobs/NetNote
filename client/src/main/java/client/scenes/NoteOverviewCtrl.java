@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import com.google.inject.Inject;
 import commons.Note;
@@ -23,6 +24,7 @@ public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
+    private final MarkdownHandler mdHandler;
     private ObservableList<Note> data;
     @FXML
     private ListView<Note> listNotes;
@@ -53,10 +55,14 @@ public class NoteOverviewCtrl implements Initializable {
      */
 
     @Inject
-    public NoteOverviewCtrl(ServerUtils2 server, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerUtils2 server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
         this.server = server;
+        this.mdHandler = mdHandler;
         this.mainCtrl = mainCtrl;
+
     }
+
+
 
     /**
      * Initializes the note overview interface.
@@ -76,6 +82,8 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(false);
         listNotes.setOnMouseClicked(this::onNoteClicked);
 
+        mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
+        mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
         refresh();
     }
@@ -162,6 +170,12 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(true);
     }
 
+    /**
+     * Updates markdown when input is typed into note contents
+     */
+    public void updateMarkdown() {
+        mdHandler.asyncMarkdownUpdate(markDownView, noteWriting.getText());
+    }
 
     /**
      * Handles note selection in the list and displays the selected note's details.
