@@ -26,6 +26,7 @@ public class NoteOverviewCtrl implements Initializable {
     private final MainCtrl mainCtrl;
     private final MarkdownHandler mdHandler;
     private ObservableList<Note> data;
+
     @FXML
     private ListView<Note> listNotes;
     @FXML
@@ -51,6 +52,7 @@ public class NoteOverviewCtrl implements Initializable {
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
      *
      * @param server   the server utils instance for interacting with the server
+     * @param mdHandler the markdown renderer instance to update the webview asynchronously
      * @param mainCtrl the main controller of the application
      */
 
@@ -59,7 +61,6 @@ public class NoteOverviewCtrl implements Initializable {
         this.server = server;
         this.mdHandler = mdHandler;
         this.mainCtrl = mainCtrl;
-
     }
 
 
@@ -142,7 +143,6 @@ public class NoteOverviewCtrl implements Initializable {
             noteSelected.setTitle(titleWriting.getText());
             try {
                 server.updateNote(noteSelected);
-
             } catch (Exception e) {
 
             }

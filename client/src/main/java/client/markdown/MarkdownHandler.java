@@ -20,7 +20,6 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MarkdownHandler {
@@ -74,6 +73,7 @@ public class MarkdownHandler {
 
     /**
      * Creates the parser and html renderer necessary to allow creation of HTML data from markdown
+     * @param extensions List of markdown extensions to load
      */
     public void createMdParser(List<Extension> extensions){
         MutableDataSet options = new MutableDataSet();
