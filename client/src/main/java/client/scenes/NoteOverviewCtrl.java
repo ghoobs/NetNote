@@ -84,6 +84,10 @@ public class NoteOverviewCtrl implements Initializable {
         listNotes.setOnMouseClicked(this::onNoteClicked);
 
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
+        mdHandler.setWebEngine(markDownView.getEngine());
+        mdHandler.setHyperlinkCallback((String link)->{
+            System.out.println("Webpage: " + link);
+        });
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
         refresh();
@@ -174,7 +178,7 @@ public class NoteOverviewCtrl implements Initializable {
      * Updates markdown when input is typed into note contents
      */
     public void updateMarkdown() {
-        mdHandler.asyncMarkdownUpdate(markDownView, noteWriting.getText());
+        mdHandler.asyncMarkdownUpdate(noteWriting.getText());
     }
 
     /**

@@ -14,19 +14,24 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import com.vladsch.flexmark.util.misc.Extension;
 import javafx.application.Platform;
-import javafx.scene.web.WebView;
+import javafx.concurrent.Worker;
+import javafx.scene.web.WebEngine;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
 
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 public class MarkdownHandler {
     // markdown related objects
-    private WebView webView;
+    private WebEngine webEngine;
     private Parser mdParser;
     private HtmlRenderer mdRenderer;
+    private String htmlCache;
+
+    private Consumer<String> hyperlinkCallback;
 
     // asynchronous thread related objects
     private Thread asyncMarkdownWorker;
@@ -58,9 +63,15 @@ public class MarkdownHandler {
         mdReadyToDisplay = new ArrayDeque<>();
     }
 
-    public void asyncMarkdownUpdate(WebView webview, String mdText) {
+    /**
+     * Loads the provided markdown into the webview asynchronously
+     * @param mdText Markdown text to load
+     */
+    public void asyncMarkdownUpdate(String mdText) {
+        if (webEngine == null) {
+            throw new IllegalStateException("WebEngine has not been set!");
+        }
         mdQueueLock.lock();
-        this.webView = webview;
         if (!mdUnrenderedTextQueue.isEmpty()) {
             mdUnrenderedTextQueue.pop();
         }
@@ -91,15 +102,42 @@ public class MarkdownHandler {
     }
 
     /**
+     * Sets the WebEngine
+     * @param webEngine WebEngine corresponding to the WebView where the markdown should be loaded.
+     */
+    public void setWebEngine(WebEngine webEngine) {
+        if (this.webEngine == webEngine) {
+            return;
+        }
+        this.webEngine = webEngine;
+        createWebEngineStateHandler();
+    }
+
+    /**
+     * Allows manually determining what occurs upon clicking a hyperlink. If set to null, the default handler will be used.
+     * The WebEngine MUST be set prior in order to modify the callback.
+     * @param callback The lambda that will be invoked when a hyperlink is clicked, provided with the link address
+     */
+    public void setHyperlinkCallback(Consumer<String> callback) {
+        if (webEngine == null) {
+            throw new IllegalStateException("WebEngine has not been set!");
+        }
+        hyperlinkCallback = callback;
+    }
+
+    /**
      * Starts asynchronous thread worker that renders markdown asynchronously,
      * avoiding poor perceived performance on the client.
      */
     public void launchAsyncWorker() {
+        if (asyncMarkdownWorker != null) {
+            throw new IllegalStateException("Markdown worker is already running");
+        }
         if (mdParser == null || mdRenderer == null) {
             throw new IllegalStateException("Markdown parser has not been created!");
         }
-        if (asyncMarkdownWorker != null) {
-            throw new IllegalStateException("Markdown worker is already running");
+        if (webEngine == null) {
+            throw new IllegalStateException("WebEngine has not been set!");
         }
         workerActive=true;
         asyncMarkdownWorker = new Thread(this::performMarkdownUpdateCycle);
@@ -161,15 +199,47 @@ public class MarkdownHandler {
         synchronized (mdReadyToDisplay) {
             mdReadyToDisplay.add(html);
         }
-        Platform.runLater(() -> {
-            synchronized (mdReadyToDisplay) {
-                if (mdReadyToDisplay.isEmpty()) {
-                    return; // task discarded due to long waiting
-                }
-                mdReadyToDisplay.pollLast();
-                mdReadyToDisplay.clear();
+        Platform.runLater(this::loadDispatchedHtml);
+    }
+
+    /**
+     * Loads the latest dispatched HTML data into the webview engine
+     */
+    private void loadDispatchedHtml(){
+        String html;
+        synchronized (mdReadyToDisplay) {
+            if (mdReadyToDisplay.isEmpty()) {
+                return; // task discarded due to long waiting
             }
-            webView.getEngine().loadContent(html);
-        });
+            html = mdReadyToDisplay.pollLast();
+            mdReadyToDisplay.clear();
+            htmlCache=html;
+        }
+        webEngine.loadContent(html);
+    }
+
+    /**
+     * Creates a new state listener for the webview engine which will deal with the hyperlink callback
+     */
+    private void createWebEngineStateHandler() {
+        webEngine.getLoadWorker().stateProperty()
+            .addListener(
+                (_, _, newValue) -> {
+                    if (hyperlinkCallback == null) {
+                        return;
+                    }
+                    if (Worker.State.SUCCEEDED.equals(newValue)) {
+                        String location = webEngine.getLocation();
+                        hyperlinkCallback.accept(location);
+                        if (htmlCache == null) {
+                            return;
+                        }
+                        // check if the new location is meaningful or not
+                        if (!location.isEmpty()) {
+                           webEngine.loadContent(htmlCache); // restore the html page
+                        }
+                    }
+                }
+            );
     }
 }
