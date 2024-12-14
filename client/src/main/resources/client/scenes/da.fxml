@@ -53,6 +53,6 @@
             <Button fx:id="searchButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="67.0" text="Search" />
          </items>
       </ToolBar>
-      <Button layoutX="8.0" layoutY="373.0" mnemonicParsing="false" text="Delete" />
+      <Button fx:id="deleteButton" layoutX="8.0" layoutY="373.0" mnemonicParsing="false" onAction="#deleteNote" text="Delete" />
    </children>
 </AnchorPane>
