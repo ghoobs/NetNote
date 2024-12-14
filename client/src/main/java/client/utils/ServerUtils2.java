@@ -109,4 +109,15 @@ public class ServerUtils2 {
                 .get(new GenericType<List<Note>>() {});
     }
 
+    /**
+     * Delete an existing note on the server
+     *
+     * @param note the note object that wil be deleted
+     */
+    public void deleteNote(Note note) {
+        ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/notes/delete/" + note.getId()) //Endpoint for deleting a note
+                .request(APPLICATION_JSON)
+                .delete();
+    }
 }
