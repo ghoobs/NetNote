@@ -155,20 +155,24 @@ public class NoteOverviewCtrl implements Initializable {
             alert.setTitle("Delete Note");
             alert.setHeaderText("Are you sure you want to delete this note?");
             alert.setContentText(noteSelected.getTitle());
-            try {
-                server.deleteNote(noteSelected);
-                listNotes.getItems().remove(noteSelected);
-                listNotes.refresh();
-            } catch (Exception e) {
-                //error if delete fails
-                Alert alert2 = new Alert(Alert.AlertType.ERROR);
-                alert2.setTitle("Deletion Failed");
-                alert2.setHeaderText("Error occurred during deletion");
-                alert2.setContentText(e.getMessage());
-                alert2.showAndWait();
-            }
-        }
 
+            alert.showAndWait().ifPresent(response -> {
+                if(response == ButtonType.OK) {
+                    try {
+                        server.deleteNote(noteSelected);
+                        listNotes.getItems().remove(noteSelected);
+                        listNotes.refresh();
+                    } catch (Exception e) {
+                        //error if delete fails
+                        Alert alert2 = new Alert(Alert.AlertType.ERROR);
+                        alert2.setTitle("Deletion Failed");
+                        alert2.setHeaderText("Error occurred during deletion");
+                        alert2.setContentText(e.getMessage());
+                        alert2.showAndWait();
+                    }
+                }
+            });
+        }
     }
     /**
      * Displays the note editing scene to start editing the note
