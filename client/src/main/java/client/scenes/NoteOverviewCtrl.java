@@ -19,23 +19,26 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 
 import java.net.URL;
-//import java.util.Arrays;
-//import java.util.List;
 import java.util.List;
 import java.util.ResourceBundle;
 //import java.util.stream.Collectors;
 
+/**
+ * The type Note overview ctrl.
+ */
 public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
     private final MarkdownHandler mdHandler;
-    private ObservableList<Note> data;
-
-    @FXML
-    private ListView<Note> listNotes;
+    /**
+     * The Note writing.
+     */
     @FXML
     TextArea noteWriting;
+    private ObservableList<Note> data;
+    @FXML
+    private ListView<Note> listNotes;
     @FXML
     private TextField titleWriting;
     @FXML
@@ -48,7 +51,7 @@ public class NoteOverviewCtrl implements Initializable {
     private Button addButton;
     @FXML
     private TextField searchBar;
-//    @FXML
+    //    @FXML
 //    private Button searchButton;
     @FXML
     private Button deleteButton;
@@ -56,9 +59,9 @@ public class NoteOverviewCtrl implements Initializable {
     /**
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
      *
-     * @param server   the server utils instance for interacting with the server
+     * @param server    the server utils instance for interacting with the server
      * @param mdHandler the markdown renderer instance to update the webview asynchronously
-     * @param mainCtrl the main controller of the application
+     * @param mainCtrl  the main controller of the application
      */
     @Inject
     public NoteOverviewCtrl(ServerUtils2 server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
@@ -66,7 +69,6 @@ public class NoteOverviewCtrl implements Initializable {
         this.mdHandler = mdHandler;
         this.mainCtrl = mainCtrl;
     }
-
 
 
     /**
@@ -84,11 +86,11 @@ public class NoteOverviewCtrl implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         data = FXCollections.observableArrayList();
         listNotes.setItems(data);
-        noteWriting.setEditable(false);
+        makeNotEditable(noteWriting);
         titleWriting.setEditable(false);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
         mdHandler.setWebEngine(markDownView.getEngine());
-        mdHandler.setHyperlinkCallback((String link)->{
+        mdHandler.setHyperlinkCallback((String link) -> {
             System.out.println("Webpage: " + link);
         });
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
@@ -140,8 +142,8 @@ public class NoteOverviewCtrl implements Initializable {
         saveButton.setDisable(false);
         editButton.setDisable(false);
         listNotes.getSelectionModel().select(newNote);
-        noteWriting.setEditable(true);
-        titleWriting.setEditable(true);
+        makeEditable(noteWriting);
+        makeEditable(titleWriting);
         noteWriting.setText(newNote.getText());
         titleWriting.setText(newNote.getTitle());
     }
@@ -161,8 +163,8 @@ public class NoteOverviewCtrl implements Initializable {
     public void savingNote() {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
         if (noteSelected != null) {
-            if(!titleWriting.getText().isEmpty()) {
-                if(!allTitles().contains(titleWriting.getText())) {
+            if (!titleWriting.getText().isEmpty()) {
+                if (!allTitles().contains(titleWriting.getText())) {
                     noteSelected.setText(noteWriting.getText());
                     noteSelected.setTitle(titleWriting.getText());
                     try {
@@ -171,10 +173,9 @@ public class NoteOverviewCtrl implements Initializable {
 
                     }
                     listNotes.refresh();
-                    noteWriting.setEditable(false);
-                    titleWriting.setEditable(false);
-                }
-                else{
+                    makeNotEditable(noteWriting);
+                    makeNotEditable(titleWriting);
+                } else {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Title Already Exists");
                     alert.setHeaderText("The title of your note has to be unique!");
@@ -184,8 +185,7 @@ public class NoteOverviewCtrl implements Initializable {
                         }
                     });
                 }
-            }
-            else{
+            } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Empty Title");
                 alert.setHeaderText("The title of your note can't be empty!");
@@ -203,7 +203,7 @@ public class NoteOverviewCtrl implements Initializable {
      *
      * @return a List of titles
      */
-    private List<String> allTitles(){
+    private List<String> allTitles() {
         return listNotes.getItems().stream()
                 .map(n -> n.getTitle())
                 .toList();
@@ -222,7 +222,7 @@ public class NoteOverviewCtrl implements Initializable {
             alert.setContentText(noteSelected.getTitle());
 
             alert.showAndWait().ifPresent(response -> {
-                if(response == ButtonType.OK) {
+                if (response == ButtonType.OK) {
                     try {
                         server.deleteNote(noteSelected);
                         listNotes.getItems().remove(noteSelected);
@@ -252,8 +252,8 @@ public class NoteOverviewCtrl implements Initializable {
      * Enables editing mode for the currently selected note when the "Edit" button is clicked.
      */
     public void editingNote() {
-        noteWriting.setEditable(true);
-        titleWriting.setEditable(true);
+        makeEditable(noteWriting);
+        makeEditable(titleWriting);
     }
 
     /**
@@ -271,9 +271,9 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void onNoteClicked(MouseEvent mouseEvent) {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
-        if(noteSelected != null) {
-            noteWriting.setEditable(false);
-            titleWriting.setEditable(false);
+        if (noteSelected != null) {
+            makeNotEditable(noteWriting);
+            makeNotEditable(titleWriting);
             noteWriting.setText(noteSelected.getText());
             titleWriting.setText(noteSelected.getTitle());
         }
@@ -297,19 +297,19 @@ public class NoteOverviewCtrl implements Initializable {
      * @param keyEvent the key event triggered by the user
      */
     public void keyPressed(KeyEvent keyEvent) {
-        if(keyEvent.getCode() == KeyCode.ESCAPE){
+        if (keyEvent.getCode() == KeyCode.ESCAPE) {
             searchBar.requestFocus();
         }
-        if(listNotes.isFocused() && keyEvent.getCode() == KeyCode.O){
+        if (listNotes.isFocused() && keyEvent.getCode() == KeyCode.O) {
             Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
-            if(noteSelected != null) {
-                noteWriting.setEditable(false);
-                titleWriting.setEditable(false);
+            if (noteSelected != null) {
+                makeNotEditable(noteWriting);
+                makeNotEditable(titleWriting);
                 noteWriting.setText(noteSelected.getText());
                 titleWriting.setText(noteSelected.getTitle());
             }
         }
-        if(keyEvent.isShortcutDown()) {
+        if (keyEvent.isShortcutDown()) {
             switch (keyEvent.getCode()) {
                 case S:
                     saveNote();
@@ -410,7 +410,7 @@ public class NoteOverviewCtrl implements Initializable {
      * @param text    the full text in which to search for the keyword
      * @param keyword the keyword to highlight
      * @return the modified text with the keyword highlighted using double asterisks,
-     *         or the original text if the keyword is null or empty
+     * or the original text if the keyword is null or empty
      */
 
     private String applyHighlight(String text, String keyword) {
@@ -418,5 +418,117 @@ public class NoteOverviewCtrl implements Initializable {
             return text;
         }
         return text.replaceAll("(?i)(" + keyword + ")", "**$1**");
+    }
+
+
+    // For UX purposes to understand when a field is editable or not
+    // This could be improved by making in inherit from node instead of TextArea
+    // But right i want it to be more easily readable
+
+
+    /**
+     * Makes txtArea not editable and displays it to the user by:
+     * 1. Making the text gray
+     * 2. Making the background gray
+     *
+     * @param txtArea the area to make not editable
+     */
+    private void makeNotEditable(TextArea txtArea) {
+
+        txtArea.setEditable(false);
+
+
+        // Only way i found to change text color is
+        // through css style but theoretically
+        // setBackground() could be used for the background stuff
+        // https://openjfx.io/javadoc/21/javafx.graphics/javafx/scene/layout/Region.html#setBackground(javafx.scene.layout.Background)
+
+        String textColor = "gray";
+
+        String style = "-fx-text-fill:" + textColor + ";";
+
+        txtArea.setStyle(style);
+
+        String backgroundColor = "lightgrey";
+
+        style = "-fx-control-inner-background:" + backgroundColor + ";";
+        txtArea.setStyle(style);
+    }
+
+
+    /**
+     * Restores the textArea to its original state
+     * Makes the text black again
+     * Sets the style back to its original
+     * Makes it editable
+     *
+     * @param textArea the text area to make editable again
+     */
+    private void makeEditable(TextArea textArea) {
+
+        textArea.setEditable(true);
+
+
+        String textColor = "black";
+
+        // CSS change style :
+        String style = "-fx-text-fill:" + textColor + ";";
+
+        textArea.setStyle(style);
+
+    }
+
+
+    /**
+     * Makes textField not editable,
+     * Virtually does the same thing as the overloaded counterpart
+     * changes text and background color
+     *
+     * @param textField the area to make not editable
+     */
+    private void makeNotEditable(TextField textField) {
+
+        textField.setEditable(false);
+
+        // through css style
+
+        // text
+        String textColor = "gray";
+
+        String style = "-fx-text-fill:" + textColor + ";";
+
+        textField.setStyle(style);
+
+
+        // background
+
+        String backgroundColor = "lightgrey";
+
+        style = "-fx-control-inner-background:" + backgroundColor + ";";
+
+
+        textField.setStyle(style);
+    }
+
+
+    /**
+     * Makes textField editable:
+     * Same as makeEditable for TextArea
+     *
+     * @param textField the area to make not editable
+     */
+    private void makeEditable(TextField textField) {
+
+        textField.setEditable(true);
+
+
+        String textColor = "black";
+
+        // CSS change style :
+        String style = "-fx-text-fill:" + textColor + ";";
+
+        textField.setStyle(style);
+
+
     }
 }
