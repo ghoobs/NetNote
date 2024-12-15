@@ -427,9 +427,10 @@ public class NoteOverviewCtrl implements Initializable {
 
 
     /**
-     *  Makes txtArea not editable and displays it to the user by:
-     *  1. Making the text gray
-     *  2. Making the background gray
+     * Makes txtArea not editable and displays it to the user by:
+     * 1. Making the text gray
+     * 2. Making the background gray
+     *
      * @param txtArea the area to make not editable
      */
     private void makeNotEditable(TextArea txtArea) {
@@ -457,9 +458,10 @@ public class NoteOverviewCtrl implements Initializable {
 
     /**
      * Restores the textArea to its original state
-     *  Makes the text black again
-     *  Sets the style back to its original
-     *  Makes it editable
+     * Makes the text black again
+     * Sets the style back to its original
+     * Makes it editable
+     *
      * @param textArea the text area to make editable again
      */
     private void makeEditable(TextArea textArea) {
@@ -478,9 +480,10 @@ public class NoteOverviewCtrl implements Initializable {
 
 
     /**
-     *  Makes textField not editable,
-     *  Virtually does the same thing as the overloaded counterpart
-     *  changes text and background color
+     * Makes textField not editable,
+     * Virtually does the same thing as the overloaded counterpart
+     * changes text and background color
+     *
      * @param textField the area to make not editable
      */
     private void makeNotEditable(TextField textField) {
@@ -509,8 +512,9 @@ public class NoteOverviewCtrl implements Initializable {
 
 
     /**
-     *  Makes textField editable:
-     *  Same as makeEditable for TextArea
+     * Makes textField editable:
+     * Same as makeEditable for TextArea
+     *
      * @param textField the area to make not editable
      */
     private void makeEditable(TextField textField) {
