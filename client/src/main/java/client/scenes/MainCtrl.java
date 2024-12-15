@@ -53,6 +53,7 @@ public class MainCtrl {
     public void showOverview() {
         primaryStage.setTitle("Notes: Overview");
         primaryStage.setScene(overview);
+        overview.setOnKeyPressed(e -> overviewCtrl.keyPressed(e));
     }
 
 
