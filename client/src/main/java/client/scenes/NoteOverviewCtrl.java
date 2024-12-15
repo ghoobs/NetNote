@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import com.google.inject.Inject;
 import commons.Note;
@@ -23,7 +24,9 @@ public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
+    private final MarkdownHandler mdHandler;
     private ObservableList<Note> data;
+
     @FXML
     private ListView<Note> listNotes;
     @FXML
@@ -49,14 +52,18 @@ public class NoteOverviewCtrl implements Initializable {
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
      *
      * @param server   the server utils instance for interacting with the server
+     * @param mdHandler the markdown renderer instance to update the webview asynchronously
      * @param mainCtrl the main controller of the application
      */
 
     @Inject
-    public NoteOverviewCtrl(ServerUtils2 server, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerUtils2 server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
         this.server = server;
+        this.mdHandler = mdHandler;
         this.mainCtrl = mainCtrl;
     }
+
+
 
     /**
      * Initializes the note overview interface.
@@ -76,6 +83,12 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(false);
         listNotes.setOnMouseClicked(this::onNoteClicked);
 
+        mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
+        mdHandler.setWebEngine(markDownView.getEngine());
+        mdHandler.setHyperlinkCallback((String link)->{
+            System.out.println("Webpage: " + link);
+        });
+        mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
         refresh();
     }
@@ -134,7 +147,6 @@ public class NoteOverviewCtrl implements Initializable {
             noteSelected.setTitle(titleWriting.getText());
             try {
                 server.updateNote(noteSelected);
-
             } catch (Exception e) {
 
             }
@@ -192,6 +204,12 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(true);
     }
 
+    /**
+     * Updates markdown when input is typed into note contents
+     */
+    public void updateMarkdown() {
+        mdHandler.asyncMarkdownUpdate(noteWriting.getText());
+    }
 
     /**
      * Handles note selection in the list and displays the selected note's details.
