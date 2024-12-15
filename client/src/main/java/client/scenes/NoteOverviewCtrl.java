@@ -23,11 +23,17 @@ import java.util.List;
 import java.util.ResourceBundle;
 //import java.util.stream.Collectors;
 
+/**
+ * The type Note overview ctrl.
+ */
 public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
     private final MarkdownHandler mdHandler;
+    /**
+     * The Note writing.
+     */
     @FXML
     TextArea noteWriting;
     private ObservableList<Note> data;
@@ -418,6 +424,14 @@ public class NoteOverviewCtrl implements Initializable {
     // For UX purposes to understand when a field is editable or not
     // This could be improved by making in inherit from node instead of TextArea
     // But right i want it to be more easily readable
+
+
+    /**
+     *  Makes txtArea not editable and displays it to the user by:
+     *  1. Making the text gray
+     *  2. Making the background gray
+     * @param txtArea the area to make not editable
+     */
     private void makeNotEditable(TextArea txtArea) {
 
         txtArea.setEditable(false);
@@ -441,6 +455,13 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
 
+    /**
+     * Restores the textArea to its original state
+     *  Makes the text black again
+     *  Sets the style back to its original
+     *  Makes it editable
+     * @param textArea the text area to make editable again
+     */
     private void makeEditable(TextArea textArea) {
 
         textArea.setEditable(true);
@@ -456,6 +477,12 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
 
+    /**
+     *  Makes textField not editable,
+     *  Virtually does the same thing as the overloaded counterpart
+     *  changes text and background color
+     * @param textField the area to make not editable
+     */
     private void makeNotEditable(TextField textField) {
 
         textField.setEditable(false);
@@ -481,6 +508,11 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
 
+    /**
+     *  Makes textField editable:
+     *  Same as makeEditable for TextArea
+     * @param textField the area to make not editable
+     */
     private void makeEditable(TextField textField) {
 
         textField.setEditable(true);
