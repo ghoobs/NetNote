@@ -25,7 +25,7 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="365.0" prefWidth="227.0">
                <children>
-                  <TextArea fx:id="noteWriting" layoutY="63.0" prefHeight="307.0" prefWidth="223.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0" />
+                  <TextArea fx:id="noteWriting" onKeyTyped="#updateMarkdown" layoutY="63.0" prefHeight="307.0" prefWidth="223.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0" />
                   <TextField fx:id="titleWriting" layoutX="3.0" layoutY="39.0" prefHeight="25.0" prefWidth="227.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="37.0" />
                </children>
             </AnchorPane>

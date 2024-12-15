@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import com.google.inject.Inject;
 import commons.Note;
@@ -12,6 +13,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 
@@ -26,7 +29,9 @@ public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
+    private final MarkdownHandler mdHandler;
     private ObservableList<Note> data;
+
     @FXML
     private ListView<Note> listNotes;
     @FXML
@@ -52,32 +57,60 @@ public class NoteOverviewCtrl implements Initializable {
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
      *
      * @param server   the server utils instance for interacting with the server
+     * @param mdHandler the markdown renderer instance to update the webview asynchronously
      * @param mainCtrl the main controller of the application
      */
     @Inject
-    public NoteOverviewCtrl(ServerUtils2 server, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerUtils2 server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
         this.server = server;
+        this.mdHandler = mdHandler;
         this.mainCtrl = mainCtrl;
     }
 
+
+
     /**
-     * Initializes the note overview interface.
-     * Sets up the observable data list, configures UI components, and populates initial data.
+     * Initializes the Note Overview Scene.
+     * Sets up the ListView to display notes, configures search functionality,
+     * and initializes UI components.
      *
      * @param location  The location used to resolve relative paths for the root object, or
      *                  {@code null} if the location is not known.
      * @param resources The resources used to localize the root object, or {@code null} if
      *                  the root object was not localized.
      */
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         data = FXCollections.observableArrayList();
         listNotes.setItems(data);
         noteWriting.setEditable(false);
         titleWriting.setEditable(false);
-        listNotes.setOnMouseClicked(this::onNoteClicked);
-
+        mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
+        mdHandler.setWebEngine(markDownView.getEngine());
+        mdHandler.setHyperlinkCallback((String link)->{
+            System.out.println("Webpage: " + link);
+        });
+        mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
+        listNotes.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Note note, boolean empty) {
+                super.updateItem(note, empty);
+                setText(null);
+                setGraphic(null);
+                if (!empty && note != null) {
+                    String keyword = searchBar.getText().toLowerCase();
+                    TextFlow highlightedTitle = createHighlightedText(note.getTitle(), keyword);
+                    setGraphic(highlightedTitle);
+                }
+            }
+        });
+        searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
+            filterNotes(newValue);
+            highlightSelectedNote(newValue);
+        });
+        listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
     }
 
@@ -223,6 +256,12 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(true);
     }
 
+    /**
+     * Updates markdown when input is typed into note contents
+     */
+    public void updateMarkdown() {
+        mdHandler.asyncMarkdownUpdate(noteWriting.getText());
+    }
 
     /**
      * Handles note selection in the list and displays the selected note's details.
@@ -289,5 +328,95 @@ public class NoteOverviewCtrl implements Initializable {
                     break;
             }
         }
+    }
+
+    /**
+     * Filters the notes displayed in the ListView based on the search keyword.
+     *
+     * @param searchWord the keyword to filter notes by
+     */
+
+    private void filterNotes(String searchWord) {
+        if (searchWord == null || searchWord.isEmpty()) {
+            listNotes.setItems(data);
+        } else {
+            var filteredData = data.filtered(note ->
+                    note.getTitle().toLowerCase().contains(searchWord.toLowerCase()) ||
+                            note.getText().toLowerCase().contains(searchWord.toLowerCase())
+            );
+            listNotes.setItems(filteredData);
+        }
+    }
+
+    /**
+     * Highlights the title and content of the currently selected note based on the search keyword.
+     *
+     * @param keyword the keyword to highlight
+     */
+
+    private void highlightSelectedNote(String keyword) {
+        Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
+        if (noteSelected != null) {
+            titleWriting.clear();
+            titleWriting.setText(noteSelected.getTitle());
+            String highlightedTitle = applyHighlight(noteSelected.getTitle(), keyword);
+            titleWriting.setText(highlightedTitle);
+            noteWriting.clear();
+            noteWriting.setText(noteSelected.getText());
+            String highlightedContent = applyHighlight(noteSelected.getText(), keyword);
+            noteWriting.setText(highlightedContent);
+        }
+    }
+
+    /**
+     * Creates a TextFlow with the keyword highlighted in the given text.
+     *
+     * @param text    the full text to highlight
+     * @param keyword the keyword to highlight
+     * @return a TextFlow containing the highlighted text
+     */
+
+    private TextFlow createHighlightedText(String text, String keyword) {
+        TextFlow textFlow = new TextFlow();
+        if (keyword == null || keyword.isEmpty()) {
+            textFlow.getChildren().add(new Text(text));
+            return textFlow;
+        }
+        int lastIndex = 0;
+        int keywordIndex = text.toLowerCase().indexOf(keyword);
+        while (keywordIndex >= 0) {
+            if (lastIndex < keywordIndex) {
+                textFlow.getChildren().add(new Text(text.substring(lastIndex, keywordIndex)));
+            }
+            Text highlightedText = new Text(text.substring(keywordIndex, keywordIndex + keyword.length()));
+            highlightedText.setStyle("-fx-fill: red; -fx-font-weight: bold;");
+            textFlow.getChildren().add(highlightedText);
+            lastIndex = keywordIndex + keyword.length();
+            keywordIndex = text.toLowerCase().indexOf(keyword, lastIndex);
+        }
+        if (lastIndex < text.length()) {
+            textFlow.getChildren().add(new Text(text.substring(lastIndex)));
+        }
+        return textFlow;
+    }
+
+    /**
+     * Applies a basic highlight to the given keyword within the provided text.
+     * <p>
+     * This method wraps all occurrences of the keyword in the text with double asterisks (`**`)
+     * to indicate highlighting. The search is case-insensitive.
+     * </p>
+     *
+     * @param text    the full text in which to search for the keyword
+     * @param keyword the keyword to highlight
+     * @return the modified text with the keyword highlighted using double asterisks,
+     *         or the original text if the keyword is null or empty
+     */
+
+    private String applyHighlight(String text, String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            return text;
+        }
+        return text.replaceAll("(?i)(" + keyword + ")", "**$1**");
     }
 }
