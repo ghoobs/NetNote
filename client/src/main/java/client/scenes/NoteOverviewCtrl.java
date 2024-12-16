@@ -114,8 +114,8 @@ public class NoteOverviewCtrl implements Initializable {
         });
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
+        updateMarkdown();
     }
-
     /**
      * Displays the note adding scene to create a new note
      */
@@ -165,6 +165,7 @@ public class NoteOverviewCtrl implements Initializable {
                 if (!allTitles().contains(titleWriting.getText()) || (noteSelected.getTitle().equals(titleWriting.getText()))) {
                     noteSelected.setText(noteWriting.getText());
                     noteSelected.setTitle(titleWriting.getText());
+                    updateMarkdown();
                     try {
                         server.updateNote(noteSelected);
                     } catch (Exception e) {
