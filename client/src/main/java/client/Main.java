@@ -47,7 +47,7 @@ public class Main extends Application {
             return;
         }
 
-        var overview = FXML.load(NoteOverviewCtrl.class, "client", "scenes", "da.fxml");
+        var overview = FXML.load(NoteOverviewCtrl.class, "client", "scenes", "startframe.fxml");
 
         var edit = FXML.load(EditCtrl.class, "client", "scenes", "editview.fxml");
 
