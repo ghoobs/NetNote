@@ -86,8 +86,8 @@ public class NoteOverviewCtrl implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         data = FXCollections.observableArrayList();
         listNotes.setItems(data);
-        makeNotEditable(noteWriting);
-        titleWriting.setEditable(false);
+        makeEditable(noteWriting);
+        titleWriting.setEditable(true);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
         mdHandler.setWebEngine(markDownView.getEngine());
         mdHandler.setHyperlinkCallback((String link) -> {
@@ -114,13 +114,13 @@ public class NoteOverviewCtrl implements Initializable {
         });
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
+        updateMarkdown();
     }
-
     /**
      * Displays the note adding scene to create a new note
      */
     public void addNote() {
-        mainCtrl.showAdd();
+        addingNote();
     }
 
     /**
@@ -139,8 +139,6 @@ public class NoteOverviewCtrl implements Initializable {
             return;
         }
         data.add(newNote);
-        saveButton.setDisable(false);
-        editButton.setDisable(false);
         listNotes.getSelectionModel().select(newNote);
         makeEditable(noteWriting);
         makeEditable(titleWriting);
@@ -151,8 +149,8 @@ public class NoteOverviewCtrl implements Initializable {
     /**
      * Displays the note saving scene to save the current note
      */
-    public void saveNote() {
-        mainCtrl.showSave();
+    public void editedTheNote() {
+        savingNote();
     }
 
     /**
@@ -164,17 +162,18 @@ public class NoteOverviewCtrl implements Initializable {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
         if (noteSelected != null) {
             if (!titleWriting.getText().isEmpty()) {
-                if (!allTitles().contains(titleWriting.getText())) {
+                if (!allTitles().contains(titleWriting.getText()) || (noteSelected.getTitle().equals(titleWriting.getText()))) {
                     noteSelected.setText(noteWriting.getText());
                     noteSelected.setTitle(titleWriting.getText());
+                    updateMarkdown();
                     try {
                         server.updateNote(noteSelected);
                     } catch (Exception e) {
 
                     }
                     listNotes.refresh();
-                    makeNotEditable(noteWriting);
-                    makeNotEditable(titleWriting);
+                    makeEditable(noteWriting);
+                    makeEditable(titleWriting);
                 } else {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Title Already Exists");
@@ -272,8 +271,8 @@ public class NoteOverviewCtrl implements Initializable {
     public void onNoteClicked(MouseEvent mouseEvent) {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
         if (noteSelected != null) {
-            makeNotEditable(noteWriting);
-            makeNotEditable(titleWriting);
+            makeEditable(noteWriting);
+            makeEditable(titleWriting);
             noteWriting.setText(noteSelected.getText());
             titleWriting.setText(noteSelected.getTitle());
         }
@@ -286,6 +285,8 @@ public class NoteOverviewCtrl implements Initializable {
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
         listNotes.setItems(data);
+        listNotes.getSelectionModel().select(0);
+        onNoteClicked(null);
     }
 
     /**
@@ -312,7 +313,7 @@ public class NoteOverviewCtrl implements Initializable {
         if (keyEvent.isShortcutDown()) {
             switch (keyEvent.getCode()) {
                 case S:
-                    saveNote();
+                    savingNote();
                     break;
                 case R:
                     refresh();
