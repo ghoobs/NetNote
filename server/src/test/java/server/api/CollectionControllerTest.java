@@ -3,6 +3,7 @@ package server.api;
 import commons.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -53,4 +54,17 @@ class CollectionControllerTest {
 
         assertFalse(collectionController.getAll().contains(c1));
     }
+
+    @Test
+    void updateCollection() {
+        Collection collection = new Collection("test");
+        collectionController.addCollection(collection);
+
+        Collection updatedCollection = new Collection("test but updated");
+        ResponseEntity<Collection> responseEntity = collectionController.updateCollection(collection.id, updatedCollection);
+
+        assertNotNull(responseEntity.getBody());
+        assertEquals("test but updated", responseEntity.getBody().name);
+    }
+
 }
