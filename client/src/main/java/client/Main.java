@@ -49,13 +49,7 @@ public class Main extends Application {
 
         var overview = FXML.load(NoteOverviewCtrl.class, "client", "scenes", "startframe.fxml");
 
-        var edit = FXML.load(EditCtrl.class, "client", "scenes", "editview.fxml");
-
-        var save = FXML.load(SaveCtrl.class, "client", "scenes", "saveview.fxml");
-
-        var add = FXML.load(AddCtrl.class, "client", "scenes", "addview.fxml");
-
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview, edit, save, add);
+        mainCtrl.initialize(primaryStage, overview);
     }
 }

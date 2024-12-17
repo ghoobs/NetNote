@@ -44,17 +44,7 @@ public class NoteOverviewCtrl implements Initializable {
     @FXML
     private WebView markDownView;
     @FXML
-    private Button saveButton;
-    @FXML
-    private Button editButton;
-    @FXML
-    private Button addButton;
-    @FXML
     private TextField searchBar;
-    //    @FXML
-//    private Button searchButton;
-    @FXML
-    private Button deleteButton;
 
     /**
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
@@ -116,8 +106,9 @@ public class NoteOverviewCtrl implements Initializable {
         refresh();
         updateMarkdown();
     }
+
     /**
-     * Displays the note adding scene to create a new note
+     * Calls the addingnote function
      */
     public void addNote() {
         addingNote();
@@ -147,16 +138,15 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Displays the note saving scene to save the current note
+     * Calls the savingnote function
      */
     public void editedTheNote() {
         savingNote();
     }
 
     /**
-     * Saves changes made to the selected note and updates the server when the "Save" button is clicked.
-     * Ensures the note is set to non-editable mode after saving.
-     * The title of the note can't be empty and has to be unique.
+     * Ensures the note cannot be empty or used.
+     * Note gets saved automatically and is always editable.
      */
     public void savingNote() {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
@@ -240,22 +230,6 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Displays the note editing scene to start editing the note
-     */
-    public void editNote() {
-        mainCtrl.showEdit();
-    }
-
-
-    /**
-     * Enables editing mode for the currently selected note when the "Edit" button is clicked.
-     */
-    public void editingNote() {
-        makeEditable(noteWriting);
-        makeEditable(titleWriting);
-    }
-
-    /**
      * Updates markdown when input is typed into note contents
      */
     public void updateMarkdown() {
@@ -264,7 +238,7 @@ public class NoteOverviewCtrl implements Initializable {
 
     /**
      * Handles note selection in the list and displays the selected note's details.
-     * Sets the UI to non-editable mode for the selected note.
+     * Sets the UI to editable
      *
      * @param mouseEvent the mouse event that triggered this action
      */
@@ -322,7 +296,7 @@ public class NoteOverviewCtrl implements Initializable {
                     addNote();
                     break;
                 case E:
-                    editNote();
+                    editedTheNote();
                     break;
                 case D:
                     //delete note
