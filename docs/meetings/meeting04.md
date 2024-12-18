@@ -9,7 +9,7 @@
 
 *Agenda Items:*
 - Opening by chair (1 min )
-- Check - in : How is everyone doing ? (5 min )
+- Check - in : How is everyone doing ? (1 min )
 - Announcements by the team (5 min )
 - Approval of the agenda - Does anyone have any additions ? (1 min )
 - Approval of last minutes - Did everyone read the minutes from the previous meeting ? (1 min )
@@ -21,7 +21,7 @@
 - What do we want to add this week? (5 min )
 - Distribute tasks (2 min )
 
-*CLosing:*
+*Closing:*
 - Summarize action points : Who , what , when ? (2 min )
 - Feedback round : What went well and what can be improved next time ? (3 min )
 - Question round : Does anyone have anything to add before the meeting closes ? (2 min )
