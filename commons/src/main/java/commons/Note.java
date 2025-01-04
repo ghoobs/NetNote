@@ -1,11 +1,11 @@
 package commons;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Note class.
@@ -20,6 +20,9 @@ public class Note {
 
     public String title;
     public String text;
+
+    @OneToMany(mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EmbeddedFile> embeddedFiles = new ArrayList<>();
 
     /**
      * Instantiates a new Note
@@ -139,4 +142,21 @@ public class Note {
         this.title = title;
     }
 
+//    public List<EmbeddedFile> getEmbeddedFiles() {
+//        return embeddedFiles;
+//    }
+
+    public void setEmbeddedFiles(ArrayList<EmbeddedFile> embeddedFiles) {
+        this.embeddedFiles = embeddedFiles;
+    }
+
+    public boolean addEmbeddedFile(EmbeddedFile file) {
+        file.setNote(this);
+        return embeddedFiles.add(file);
+    }
+
+    public boolean removeEmbeddedFile(EmbeddedFile file) {
+        file.setNote(null);
+        return embeddedFiles.remove(file);
+    }
 }
