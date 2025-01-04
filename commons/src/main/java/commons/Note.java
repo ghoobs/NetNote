@@ -145,18 +145,18 @@ public class Note {
 //    public List<EmbeddedFile> getEmbeddedFiles() {
 //        return embeddedFiles;
 //    }
-//
-//    public void setEmbeddedFiles(ArrayList<EmbeddedFile> embeddedFiles) {
-//        this.embeddedFiles = embeddedFiles;
-//    }
-//
-//    public boolean addEmbeddedFile(EmbeddedFile file) {
-//        file.setNote(this);
-//        return embeddedFiles.add(file);
-//    }
-//
-//    public boolean removeEmbeddedFile(EmbeddedFile file) {
-//        file.setNote(null);
-//        return embeddedFiles.remove(file);
-//    }
+
+    public void setEmbeddedFiles(ArrayList<EmbeddedFile> embeddedFiles) {
+        this.embeddedFiles = embeddedFiles;
+    }
+
+    public boolean addEmbeddedFile(EmbeddedFile file) {
+        file.setNote(this);
+        return embeddedFiles.add(file);
+    }
+
+    public boolean removeEmbeddedFile(EmbeddedFile file) {
+        file.setNote(null);
+        return embeddedFiles.remove(file);
+    }
 }
