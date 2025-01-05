@@ -5,6 +5,8 @@ import client.utils.ServerUtils2;
 import com.google.inject.Inject;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -18,10 +20,11 @@ import javafx.scene.text.TextFlow;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
-//import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * The type Note overview ctrl.
@@ -45,6 +48,18 @@ public class NoteOverviewCtrl implements Initializable {
     private WebView markDownView;
     @FXML
     private TextField searchBar;
+    @FXML
+    private Button deleteButton;
+    @FXML
+    private Button addButton;
+    @FXML
+    private Button searchButton;
+    private final StringProperty propertyDeleteButton = new SimpleStringProperty();
+    private final StringProperty propertyAddButton = new SimpleStringProperty();
+    private final StringProperty propertySearchButton = new SimpleStringProperty();
+    private final StringProperty propertySearchBarPrompt = new SimpleStringProperty();
+    private Locale currentLocale;
+    private ResourceBundle resourceBundle;
 
     /**
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
@@ -74,6 +89,13 @@ public class NoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        deleteButton.textProperty().bind(propertyDeleteButton);
+        addButton.textProperty().bind(propertyAddButton);
+        searchButton.textProperty().bind(propertySearchButton);
+        searchBar.promptTextProperty().bind(propertySearchBarPrompt);
+        this.currentLocale = loadSavedLocale();
+        this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
+        setLocale(currentLocale);
         data = FXCollections.observableArrayList();
         listNotes.setItems(data);
         makeEditable(noteWriting);
@@ -506,4 +528,163 @@ public class NoteOverviewCtrl implements Initializable {
 
 
     }
+    /**
+     * Sets the locale for the application and updates all UI properties with localized strings.
+     *
+     * @param locale the {@code Locale} to set for the application.
+     */
+    public void setLocale(Locale locale) {
+        ResourceBundle rb = ResourceBundle.getBundle("bundle", locale);
+        propertyDeleteButton.set(rb.getString("button.delete"));
+        propertyAddButton.set(rb.getString("button.add"));
+        propertySearchButton.set(rb.getString("button.search"));
+        propertySearchBarPrompt.set(rb.getString("searchBar.prompt"));
+    }
+
+    /**
+     * Switches the application's language to English.
+     */
+    public void switchToEnglish() {
+        switchLanguage(Locale.ENGLISH);
+    }
+
+    /**
+     * Switches the application's language to Dutch.
+     */
+    public void switchToDutch() {
+        switchLanguage(new Locale("nl"));
+    }
+
+    /**
+     * Switches the application's language to Spanish.
+     */
+    public void switchToSpanish() {
+        switchLanguage(new Locale("es"));
+    }
+
+    /**
+     * Loads the saved locale from the configuration file.
+     * If no locale is saved, defaults to English.
+     *
+     * @return the {@code Locale} loaded from the configuration file or the default {@code Locale.ENGLISH}.
+     */
+    protected Locale loadSavedLocale() {
+        try {
+            Properties props = new Properties();
+            props.load(new FileInputStream("config.properties"));
+            return new Locale(props.getProperty("language", "en"));
+        } catch (IOException e) {
+            return Locale.ENGLISH;
+        }
+    }
+
+    /**
+     * Switches the application's language to the specified locale.
+     * Updates the UI, saves the selected locale to the configuration file, and sets it globally.
+     *
+     * @param locale the {@code Locale} to switch to.
+     */
+    private void switchLanguage(Locale locale) {
+        this.currentLocale = locale;
+        this.resourceBundle = ResourceBundle.getBundle("bundle", locale);
+        saveLocale(locale);
+        setLocale(locale);
+    }
+
+    /**
+     * Saves the specified locale to the configuration file.
+     *
+     * @param locale the {@code Locale} to save.
+     */
+    protected void saveLocale(Locale locale) {
+        try {
+            Properties props = new Properties();
+            props.setProperty("language", locale.getLanguage());
+            props.store(new FileOutputStream("config.properties"), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Sets the {@code Button} used for the delete functionality.
+     *
+     * @param deleteButton the delete {@code Button}.
+     */
+    public void setDeleteButton(Button deleteButton) {
+        this.deleteButton = deleteButton;
+    }
+
+    /**
+     * Sets the {@code Button} used for the add functionality.
+     *
+     * @param addButton the add {@code Button}.
+     */
+    public void setAddButton(Button addButton) {
+        this.addButton = addButton;
+    }
+
+    /**
+     * Sets the {@code Button} used for the search functionality.
+     *
+     * @param searchButton the search {@code Button}.
+     */
+    public void setSearchButton(Button searchButton) {
+        this.searchButton = searchButton;
+    }
+
+    /**
+     * Gets the current locale used by the application.
+     *
+     * @return the current {@code Locale}.
+     */
+    public Locale getCurrentLocale() {
+        return currentLocale;
+    }
+
+    /**
+     * Sets the {@code TextField} used for the search bar functionality.
+     *
+     * @param searchBar the search {@code TextField}.
+     */
+    public void setSearchBar(TextField searchBar) {
+        this.searchBar = searchBar;
+    }
+
+    /**
+     * Gets the {@code Button} used for the search functionality.
+     *
+     * @return the search {@code Button}.
+     */
+    public Button getSearchButton() {
+        return searchButton;
+    }
+
+    /**
+     * Gets the {@code Button} used for the add functionality.
+     *
+     * @return the add {@code Button}.
+     */
+    public Button getAddButton() {
+        return addButton;
+    }
+
+    /**
+     * Gets the {@code Button} used for the delete functionality.
+     *
+     * @return the delete {@code Button}.
+     */
+    public Button getDeleteButton() {
+        return deleteButton;
+    }
+
+    /**
+     * Gets the {@code TextField} used for the search bar functionality.
+     *
+     * @return the search {@code TextField}.
+     */
+    public TextField getSearchBar() {
+        return searchBar;
+    }
+
 }
