@@ -22,14 +22,12 @@ class NoteControllerTest {
 
     //If you implement
     private TestNoteRepository testNoteRepository;
-    private ApplicationEventPublisher eventPublisher;
     private NoteController noteController;
 
     @BeforeEach
     void setUp() {
-        eventPublisher = mock(ApplicationEventPublisher.class);
         testNoteRepository = new TestNoteRepository();
-        noteController = new NoteController(testNoteRepository, eventPublisher);
+        noteController = new NoteController(testNoteRepository);
     }
 
     void putData() {

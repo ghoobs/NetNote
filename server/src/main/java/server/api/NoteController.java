@@ -37,16 +37,14 @@ import server.database.NoteRepository;
 public class NoteController {
 
     private final NoteRepository notes;
-    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Instantiates a new Note controller.
      *
      * @param repo the repo
      */
-    public NoteController(NoteRepository repo, ApplicationEventPublisher eventPublisher) {
+    public NoteController(NoteRepository repo) {
         this.notes = repo;
-        this.eventPublisher = eventPublisher;
     }
 
 
@@ -59,7 +57,6 @@ public class NoteController {
         Note toDelete = notes.findById(id).get();
         notes.deleteById(id);
 
-        eventPublisher.publishEvent(new DeleteEvent(this, toDelete));
         return ResponseEntity.ok().build();
     }
 
@@ -155,7 +152,6 @@ public class NoteController {
 
         Note savedNote = notes.save(noteAdding);
 
-        eventPublisher.publishEvent(new AddEvent(this, savedNote));
         return ResponseEntity.ok(savedNote);
     }
 
@@ -176,7 +172,6 @@ public class NoteController {
         existingNote.title = updatedNote.title;
         existingNote.text = updatedNote.text;
 
-        eventPublisher.publishEvent(new UpdateEvent(this, existingNote));
         return ResponseEntity.ok(existingNote);
     }
 
