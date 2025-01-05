@@ -4,6 +4,8 @@ import commons.Note;
 import commons.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -14,12 +16,12 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 class NoteControllerTest {
 
     //If you implement
     private TestNoteRepository testNoteRepository;
-
     private NoteController noteController;
 
     @BeforeEach
