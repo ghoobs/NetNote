@@ -4,8 +4,8 @@
 | Time : | 16:45-17:30                                |
 | Location : | Drebbelweg PC1-C5 (Some online)                   |
 | Chair | Tristan Fransen                               |
-| Minute Taker |    ???                         |
-| Attendees : | Rares, Kaja, Chahid, Tristan, Kosmas + TA |
+| Minute Taker |    Kaja                         |
+| Attendees : | Rares (Online), Kaja, Chahid, Tristan, Kosmas + TA |
 
 *Agenda Items:*
 - Opening by chair (1 min )
