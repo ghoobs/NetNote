@@ -8,6 +8,7 @@ import commons.Pair;
 import events.AddEvent;
 import events.DeleteEvent;
 import events.UpdateEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ import server.database.NoteRepository;
 public class NoteController {
 
     private final NoteRepository notes;
-
+    private ApplicationEventPublisher eventPublisher;
     /**
      * Instantiates a new Note controller.
      *
@@ -45,6 +46,16 @@ public class NoteController {
      */
     public NoteController(NoteRepository repo) {
         this.notes = repo;
+    }
+
+    /**
+     * setter for ApplicationEventPublisher
+     *
+     * @param eventPublisher the application event publisher
+     */
+    @Autowired
+    public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
     }
 
 
@@ -56,7 +67,7 @@ public class NoteController {
         }
         Note toDelete = notes.findById(id).get();
         notes.deleteById(id);
-
+        eventPublisher.publishEvent(new DeleteEvent(this, toDelete));
         return ResponseEntity.ok().build();
     }
 
@@ -151,7 +162,7 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
 
         Note savedNote = notes.save(noteAdding);
-
+        eventPublisher.publishEvent(new AddEvent(this, savedNote));
         return ResponseEntity.ok(savedNote);
     }
 
@@ -171,7 +182,7 @@ public class NoteController {
         Note existingNote = notes.getReferenceById(id);
         existingNote.title = updatedNote.title;
         existingNote.text = updatedNote.text;
-
+        eventPublisher.publishEvent(new UpdateEvent(this, existingNote));
         return ResponseEntity.ok(existingNote);
     }
 
