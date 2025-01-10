@@ -5,6 +5,7 @@ import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
 import org.checkerframework.checker.units.qual.C;
 import org.glassfish.jersey.client.ClientConfig;
 
@@ -95,6 +96,8 @@ public class ServerUtils2 {
      */
 
     public Note updateNote(Note note) {
+        System.out.println("updateNote in serverutils2");
+        System.out.println(note.getId());
         return ClientBuilder.newClient(new ClientConfig()) //
                 .target(SERVER).path("api/notes/" + note.getId()) // Endpoint for updating a note
                 .request(APPLICATION_JSON) //

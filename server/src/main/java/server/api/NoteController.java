@@ -176,9 +176,11 @@ public class NoteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note updatedNote) {
+        System.out.println("updateNote test1");
         if (!notes.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
+        System.out.println("updateNote test2");
         Note existingNote = notes.getReferenceById(id);
         existingNote.title = updatedNote.title;
         existingNote.text = updatedNote.text;

@@ -142,8 +142,9 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void addingNote() {
         Note newNote = new Note("New Note", "");
+        System.out.println(newNote.getId());
         try {
-            server.addNote(newNote);
+            newNote = server.addNote(newNote);
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -180,8 +181,10 @@ public class NoteOverviewCtrl implements Initializable {
                     updateMarkdown();
                     try {
                         server.updateNote(noteSelected);
+                        System.out.println("savingNote test");
                     } catch (Exception e) {
-
+                        System.out.println(e);
+                        //e.printStackTrace();
                     }
                     listNotes.refresh();
                     makeEditable(noteWriting);
@@ -271,6 +274,7 @@ public class NoteOverviewCtrl implements Initializable {
             makeEditable(titleWriting);
             noteWriting.setText(noteSelected.getText());
             titleWriting.setText(noteSelected.getTitle());
+            updateMarkdown();
         }
     }
 
@@ -309,6 +313,7 @@ public class NoteOverviewCtrl implements Initializable {
         if (keyEvent.isShortcutDown()) {
             switch (keyEvent.getCode()) {
                 case S:
+                    System.out.println("calling savingnote");
                     savingNote();
                     break;
                 case R:
@@ -321,7 +326,7 @@ public class NoteOverviewCtrl implements Initializable {
                     editedTheNote();
                     break;
                 case D:
-                    //delete note
+                    deleteNote();
                     break;
             }
         }
