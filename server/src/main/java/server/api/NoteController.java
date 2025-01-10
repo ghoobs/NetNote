@@ -157,7 +157,6 @@ public class NoteController {
      */
     @PostMapping(path = {"", "/"})
     public ResponseEntity<Note> addNote(@RequestBody Note noteAdding) {
-
         if (noteAdding.text == null || noteAdding.title == null)
             return ResponseEntity.badRequest().build();
 
@@ -175,15 +174,15 @@ public class NoteController {
      */
 
     @PutMapping("/{id}")
-    public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note updatedNote) {
-        System.out.println("updateNote test1");
+    public ResponseEntity<Note> updateNote(@PathVariable("id") Long id, @RequestBody Note updatedNote) {
         if (!notes.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
-        System.out.println("updateNote test2");
-        Note existingNote = notes.getReferenceById(id);
+        Note existingNote = notes.findById(id).get();
         existingNote.title = updatedNote.title;
         existingNote.text = updatedNote.text;
+
+        notes.save(existingNote);
         eventPublisher.publishEvent(new UpdateEvent(this, existingNote));
         return ResponseEntity.ok(existingNote);
     }

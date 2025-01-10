@@ -142,7 +142,6 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void addingNote() {
         Note newNote = new Note("New Note", "");
-        System.out.println(newNote.getId());
         try {
             newNote = server.addNote(newNote);
         } catch (WebApplicationException e) {
@@ -181,7 +180,6 @@ public class NoteOverviewCtrl implements Initializable {
                     updateMarkdown();
                     try {
                         server.updateNote(noteSelected);
-                        System.out.println("savingNote test");
                     } catch (Exception e) {
                         System.out.println(e);
                         //e.printStackTrace();

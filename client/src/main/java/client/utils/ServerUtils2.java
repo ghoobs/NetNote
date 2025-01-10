@@ -96,12 +96,10 @@ public class ServerUtils2 {
      */
 
     public Note updateNote(Note note) {
-        System.out.println("updateNote in serverutils2");
-        System.out.println(note.getId());
-        return ClientBuilder.newClient(new ClientConfig()) //
+        return ClientBuilder.newClient() //
                 .target(SERVER).path("api/notes/" + note.getId()) // Endpoint for updating a note
-                .request(APPLICATION_JSON) //
-                .put(Entity.entity(note, APPLICATION_JSON), Note.class);
+                .request(MediaType.APPLICATION_JSON) //
+                .put(Entity.entity(note, MediaType.APPLICATION_JSON), Note.class);
     }
 
     public List<Note> searchNotes(String keyword) {
