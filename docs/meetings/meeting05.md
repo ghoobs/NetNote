@@ -29,3 +29,26 @@
 - Closure (1 min )
 
 ### Minute Taker notes
+
+16:46 start of the meeting
+
+- 16:50-16:52 TA taking presence, 
+- 16:52-16:55 TA Announcements,
+    - The grades for technology will be released this weekend
+    - Deadline for features and accessibility/usability on friday
+    - The readme should be updated with an explanation on how to use te app until friday
+- 16:55-16:58 Showcasing app
+    - Changes include:
+    - Language switching (english, dutch, spanish)
+- 16:58-17:05 Planning of future tasks
+    - Chahid and Femke will continue working on their tasks from the previous week
+    - Tristan and Rares will be working on note tags
+    - Kaja and Kosmas will be working on collections
+- 17:05-17:08 Discussion about collections
+    - There should be an option to view all notes as well as an option to only view a specific collection
+    - Collections are hosted on multiple servers
+- Small to-do things mentioned throughout the meeting
+    - The pop-up when creating a note with an empty/already existing title shouldn't appear instantly when creating a new note
+    - The warning/confirmation pop-ups also have to be translated
+
+- 17:13 End of the meeting 
