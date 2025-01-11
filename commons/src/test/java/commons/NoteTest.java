@@ -38,6 +38,49 @@ public class NoteTest {
     }
 
     @Test
+    void testEqualsWithTags() {
+        Note note = new Note(
+                "Grocery List",
+                """
+                        - Milk
+                        - Bananas
+                        - Butter"""
+        );
+        note.tags.add(new Tag("Saturday"));
+        Note note2 = new Note(
+                "Grocery List",
+                """
+                        - Milk
+                        - Bananas
+                        - Butter"""
+        );
+        note2.tags.add(new Tag("Saturday"));
+
+        assertEquals(note, note2);
+    }
+    @Test
+    void testNotEqualsWithTags() {
+        Note note = new Note(
+                "Grocery List",
+                """
+                        - Milk
+                        - Bananas
+                        - Butter"""
+        );
+        note.tags.add(new Tag("Saturday"));
+        Note note2 = new Note(
+                "Grocery List",
+                """
+                        - Milk
+                        - Bananas
+                        - Butter"""
+        );
+
+        assertNotEquals(note, note2);
+    }
+
+
+    @Test
     void testHashCode() {
         Note note = new Note(
                 "Grocery List",
