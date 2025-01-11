@@ -3,6 +3,7 @@ package client.scenes;
 import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import com.google.inject.Inject;
+import commons.Collection;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
 import javafx.beans.property.SimpleStringProperty;
@@ -34,6 +35,8 @@ public class NoteOverviewCtrl implements Initializable {
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
     private final MarkdownHandler mdHandler;
+
+    private Collection currentCollection;
     /**
      * The Note writing.
      */
