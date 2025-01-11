@@ -177,7 +177,7 @@ class NoteControllerTest {
         var updatedNote = new Note("Title2", "2");
 
 
-        updatedNote = noteController.updateNote(1,updatedNote).getBody();
+        updatedNote = noteController.updateNote((long) 1,updatedNote).getBody();
 
         assertEquals(updatedNote, noteController.getById(1).getBody());
     }
