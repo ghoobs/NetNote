@@ -21,6 +21,9 @@ public class Note {
     public String title;
     public String text;
 
+    @ManyToMany
+    public List<Tag> tags;
+
     @OneToMany(mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmbeddedFile> embeddedFiles = new ArrayList<>();
 
@@ -28,9 +31,8 @@ public class Note {
      * Instantiates a new Note
      * Needed for Spring
      */
-    // Needed for Spring to initialize an object
-    // Otherwise the runtime throws an error
     public Note() {
+        tags = new ArrayList<>();
     }
 
     /**
@@ -42,6 +44,20 @@ public class Note {
     public Note(String title, String text) {
         this.title = title;
         this.text = text;
+        tags = new ArrayList<>();
+    }
+
+    /**
+     * Instantiates a new Note with a title, text and tags.
+     *
+     * @param title the title
+     * @param text  the text
+     * @param tags  the tags
+     */
+    public Note(String title, String text, List<Tag> tags) {
+        this.title = title;
+        this.text = text;
+        this.tags = tags;
     }
     /**
      * Compares two Notes
