@@ -19,6 +19,9 @@ public class MainCtrl {
      * @param overview     a Pair containing:
      *                     - the controller for the note overview (NoteOverviewCtrl)
      *                     - the root layout (Parent) for the note overview scene
+     * @param editCollections a Pair containing:
+     *                        - the controller for the edit collection window (EditCollectionCtrl)
+     *                        - the root layout (Parent) for the edit collection scene
      */
 
     public void initialize(Stage primaryStage,

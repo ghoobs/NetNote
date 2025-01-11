@@ -21,6 +21,7 @@ public class EditCollectionCtrl {
     /**
      * Constructs an EditCollectionCtrl instance with the main controller
      *
+     * @param server the server utils instance for interacting with the server
      * @param mainCtrl the main controller used for scene navigation
      */
 
