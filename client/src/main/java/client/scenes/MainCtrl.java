@@ -9,6 +9,8 @@ public class MainCtrl {
     private Stage primaryStage;
     private NoteOverviewCtrl overviewCtrl;
     private Scene overview;
+    private Scene editCollections;
+    private EditCollectionCtrl editCollectionCtrl;
 
     /**
      * Sets up and displays the primary stage with the note overview scene.
@@ -20,10 +22,15 @@ public class MainCtrl {
      */
 
     public void initialize(Stage primaryStage,
-                           Pair<NoteOverviewCtrl, Parent> overview) {
+                           Pair<NoteOverviewCtrl, Parent> overview,
+                           Pair<EditCollectionCtrl, Parent> editCollections) {
         this.primaryStage = primaryStage;
+
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
+        this.editCollections = new Scene(editCollections.getValue());
+        this.editCollectionCtrl = editCollections.getKey();
+
         showOverview();
         primaryStage.show();
     }
@@ -36,6 +43,15 @@ public class MainCtrl {
         primaryStage.setTitle("Notes: Overview");
         primaryStage.setScene(overview);
         overview.setOnKeyPressed(e -> overviewCtrl.keyPressed(e));
+    }
+
+    /**
+     * Sets the main scene to the editcollections scene and updates its title
+     */
+    public void showEditWindow(){
+        primaryStage.setTitle("Edit Collections");
+        primaryStage.setScene(editCollections);
+        editCollections.setOnKeyPressed(e -> editCollectionCtrl.keyPressed(e));
     }
 
     /**

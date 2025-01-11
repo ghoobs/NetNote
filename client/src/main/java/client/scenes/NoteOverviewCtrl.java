@@ -54,10 +54,16 @@ public class NoteOverviewCtrl implements Initializable {
     private Button addButton;
     @FXML
     private Button searchButton;
+    @FXML
+    private Button editCollectionButton;
+    @FXML
+    private Label collectionLabel;
     private final StringProperty propertyDeleteButton = new SimpleStringProperty();
     private final StringProperty propertyAddButton = new SimpleStringProperty();
     private final StringProperty propertySearchButton = new SimpleStringProperty();
     private final StringProperty propertySearchBarPrompt = new SimpleStringProperty();
+    private final StringProperty propertyEditCollButton = new SimpleStringProperty();
+    private final StringProperty propertyCollectionLabel = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
 
@@ -93,6 +99,8 @@ public class NoteOverviewCtrl implements Initializable {
         addButton.textProperty().bind(propertyAddButton);
         searchButton.textProperty().bind(propertySearchButton);
         searchBar.promptTextProperty().bind(propertySearchBarPrompt);
+        editCollectionButton.textProperty().bind(propertyEditCollButton);
+        collectionLabel.textProperty().bind(propertyCollectionLabel);
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
         setLocale(currentLocale);
@@ -542,6 +550,8 @@ public class NoteOverviewCtrl implements Initializable {
         propertyAddButton.set(rb.getString("button.add"));
         propertySearchButton.set(rb.getString("button.search"));
         propertySearchBarPrompt.set(rb.getString("searchBar.prompt"));
+        propertyEditCollButton.set(rb.getString("button.editCollection"));
+        propertyCollectionLabel.set(rb.getString("label.collections"));
     }
 
     /**
@@ -607,6 +617,13 @@ public class NoteOverviewCtrl implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Displays a new window for editing collections
+     */
+    public void editCollections(){
+        mainCtrl.showEditWindow();
     }
 
     /**
