@@ -8,19 +8,21 @@ import java.util.Objects;
 @Entity
 public class Tag {
     @Id
-    public String tag;
+    public String name;
 
     /**
      * Initializes Tag
      */
-    public Tag() {}
+    public Tag() {
+        name = "";
+    }
 
     /**
      * Initializes Tag with a proper value
-     * @param tag Value of the tag
+     * @param name Value of the tag
      */
-    public Tag(String tag) {
-        this.tag = tag;
+    public Tag(String name) {
+        this.name = name;
     }
 
     /**
@@ -29,7 +31,7 @@ public class Tag {
      */
     @Override
     public int hashCode() {
-        return tag.hashCode();
+        return name.hashCode();
     }
 
     /**
@@ -42,7 +44,7 @@ public class Tag {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Tag tag1 = (Tag) o;
-        return Objects.equals(tag, tag1.tag);
+        return Objects.equals(name, tag1.name);
     }
 
     /**
@@ -51,7 +53,7 @@ public class Tag {
      */
     @Override
     public String toString() {
-        return tag;
+        return name;
     }
 
     /**
@@ -59,6 +61,6 @@ public class Tag {
      * @return True if the tag's value is non-null and not empty
      */
     public boolean valid() {
-        return tag != null && !tag.isEmpty();
+        return name != null && !name.isEmpty();
     }
 }

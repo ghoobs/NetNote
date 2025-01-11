@@ -1,6 +1,5 @@
 package server.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -109,7 +108,7 @@ public class NoteController {
     @GetMapping("/list")
     public List<Pair<String, Long>> getAllNamesIds(){
         return getAll().stream()
-                .map(note -> new Pair<String, Long>(note.title, note.id))
+                .map(note -> new Pair<>(note.title, note.id))
                 .toList();
     }
 
@@ -144,8 +143,7 @@ public class NoteController {
     public List<Note> searchNotes(@RequestParam String keyword){
             List<Note> allNotes = notes.findAll();
             return allNotes.stream()
-                    .filter(note -> note.getTitle().toLowerCase().contains(keyword.toLowerCase())
-                            || note.getText().toLowerCase().contains(keyword.toLowerCase()))
+                    .filter(note -> note.hasKeyword(keyword))
                     .collect(Collectors.toList());
     }
 
@@ -179,8 +177,7 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
         }
         Note existingNote = notes.findById(id).get();
-        existingNote.title = updatedNote.title;
-        existingNote.text = updatedNote.text;
+        updatedNote.copyTo(existingNote);
 
         notes.save(existingNote);
         eventPublisher.publishEvent(new UpdateEvent(this, existingNote));

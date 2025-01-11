@@ -59,6 +59,17 @@ public class Note {
         this.text = text;
         this.tags = tags;
     }
+
+    /**
+     * Shallow copies the values of this note to the destination note
+     * @param dst Note to shallow-copy the values into
+     */
+    public void copyTo(Note dst) {
+        dst.title = this.title;
+        dst.text = this.text;
+        dst.tags = this.tags;
+    }
+
     /**
      * Compares two Notes
      *
@@ -174,5 +185,29 @@ public class Note {
     public boolean removeEmbeddedFile(EmbeddedFile file) {
         file.setNote(null);
         return embeddedFiles.remove(file);
+    }
+
+    /**
+     * Checks if the keyword is related in the title, body, or tags.
+     * @param keyword Keyword to check
+     * @return true if the keyword is found in the aforementioned elements, or if the elements are present in the keyword.
+     */
+    public boolean hasKeyword(String keyword) {
+        String lowerKw = keyword.toLowerCase();
+        String lowerTitle= title.toLowerCase();
+        if (lowerTitle.contains(lowerKw) || lowerKw.contains(lowerTitle)) {
+            return true;
+        }
+        String lowerText = text.toLowerCase();
+        if (lowerText.contains(lowerKw) || lowerKw.contains(lowerText)) {
+            return true;
+        }
+        for (Tag tag : tags) {
+            String lowerTag = tag.name.toLowerCase();
+            if (lowerTag.contains(lowerKw) || lowerKw.contains(lowerTag)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
