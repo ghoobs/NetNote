@@ -32,10 +32,10 @@
       </AnchorPane>
       <AnchorPane layoutX="137.0" layoutY="39.0" prefHeight="200.0" prefWidth="463.0">
          <children>
-            <Label layoutX="50.0" layoutY="36.0" prefHeight="25.0" prefWidth="60.0" text="Title" />
-            <Label layoutX="50.0" layoutY="63.0" prefHeight="25.0" prefWidth="60.0" text="Server" />
-            <Label layoutX="50.0" layoutY="90.0" prefHeight="25.0" text="Collection" />
-            <Label layoutX="50.0" layoutY="117.0" prefHeight="25.0" prefWidth="60.0" text="Status" />
+            <Label fx:id="title" layoutX="50.0" layoutY="36.0" prefHeight="25.0" prefWidth="60.0" text="Title" />
+            <Label fx:id="serverName" layoutX="50.0" layoutY="63.0" prefHeight="25.0" prefWidth="60.0" text="Server" />
+            <Label fx:id="collectionName" layoutX="50.0" layoutY="90.0" prefHeight="25.0" text="Collection" />
+            <Label fx:id="status" layoutX="50.0" layoutY="117.0" prefHeight="25.0" prefWidth="60.0" text="Status" />
             <TextField layoutX="116.0" layoutY="36.0" />
             <TextField layoutX="116.0" layoutY="63.0" />
             <TextField layoutX="116.0" layoutY="90.0" />

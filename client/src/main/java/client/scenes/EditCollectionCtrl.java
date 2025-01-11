@@ -7,6 +7,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 
 import java.net.URL;
@@ -27,9 +28,21 @@ public class EditCollectionCtrl implements Initializable {
     private Button addCollButton;
     @FXML
     private Button backButton;
+    @FXML
+    private Label title;
+    @FXML
+    private Label serverName;
+    @FXML
+    private Label collectionName;
+    @FXML
+    private Label status;
     private final StringProperty propertyDeleteButton = new SimpleStringProperty();
     private final StringProperty propertyAddButton = new SimpleStringProperty();
     private final StringProperty propertyBackButton = new SimpleStringProperty();
+    private final StringProperty propertyTitleLabel = new SimpleStringProperty();
+    private final StringProperty propertyServerNameLabel = new SimpleStringProperty();
+    private final StringProperty propertyCollectionNameLabel = new SimpleStringProperty();
+    private final StringProperty propertystatusLabel = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
 
@@ -50,6 +63,10 @@ public class EditCollectionCtrl implements Initializable {
         deleteCollButton.textProperty().bind(propertyDeleteButton);
         addCollButton.textProperty().bind(propertyAddButton);
         backButton.textProperty().bind(propertyBackButton);
+        title.textProperty().bind(propertyTitleLabel);
+        serverName.textProperty().bind(propertyServerNameLabel);
+        collectionName.textProperty().bind(propertyCollectionNameLabel);
+        status.textProperty().bind(propertystatusLabel);
 
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
@@ -66,6 +83,10 @@ public class EditCollectionCtrl implements Initializable {
         propertyDeleteButton.set(rb.getString("button.delete"));
         propertyAddButton.set(rb.getString("button.add"));
         propertyBackButton.set(rb.getString("button.back"));
+        propertyTitleLabel.set(rb.getString("label.title"));
+        propertyServerNameLabel.set(rb.getString("label.serverName"));
+        propertyCollectionNameLabel.set(rb.getString("label.collectionName"));
+        propertystatusLabel.set(rb.getString("label.status"));
     }
 
     /**
