@@ -1,9 +1,12 @@
 package server.api;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import commons.Pair;
+import commons.Tag;
 import events.AddEvent;
 import events.DeleteEvent;
 import events.UpdateEvent;
@@ -131,6 +134,18 @@ public class NoteController {
     @GetMapping("/ids")
     public List<Long> getAllIds() {
         return getAll().stream().map(note -> note.id).toList();
+    }
+
+    /**
+     * Get all tag list.
+     *
+     * @return the tags
+     */
+    @GetMapping("/tags")
+    public List<Tag> getAllTags() {
+        Set<Tag> tags = new HashSet<>();
+        getAll().forEach(note -> tags.addAll(note.tags));
+        return tags.stream().toList();
     }
 
     /**
