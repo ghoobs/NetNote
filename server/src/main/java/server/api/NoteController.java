@@ -1,10 +1,12 @@
 package server.api;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import commons.Pair;
+import commons.Tag;
 import events.AddEvent;
 import events.DeleteEvent;
 import events.UpdateEvent;
@@ -109,7 +111,7 @@ public class NoteController {
     @GetMapping("/list")
     public List<Pair<String, Long>> getAllNamesIds(){
         return getAll().stream()
-                .map(note -> new Pair<String, Long>(note.title, note.id))
+                .map(note -> new Pair<>(note.title, note.id))
                 .toList();
     }
 
@@ -135,6 +137,18 @@ public class NoteController {
     }
 
     /**
+     * Get all tag list.
+     *
+     * @return the tags
+     */
+    @GetMapping("/tags")
+    public List<Tag> getAllTags() {
+        Set<Tag> tags = new HashSet<>();
+        getAll().forEach(note -> tags.addAll(note.tags));
+        return tags.stream().toList();
+    }
+
+    /**
      * Search through notes using a keyword/string
      * Is case-insensitive to allow for more keywords
      * @param keyword the keyword used to search through the notes
@@ -144,8 +158,7 @@ public class NoteController {
     public List<Note> searchNotes(@RequestParam String keyword){
             List<Note> allNotes = notes.findAll();
             return allNotes.stream()
-                    .filter(note -> note.getTitle().toLowerCase().contains(keyword.toLowerCase())
-                            || note.getText().toLowerCase().contains(keyword.toLowerCase()))
+                    .filter(note -> note.hasKeyword(keyword))
                     .collect(Collectors.toList());
     }
 
@@ -179,8 +192,7 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
         }
         Note existingNote = notes.findById(id).get();
-        existingNote.title = updatedNote.title;
-        existingNote.text = updatedNote.text;
+        updatedNote.copyTo(existingNote);
 
         notes.save(existingNote);
         eventPublisher.publishEvent(new UpdateEvent(this, existingNote));
