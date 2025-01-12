@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,8 +33,8 @@ public class ConfigTest {
         temporaryFile = Files.createTempFile("config", ".json").toFile();
         temporaryFile.deleteOnExit();
         config = new Config();
-        Collection collection = new Collection("collection");
-        config.setCollections(Collections.singletonList(Collections.singletonList(collection)));
+        config.addNewCollection("http://localhost:8080/", 0L);
+        config.addNewCollection("http://localhost:8090/", 1L);
     }
 
     /**
@@ -56,9 +57,29 @@ public class ConfigTest {
     @Test
     void loadConfig() throws IOException {
         config.saveConfig(temporaryFile);
-        Config loadedConfig = config.loadConfig(temporaryFile);
+        Config loadedConfig = Config.loadConfig(temporaryFile);
 
         assertNotNull(loadedConfig);
-        assertEquals(loadedConfig.getCollections().size(), 1);
+        assertEquals(loadedConfig, config);
     }
+
+    @Test
+    void writeAndLoadConfigStatic() throws IOException {
+        config.saveConfig();
+        assertEquals(config, Config.loadConfig());
+    }
+
+    @Test
+    void commonMethods(){
+        var allIDs = config.getAllCollectionIds();
+        assertTrue(allIDs.contains(1L));
+        assertTrue(allIDs.contains(0L));
+
+        var allServers = config.getAllServers();
+        assertTrue(allServers.contains("http://localhost:8080/"));
+        assertTrue(allServers.contains("http://localhost:8090/"));
+
+        assertEquals(config.getIdsFromServer("http://localhost:8080/"), List.of(0L));
+    }
+
 }
