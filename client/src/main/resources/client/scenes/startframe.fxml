@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -60,29 +61,29 @@
                <menus>
                   <Menu text="Language">
                      <items>
-                        <MenuItem text="English" onAction="#switchToEnglish">
+                        <MenuItem onAction="#switchToEnglish" text="English">
                            <graphic>
-                              <ImageView fitWidth="20" fitHeight="15">
+                              <ImageView fitHeight="15" fitWidth="20">
                                  <image>
-                                    <Image url="/images/englishflag.png" />
+                                    <Image url="@/images/englishflag.png" />
                                  </image>
                               </ImageView>
                            </graphic>
                         </MenuItem>
-                        <MenuItem text="Dutch" onAction="#switchToDutch">
+                        <MenuItem onAction="#switchToDutch" text="Dutch">
                            <graphic>
-                              <ImageView fitWidth="20" fitHeight="15">
+                              <ImageView fitHeight="15" fitWidth="20">
                                  <image>
-                                    <Image url="/images/dutchflag.png" />
+                                    <Image url="@/images/dutchflag.png" />
                                  </image>
                               </ImageView>
                            </graphic>
                         </MenuItem>
-                        <MenuItem text="Spanish" onAction="#switchToSpanish">
+                        <MenuItem onAction="#switchToSpanish" text="Spanish">
                            <graphic>
-                              <ImageView fitWidth="20" fitHeight="15">
+                              <ImageView fitHeight="15" fitWidth="20">
                                  <image>
-                                    <Image url="/images/spanishflag.png" />
+                                    <Image url="@/images/spanishflag.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -91,6 +92,18 @@
                   </Menu>
                </menus>
             </MenuBar>
+            <Label fx:id="collectionLabel" alignment="CENTER" prefHeight="26.0" prefWidth="83.0" text="Collection:" />
+            <MenuBar prefHeight="26.0" prefWidth="91.0">
+              <menus>
+                <Menu mnemonicParsing="false" text="Select">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="All" />
+                     <MenuItem mnemonicParsing="false" text="Default" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <Button fx:id="editCollectionButton" mnemonicParsing="false" onAction="#editCollections" text="Edit Collections" />
          </items>
       </ToolBar>
    </children>
