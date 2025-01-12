@@ -1,5 +1,6 @@
 package server.websocket;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.TextMessage;
@@ -14,6 +15,8 @@ public class WebSocketMessaging {
 
     /**
      * Sends a message to all connected WebSocket clients
+     *
+     * @param event the event object to be sent to clients
      */
     public void sendEvent(Object event) {
         String eventMessage = event.toString();
