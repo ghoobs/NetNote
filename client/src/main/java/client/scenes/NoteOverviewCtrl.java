@@ -16,6 +16,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.web.WebView;
@@ -26,6 +27,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The type Note overview ctrl.
@@ -61,6 +65,15 @@ public class NoteOverviewCtrl implements Initializable {
     private Button editCollectionButton;
     @FXML
     private Label collectionLabel;
+    @FXML
+    private HBox tagField; // HBox to hold the tag ComboBoxes
+    @FXML
+    private ComboBox<String> tagComboBox; // Initial ComboBox for tags
+    @FXML
+    private Button clearTagsButton; // Button to reset filters
+    private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
+    private List<ComboBox<String>> tagFilters = new ArrayList<>();
+    private ObservableList<Note> filteredNotes;
     private final StringProperty propertyDeleteButton = new SimpleStringProperty();
     private final StringProperty propertyAddButton = new SimpleStringProperty();
     private final StringProperty propertySearchButton = new SimpleStringProperty();
@@ -107,8 +120,17 @@ public class NoteOverviewCtrl implements Initializable {
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
         setLocale(currentLocale);
-        data = FXCollections.observableArrayList();
-        listNotes.setItems(data);
+        // Load notes and initialize UI
+        data = FXCollections.observableArrayList(server.getNotes());
+        filteredNotes = FXCollections.observableArrayList(data);
+        listNotes.setItems(filteredNotes);
+
+        // Add the initial ComboBox to the tag field
+        tagFilters.add(tagComboBox);
+        displayTags(tagComboBox);
+
+        // Clear tags when the clear button is clicked
+        clearTagsButton.setOnAction(event -> clearTags());
         makeEditable(noteWriting);
         titleWriting.setEditable(true);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
@@ -709,5 +731,69 @@ public class NoteOverviewCtrl implements Initializable {
     public TextField getSearchBar() {
         return searchBar;
     }
-
+    /**
+     * Filters notes by a selected tag.
+     */
+    private void filterByTag(String newTag) {
+        if (newTag == null || newTag.isEmpty()) {
+            return;
+        }
+        activeTagFilters.add(newTag);
+        filteredNotes.setAll(data.stream()
+                .filter(note -> activeTagFilters.stream().allMatch(tag -> note.getText().contains(tag)))
+                .toList());
+        listNotes.setItems(filteredNotes);
+        ComboBox<String> newComboBox = new ComboBox<>();
+        newComboBox.setPromptText("Select a tag");
+        tagFilters.add(newComboBox);
+        tagField.getChildren().add(newComboBox);
+        displayTags(newComboBox);
+    }
+    /**
+     * Displays available tags in a given ComboBox.
+     */
+    private void displayTags(ComboBox<String> tagBox) {
+        List<String> allTags = filteredNotes.stream()
+                .map(Note::getText) // Get content from each note
+                .flatMap(content -> extractTags(content).stream()) // Flatten the tags
+                .distinct() // Remove duplicates
+                .toList();
+        List<String> mutableTags = new ArrayList<>(allTags);
+        mutableTags.removeAll(activeTagFilters);
+        tagBox.getItems().setAll(mutableTags);
+        tagBox.valueProperty().addListener((observable, oldValue, newValue) -> filterByTag(newValue));
+    }
+    /**
+     * Clears all tag filters and resets the notes list.
+     */
+    public void clearTags() {
+        activeTagFilters.clear(); // Clear active filters
+        tagFilters.clear(); // Clear ComboBoxes
+        tagField.getChildren().clear(); // Clear UI elements
+        ComboBox<String> initialComboBox = new ComboBox<>();
+        initialComboBox.setPromptText("Select a tag");
+        tagFilters.add(initialComboBox);
+        tagField.getChildren().add(initialComboBox);
+        displayTags(initialComboBox);
+        filteredNotes.setAll(data);
+        listNotes.setItems(filteredNotes);
+    }
+    /**
+     * Filters notes based on the provided predicate.
+     */
+    private void filterNotes(Predicate<Note> predicate) {
+        filteredNotes.setAll(data.stream().filter(predicate).toList());
+        listNotes.setItems(filteredNotes);
+    }
+    /**
+     * Extracts tags directly from the content of a note using regex.
+     */
+    private List<String> extractTags(String content) {
+        List<String> tags = new ArrayList<>();
+        Matcher matcher = Pattern.compile("#\\w+").matcher(content);
+        while (matcher.find()) {
+            tags.add(matcher.group());
+        }
+        return tags;
+    }
 }
