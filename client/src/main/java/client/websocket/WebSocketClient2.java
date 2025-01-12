@@ -28,12 +28,6 @@ public class WebSocketClient2 implements WebSocketHandler {
         session = client.doHandshake(this, uri).get();
     }
 
-    public void sendMessage(String message) throws Exception {
-        if (session != null && session.isOpen()) {
-            session.sendMessage(new TextMessage(message));
-        }
-    }
-
     public void addWebSocketListener(Consumer<String> listener) {
         this.listener = listener;
     }

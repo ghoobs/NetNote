@@ -100,15 +100,15 @@ public class NoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        webSocketClient = new WebSocketClient2();
-        webSocketClient.addWebSocketListener(message -> {
-            refresh();
-        });
-        try {
-            webSocketClient.connect("ws://localhost:8080/ws/notes");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        webSocketClient = new WebSocketClient2();
+//        webSocketClient.addWebSocketListener(message -> {
+//            refresh();
+//        });
+//        try {
+//            webSocketClient.connect("ws://localhost:8080/ws/notes");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
         searchButton.textProperty().bind(propertySearchButton);
