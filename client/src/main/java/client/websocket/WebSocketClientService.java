@@ -20,9 +20,10 @@ public class WebSocketClientService {
 
         @Override
         public void handleTextMessage(WebSocketSession session, TextMessage message) {
-            // Handle incoming message (For now, just print to console)
             Platform.runLater(() -> {
-                // Update UI or take appropriate action here
+
+                /// TO BE FINISHED - SHOULD REFRESH
+
                 System.out.println("Received message: " + message.getPayload());
             });
         }
