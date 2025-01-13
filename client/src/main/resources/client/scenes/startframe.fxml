@@ -16,95 +16,106 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.web.WebView?>
-
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ComboBox?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.NoteOverviewCtrl">
-   <children>
-      <HBox layoutY="-1.0" prefHeight="372.0" prefWidth="139.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="461.0" AnchorPane.topAnchor="-1.0">
-         <children>
-            <ListView fx:id="listNotes" prefHeight="335.0" prefWidth="139.0">
-               <HBox.margin>
-                  <Insets top="40.0" />
-               </HBox.margin>
-            </ListView>
-         </children>
-      </HBox>
-      <SplitPane dividerPositions="0.5" layoutX="137.0" layoutY="1.0" prefHeight="372.0" prefWidth="462.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="137.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
-         <items>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="365.0" prefWidth="227.0">
-               <children>
-                  <TextArea fx:id="noteWriting" layoutY="63.0" onKeyReleased="#editedTheNote" prefHeight="307.0" prefWidth="223.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0" />
-                  <TextField fx:id="titleWriting" layoutX="3.0" layoutY="39.0" onKeyReleased="#editedTheNote" prefHeight="25.0" prefWidth="227.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="37.0" />
-               </children>
-            </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="175.0">
-               <children>
-                  <WebView fx:id="markDownView" layoutX="-1.0" layoutY="34.0" prefHeight="336.0" prefWidth="227.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
-               </children>
-            </AnchorPane>
-         </items>
-      </SplitPane>
-      <AnchorPane layoutX="147.0" layoutY="371.0" prefHeight="31.0" prefWidth="228.0" AnchorPane.bottomAnchor="-2.0" AnchorPane.leftAnchor="147.0" AnchorPane.rightAnchor="225.0" AnchorPane.topAnchor="371.0">
-         <children>
-            <HBox layoutX="-147.0" layoutY="1.0" prefHeight="26.0" prefWidth="600.0" spacing="10.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="-147.0" AnchorPane.rightAnchor="-225.0">
-               <children>
-                  <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteNote" text="Delete" />
-                  <Button fx:id="addButton" mnemonicParsing="false" onAction="#addNote" prefHeight="25.0" prefWidth="57.0" text="Add" />
-               </children>
-            </HBox>
-         </children>
-      </AnchorPane>
-      <ToolBar prefHeight="36.0" prefWidth="600.0">
-         <items>
-            <TextField fx:id="searchBar" alignment="TOP_CENTER" prefHeight="26.0" prefWidth="132.0" promptText="Search..." />
-            <Button fx:id="searchButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="67.0" text="Search" />
-            <MenuBar>
-               <menus>
-                  <Menu text="Language">
-                     <items>
-                        <MenuItem onAction="#switchToEnglish" text="English">
-                           <graphic>
-                              <ImageView fitHeight="15" fitWidth="20">
-                                 <image>
-                                    <Image url="@/images/englishflag.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </MenuItem>
-                        <MenuItem onAction="#switchToDutch" text="Dutch">
-                           <graphic>
-                              <ImageView fitHeight="15" fitWidth="20">
-                                 <image>
-                                    <Image url="@/images/dutchflag.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </MenuItem>
-                        <MenuItem onAction="#switchToSpanish" text="Spanish">
-                           <graphic>
-                              <ImageView fitHeight="15" fitWidth="20">
-                                 <image>
-                                    <Image url="@/images/spanishflag.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </MenuItem>
-                     </items>
-                  </Menu>
-               </menus>
-            </MenuBar>
-            <Label fx:id="collectionLabel" alignment="CENTER" prefHeight="26.0" prefWidth="83.0" text="Collection:" />
-            <MenuBar prefHeight="26.0" prefWidth="91.0">
-              <menus>
-                <Menu mnemonicParsing="false" text="Select">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="All" />
-                     <MenuItem mnemonicParsing="false" text="Default" />
-                  </items>
-                </Menu>
-              </menus>
-            </MenuBar>
-            <Button fx:id="editCollectionButton" mnemonicParsing="false" onAction="#editCollections" text="Edit Collections" />
-         </items>
-      </ToolBar>
-   </children>
+    <children>
+        <HBox layoutY="-1.0" prefHeight="372.0" prefWidth="139.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="461.0" AnchorPane.topAnchor="-1.0">
+            <children>
+                <ListView fx:id="listNotes" prefHeight="335.0" prefWidth="139.0">
+                    <HBox.margin>
+                        <Insets top="40.0" />
+                    </HBox.margin>
+                </ListView>
+            </children>
+        </HBox>
+        <SplitPane dividerPositions="0.5" layoutX="137.0" layoutY="1.0" prefHeight="372.0" prefWidth="462.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="137.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="365.0" prefWidth="227.0">
+                    <children>
+                        <TextArea fx:id="noteWriting" layoutY="63.0" onKeyReleased="#editedTheNote" prefHeight="307.0" prefWidth="223.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0" />
+                        <TextField fx:id="titleWriting" layoutX="3.0" layoutY="39.0" onKeyReleased="#editedTheNote" prefHeight="25.0" prefWidth="227.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="37.0" />
+                    </children>
+                </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="175.0">
+                    <children>
+                        <WebView fx:id="markDownView" layoutX="-1.0" layoutY="34.0" prefHeight="336.0" prefWidth="227.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+        <AnchorPane layoutX="0.0" layoutY="371.0" prefHeight="31.0" prefWidth="600.0" AnchorPane.bottomAnchor="-2.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="371.0">
+            <children>
+                <HBox layoutX="10.0" layoutY="1.0" prefHeight="26.0" prefWidth="600.0" spacing="10.0" alignment="CENTER_LEFT" AnchorPane.leftAnchor="10.0">
+                    <children>
+                        <!-- Buttons moved to the far-left -->
+                        <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteNote" text="Delete" />
+                        <Button fx:id="addButton" mnemonicParsing="false" onAction="#addNote" prefHeight="25.0" prefWidth="57.0" text="Add" />
+                        <Button fx:id="clearTagsButton" text="Clear Filters" />
+
+                        <!-- Dynamic Tag Filters -->
+                        <HBox fx:id="tagField" spacing="10.0">
+                            <ComboBox fx:id="tagComboBox" promptText="Select a tag" />
+                        </HBox>
+                    </children>
+                </HBox>
+            </children>
+        </AnchorPane>
+        <ToolBar prefHeight="36.0" prefWidth="600.0">
+            <items>
+                <TextField fx:id="searchBar" alignment="TOP_CENTER" prefHeight="26.0" prefWidth="132.0" promptText="Search..." />
+                <Button fx:id="searchButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="67.0" text="Search" />
+                <MenuBar>
+                    <menus>
+                        <Menu text="Language">
+                            <items>
+                                <MenuItem onAction="#switchToEnglish" text="English">
+                                    <graphic>
+                                        <ImageView fitHeight="15" fitWidth="20">
+                                            <image>
+                                                <Image url="@/images/englishflag.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem onAction="#switchToDutch" text="Dutch">
+                                    <graphic>
+                                        <ImageView fitHeight="15" fitWidth="20">
+                                            <image>
+                                                <Image url="@/images/dutchflag.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem onAction="#switchToSpanish" text="Spanish">
+                                    <graphic>
+                                        <ImageView fitHeight="15" fitWidth="20">
+                                            <image>
+                                                <Image url="@/images/spanishflag.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+                <Label fx:id="collectionLabel" alignment="CENTER" prefHeight="26.0" prefWidth="83.0" text="Collection:" />
+                <MenuBar prefHeight="26.0" prefWidth="91.0">
+                    <menus>
+                        <Menu mnemonicParsing="false" text="Select">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="All" />
+                                <MenuItem mnemonicParsing="false" text="Default" />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+                <Button fx:id="editCollectionButton" mnemonicParsing="false" onAction="#editCollections" text="Edit Collections" />
+            </items>
+        </ToolBar>
+    </children>
 </AnchorPane>
+
+
+
