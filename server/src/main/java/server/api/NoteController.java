@@ -1,10 +1,9 @@
 package server.api;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.*;
 import java.util.stream.Collectors;
-
 import commons.Pair;
 import commons.Tag;
 import events.AddEvent;
@@ -16,8 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import commons.Note;
-
-
+import server.websocket.WebSocketMessaging;
 import server.database.NoteRepository;
 
 /**
@@ -41,6 +39,7 @@ public class NoteController {
 
     private final NoteRepository notes;
     private ApplicationEventPublisher eventPublisher;
+    private WebSocketMessaging messaging;
     /**
      * Instantiates a new Note controller.
      *
@@ -60,6 +59,10 @@ public class NoteController {
         this.eventPublisher = eventPublisher;
     }
 
+    @Autowired
+    public void setWebSocketMessaging(WebSocketMessaging messaging) {
+        this.messaging = messaging;
+    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Note> delete(@PathVariable("id") Long id){
@@ -69,7 +72,9 @@ public class NoteController {
         }
         Note toDelete = notes.findById(id).get();
         notes.deleteById(id);
-        eventPublisher.publishEvent(new DeleteEvent(this, toDelete));
+        DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
+        eventPublisher.publishEvent(deleteEvent);
+//        messaging.sendEvent(deleteEvent);
         return ResponseEntity.ok().build();
     }
 
@@ -174,7 +179,9 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
 
         Note savedNote = notes.save(noteAdding);
-        eventPublisher.publishEvent(new AddEvent(this, savedNote));
+        AddEvent addEvent = new AddEvent(this, savedNote);
+        eventPublisher.publishEvent(addEvent);
+//        messaging.sendEvent(addEvent);
         return ResponseEntity.ok(savedNote);
     }
 
@@ -195,7 +202,9 @@ public class NoteController {
         updatedNote.copyTo(existingNote);
 
         notes.save(existingNote);
-        eventPublisher.publishEvent(new UpdateEvent(this, existingNote));
+        UpdateEvent updateEvent = new UpdateEvent(this, existingNote);
+        eventPublisher.publishEvent(updateEvent);
+//        messaging.sendEvent(updateEvent);
         return ResponseEntity.ok(existingNote);
     }
 
