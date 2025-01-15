@@ -48,8 +48,9 @@ public class Main extends Application {
         }
 
         var overview = FXML.load(NoteOverviewCtrl.class, "client", "scenes", "startframe.fxml");
+        var editCollections = FXML.load(EditCollectionCtrl.class, "client", "scenes", "editcollections.fxml");
 
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview);
+        mainCtrl.initialize(primaryStage, overview, editCollections);
     }
 }
