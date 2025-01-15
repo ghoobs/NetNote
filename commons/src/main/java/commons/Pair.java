@@ -1,10 +1,16 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
-public class Pair<T, G> {
-    private T field1;
-    private G field2;
+
+public class Pair<T, G>  {
+
+    private T first;
+
+    private G second;
 
     /**
      * Instantiates a new Pair.
@@ -13,8 +19,11 @@ public class Pair<T, G> {
      * @param obj2  the second Object
      */
     public Pair(T obj, G obj2){
-        field1 = obj;
-        field2 = obj2;
+        first = obj;
+        second = obj2;
+    }
+
+    public Pair(){
     }
 
     /**
@@ -27,7 +36,7 @@ public class Pair<T, G> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Pair<?, ?> pair = (Pair<?, ?>) o;
-        return Objects.equals(field1, pair.field1) && Objects.equals(field2, pair.field2);
+        return Objects.equals(first, pair.first) && Objects.equals(second, pair.second);
     }
 
     /**
@@ -36,6 +45,30 @@ public class Pair<T, G> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(field1, field2);
+        return Objects.hash(first, second);
+    }
+
+    public void setFirst(T first) {
+        this.first = first;
+    }
+
+    public void setSecond(G second) {
+        this.second = second;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "first=" + first +
+                ", second=" + second +
+                '}';
+    }
+
+    public T getFirst() {
+        return first;
+    }
+
+    public G getSecond() {
+        return second;
     }
 }

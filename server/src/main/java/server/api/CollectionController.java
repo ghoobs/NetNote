@@ -1,4 +1,5 @@
 package server.api;
+
 import commons.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import commons.Note;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 /**
  * A basic Rest Controller for Collections
@@ -24,7 +26,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/collections")
 public class CollectionController {
     private final CollectionRepository collections;
-    private final NoteRepository notes;
 
     /**
      * Instantiates a new Collection controller.
@@ -34,7 +35,6 @@ public class CollectionController {
      */
     public CollectionController(CollectionRepository collectionsRepo, NoteRepository noteRepo) {
         this.collections = collectionsRepo;
-        this.notes = noteRepo;
     }
 
     @DeleteMapping("/delete/{id}")
@@ -77,9 +77,13 @@ public class CollectionController {
      */
     @GetMapping("/list")
     public List<Pair<String, Long>> getAllNamesIds() {
+        System.out.println(getAll().stream()
+                .map(collection -> new Pair<>(collection.name, collection.id))
+                .toList());
         return getAll().stream()
                 .map(collection -> new Pair<>(collection.name, collection.id))
                 .toList();
+
     }
 
     /**

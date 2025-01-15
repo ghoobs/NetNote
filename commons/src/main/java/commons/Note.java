@@ -142,9 +142,9 @@ public class Note {
         this.title = title;
     }
 
-//    public List<EmbeddedFile> getEmbeddedFiles() {
-//        return embeddedFiles;
-//    }
+    public List<EmbeddedFile> getEmbeddedFiles() {
+        return embeddedFiles;
+    }
 
     public void setEmbeddedFiles(ArrayList<EmbeddedFile> embeddedFiles) {
         this.embeddedFiles = embeddedFiles;
