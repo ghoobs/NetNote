@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
+import client.websocket.WebSocketClient2;
 import com.google.inject.Inject;
 import commons.Collection;
 import commons.Note;
@@ -39,6 +40,7 @@ public class NoteOverviewCtrl implements Initializable {
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
     private final MarkdownHandler mdHandler;
+    private WebSocketClient2 webSocketClient;
 
     private Collection currentCollection;
     /**
@@ -111,6 +113,15 @@ public class NoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+//        webSocketClient = new WebSocketClient2();
+//        webSocketClient.addWebSocketListener(message -> {
+//            refresh();
+//        });
+//        try {
+//            webSocketClient.connect("ws://localhost:8080/ws/notes");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
         searchButton.textProperty().bind(propertySearchButton);
