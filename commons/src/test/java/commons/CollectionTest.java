@@ -8,21 +8,21 @@ import java.util.List;
 
 public class CollectionTest {
 
-    private Note note1;
-    private Note note2;
+    private CollectionNote note1;
+    private CollectionNote note2;
     private Collection collection1;
     private Collection collection2;
 
     @BeforeEach
     void setUp() {
-        note1 = new Note(
+        note1 = new CollectionNote(
                 "Grocery List",
                 """
                         - Milk
                         - Bananas
                         - Butter"""
         );
-        note2 = new Note("", "");
+        note2 = new CollectionNote("", "");
 
         collection1 = new Collection("Test1", List.of(note1, note2));
         collection2 = new Collection("Test1", List.of(note1, note2));

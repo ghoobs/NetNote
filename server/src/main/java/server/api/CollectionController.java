@@ -77,9 +77,6 @@ public class CollectionController {
      */
     @GetMapping("/list")
     public List<Pair<String, Long>> getAllNamesIds() {
-        System.out.println(getAll().stream()
-                .map(collection -> new Pair<>(collection.name, collection.id))
-                .toList());
         return getAll().stream()
                 .map(collection -> new Pair<>(collection.name, collection.id))
                 .toList();
