@@ -163,12 +163,10 @@ public class NoteOverviewCtrl implements Initializable {
             applyFilters(newValue);
             highlightSelectedNote(newValue);
         });
-
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
         updateMarkdown();
     }
-
     /**
      * Calls the addingnote function
      */
@@ -185,19 +183,24 @@ public class NoteOverviewCtrl implements Initializable {
         try {
             newNote = server.addNote(newNote);
         } catch (WebApplicationException e) {
-            var alert = new Alert(Alert.AlertType.ERROR);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(e.getMessage());
             alert.showAndWait();
             return;
         }
+
         data.add(newNote);
+        filteredNotes.add(newNote);
         listNotes.getSelectionModel().select(newNote);
         makeEditable(noteWriting);
         makeEditable(titleWriting);
         noteWriting.setText(newNote.getText());
         titleWriting.setText(newNote.getTitle());
+        updateMarkdown();
+        noteWriting.requestFocus();
     }
+
 
     /**
      * Calls the savingnote function
@@ -261,9 +264,6 @@ public class NoteOverviewCtrl implements Initializable {
                 .toList();
     }
 
-    /**
-     * Deletes the currently selected note from the server, and the list
-     */
     public void deleteNote() {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
 
@@ -277,10 +277,11 @@ public class NoteOverviewCtrl implements Initializable {
                 if (response == ButtonType.OK) {
                     try {
                         server.deleteNote(noteSelected);
-                        listNotes.getItems().remove(noteSelected);
+                        data.remove(noteSelected);
+                        filteredNotes.remove(noteSelected);
                         listNotes.refresh();
+                        listNotes.getSelectionModel().clearSelection();
                     } catch (Exception e) {
-                        //error if delete fails
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
                         alert2.setTitle("Deletion Failed");
                         alert2.setHeaderText("Error occurred during deletion");
@@ -291,7 +292,6 @@ public class NoteOverviewCtrl implements Initializable {
             });
         }
     }
-
     /**
      * Updates markdown when input is typed into note contents
      */
@@ -350,21 +350,25 @@ public class NoteOverviewCtrl implements Initializable {
         }
         if (keyEvent.isShortcutDown()) {
             switch (keyEvent.getCode()) {
+                case N:
+                    addNote();
+                    keyEvent.consume();
+                    break;
                 case S:
-                    System.out.println("calling savingnote");
                     savingNote();
+                    keyEvent.consume();
                     break;
                 case R:
                     refresh();
-                    break;
-                case N:
-                    addNote();
+                    keyEvent.consume();
                     break;
                 case E:
                     editedTheNote();
+                    keyEvent.consume();
                     break;
                 case D:
                     deleteNote();
+                    keyEvent.consume();
                     break;
             }
         }
@@ -770,14 +774,11 @@ public class NoteOverviewCtrl implements Initializable {
                 .flatMap(content -> extractTags(content).stream()) // Flatten the tags
                 .distinct()
                 .toList();
-        List<String> mutableTags = new ArrayList<>(allTags);
-        mutableTags.removeAll(activeTagFilters);
-        tagBox.getItems().setAll(mutableTags);
+        List<String> availableTags = new ArrayList<>(allTags);
+        availableTags.removeAll(activeTagFilters);
+        tagBox.getItems().setAll(availableTags);
         tagBox.valueProperty().addListener((observable, oldValue, newValue) -> filterByTag(newValue));
     }
-    /**
-     * Clears all tag filters and resets the notes list.
-     */
     public void clearTags() {
         activeTagFilters.clear();
         tagFilters.clear();
@@ -787,9 +788,9 @@ public class NoteOverviewCtrl implements Initializable {
         tagFilters.add(initialComboBox);
         tagField.getChildren().add(initialComboBox);
         displayTags(initialComboBox);
-        applyFilters(searchBar.getText());
+        filteredNotes.setAll(data);
+        listNotes.setItems(filteredNotes);
     }
-
     /**
      * Filters notes based on the provided predicate.
      */
