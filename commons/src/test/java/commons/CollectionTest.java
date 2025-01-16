@@ -9,23 +9,25 @@ import java.util.List;
 
 public class CollectionTest {
 
-    private Note note1;
-    private Note note2;
-    private Note note3;
+    private CollectionNote note1;
+    private CollectionNote note2;
+    private CollectionNote note3;
+
     private Collection collection1;
     private Collection collection2;
 
     @BeforeEach
     void setUp() {
-        note1 = new Note(
+        note1 = new CollectionNote(
                 "Grocery List",
                 """
                         - Milk
                         - Bananas
                         - Butter"""
         );
-        note2 = new Note("To-Do", "- Study\n- Finish project");
-        note3 = new Note("", ""); // Empty note
+
+        note2 = new CollectionNote("To-Do", "- Study\n- Finish project");
+        note3 = new CollectionNote("", ""); // Empty note
 
         collection1 = new Collection("Test1", new ArrayList<>(List.of(note1, note2)));
         collection2 = new Collection("Test1", new ArrayList<>(List.of(note1, note2)));
