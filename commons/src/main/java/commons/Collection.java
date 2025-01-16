@@ -1,5 +1,6 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -19,8 +20,9 @@ public class Collection {
 
     public String name;
 
-    @OneToMany
-    public List<Note> notes;
+    //@JsonIgnoreProperties({"collection"})
+    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<CollectionNote> notes;
 
     /**
      * Instantiates a new Collection
@@ -45,9 +47,17 @@ public class Collection {
      * @param name the name
      * @param notes  the Notes
      */
-    public Collection(String name, List<Note> notes) {
+    public Collection(String name, List<CollectionNote> notes) {
         this.name = name;
         this.notes = notes;
+        for (CollectionNote note : notes) {
+            note.setCollection(this);
+        }
+    }
+
+    public void addNote(CollectionNote note) {
+        notes.add(note);
+        note.setCollection(this);
     }
 
     /**
@@ -85,7 +95,9 @@ public class Collection {
             result += name;
         }
         result += "\n";
+
         for(Note note : notes){
+            //System.out.println(note);
             if (note.title.isEmpty()) {
                 result += "Unnamed Note\n";
             } else {
