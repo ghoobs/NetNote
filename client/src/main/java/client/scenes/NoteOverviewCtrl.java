@@ -131,16 +131,11 @@ public class NoteOverviewCtrl implements Initializable {
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
         setLocale(currentLocale);
-        // Load notes and initialize UI
         data = FXCollections.observableArrayList(server.getNotes());
         filteredNotes = FXCollections.observableArrayList(data);
         listNotes.setItems(filteredNotes);
-
-        // Add the initial ComboBox to the tag field
         tagFilters.add(tagComboBox);
         displayTags(tagComboBox);
-
-        // Clear tags when the clear button is clicked
         clearTagsButton.setOnAction(event -> clearTags());
         makeEditable(noteWriting);
         titleWriting.setEditable(true);
@@ -165,9 +160,10 @@ public class NoteOverviewCtrl implements Initializable {
             }
         });
         searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
-            filterNotes(newValue);
+            applyFilters(newValue);
             highlightSelectedNote(newValue);
         });
+
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
         updateMarkdown();
@@ -375,21 +371,26 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Filters the notes displayed in the ListView based on the search keyword.
-     *
-     * @param searchWord the keyword to filter notes by
+     * Filters the notes based on both search and active tag filters.
      */
-
-    private void filterNotes(String searchWord) {
-        if (searchWord == null || searchWord.isEmpty()) {
-            listNotes.setItems(data);
+    private void applyFilters(String searchWord) {
+        if ((searchWord == null || searchWord.isEmpty()) && activeTagFilters.isEmpty()) {
+            filteredNotes.setAll(data);
         } else {
-            var filteredData = data.filtered(note ->
-                    note.getTitle().toLowerCase().contains(searchWord.toLowerCase()) ||
-                            note.getText().toLowerCase().contains(searchWord.toLowerCase())
-            );
-            listNotes.setItems(filteredData);
+            filteredNotes.setAll(data.stream()
+                    .filter(note -> {
+                        boolean matchesSearch = (searchWord == null || searchWord.isEmpty()) ||
+                                note.getTitle().toLowerCase().contains(searchWord.toLowerCase()) ||
+                                note.getText().toLowerCase().contains(searchWord.toLowerCase());
+
+                        boolean matchesTags = activeTagFilters.isEmpty() ||
+                                activeTagFilters.stream().allMatch(tag -> note.getText().contains(tag));
+
+                        return matchesSearch && matchesTags; // Must satisfy both
+                    })
+                    .toList());
         }
+        listNotes.setItems(filteredNotes); // Update ListView
     }
 
     /**
@@ -397,18 +398,15 @@ public class NoteOverviewCtrl implements Initializable {
      *
      * @param keyword the keyword to highlight
      */
-
     private void highlightSelectedNote(String keyword) {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
         if (noteSelected != null) {
             titleWriting.clear();
+            TextFlow highlightedTitle = createHighlightedText(noteSelected.getTitle(), keyword);
             titleWriting.setText(noteSelected.getTitle());
-            String highlightedTitle = applyHighlight(noteSelected.getTitle(), keyword);
-            titleWriting.setText(highlightedTitle);
             noteWriting.clear();
+            TextFlow highlightedContent = createHighlightedText(noteSelected.getText(), keyword);
             noteWriting.setText(noteSelected.getText());
-            String highlightedContent = applyHighlight(noteSelected.getText(), keyword);
-            noteWriting.setText(highlightedContent);
         }
     }
 
@@ -419,13 +417,13 @@ public class NoteOverviewCtrl implements Initializable {
      * @param keyword the keyword to highlight
      * @return a TextFlow containing the highlighted text
      */
-
     private TextFlow createHighlightedText(String text, String keyword) {
         TextFlow textFlow = new TextFlow();
         if (keyword == null || keyword.isEmpty()) {
             textFlow.getChildren().add(new Text(text));
             return textFlow;
         }
+
         int lastIndex = 0;
         int keywordIndex = text.toLowerCase().indexOf(keyword);
         while (keywordIndex >= 0) {
@@ -433,11 +431,13 @@ public class NoteOverviewCtrl implements Initializable {
                 textFlow.getChildren().add(new Text(text.substring(lastIndex, keywordIndex)));
             }
             Text highlightedText = new Text(text.substring(keywordIndex, keywordIndex + keyword.length()));
-            highlightedText.setStyle("-fx-fill: red; -fx-font-weight: bold;");
+            highlightedText.setStyle("-fx-fill: red; -fx-font-weight: bold;"); // Highlighting style
             textFlow.getChildren().add(highlightedText);
+
             lastIndex = keywordIndex + keyword.length();
             keywordIndex = text.toLowerCase().indexOf(keyword, lastIndex);
         }
+
         if (lastIndex < text.length()) {
             textFlow.getChildren().add(new Text(text.substring(lastIndex)));
         }
@@ -745,29 +745,30 @@ public class NoteOverviewCtrl implements Initializable {
     /**
      * Filters notes by a selected tag.
      */
+    /**
+     * Filters notes by a selected tag and applies the combined filters.
+     */
     private void filterByTag(String newTag) {
         if (newTag == null || newTag.isEmpty()) {
             return;
         }
         activeTagFilters.add(newTag);
-        filteredNotes.setAll(data.stream()
-                .filter(note -> activeTagFilters.stream().allMatch(tag -> note.getText().contains(tag)))
-                .toList());
-        listNotes.setItems(filteredNotes);
+        applyFilters(searchBar.getText());
         ComboBox<String> newComboBox = new ComboBox<>();
         newComboBox.setPromptText("Select a tag");
         tagFilters.add(newComboBox);
         tagField.getChildren().add(newComboBox);
         displayTags(newComboBox);
     }
+
     /**
      * Displays available tags in a given ComboBox.
      */
     private void displayTags(ComboBox<String> tagBox) {
         List<String> allTags = filteredNotes.stream()
-                .map(Note::getText) // Get content from each note
+                .map(Note::getText)
                 .flatMap(content -> extractTags(content).stream()) // Flatten the tags
-                .distinct() // Remove duplicates
+                .distinct()
                 .toList();
         List<String> mutableTags = new ArrayList<>(allTags);
         mutableTags.removeAll(activeTagFilters);
@@ -778,17 +779,17 @@ public class NoteOverviewCtrl implements Initializable {
      * Clears all tag filters and resets the notes list.
      */
     public void clearTags() {
-        activeTagFilters.clear(); // Clear active filters
-        tagFilters.clear(); // Clear ComboBoxes
-        tagField.getChildren().clear(); // Clear UI elements
+        activeTagFilters.clear();
+        tagFilters.clear();
+        tagField.getChildren().clear();
         ComboBox<String> initialComboBox = new ComboBox<>();
         initialComboBox.setPromptText("Select a tag");
         tagFilters.add(initialComboBox);
         tagField.getChildren().add(initialComboBox);
         displayTags(initialComboBox);
-        filteredNotes.setAll(data);
-        listNotes.setItems(filteredNotes);
+        applyFilters(searchBar.getText());
     }
+
     /**
      * Filters notes based on the provided predicate.
      */
