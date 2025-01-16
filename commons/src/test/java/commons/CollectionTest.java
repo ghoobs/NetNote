@@ -12,7 +12,7 @@ public class CollectionTest {
     private CollectionNote note1;
     private CollectionNote note2;
     private CollectionNote note3;
->>>>>>> commons/src/test/java/commons/CollectionTest.java
+
     private Collection collection1;
     private Collection collection2;
 
