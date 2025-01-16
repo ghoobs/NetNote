@@ -48,12 +48,10 @@
             <children>
                 <HBox layoutX="10.0" layoutY="1.0" prefHeight="26.0" prefWidth="600.0" spacing="10.0" alignment="CENTER_LEFT" AnchorPane.leftAnchor="10.0">
                     <children>
-                        <!-- Buttons moved to the far-left -->
                         <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteNote" text="Delete" />
                         <Button fx:id="addButton" mnemonicParsing="false" onAction="#addNote" prefHeight="25.0" prefWidth="57.0" text="Add" />
+                        <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="70.0" text="Refresh" />
                         <Button fx:id="clearTagsButton" text="Clear Filters" />
-
-                        <!-- Dynamic Tag Filters -->
                         <HBox fx:id="tagField" spacing="10.0">
                             <ComboBox fx:id="tagComboBox" promptText="Select a tag" />
                         </HBox>
@@ -116,6 +114,3 @@
         </ToolBar>
     </children>
 </AnchorPane>
-
-
-

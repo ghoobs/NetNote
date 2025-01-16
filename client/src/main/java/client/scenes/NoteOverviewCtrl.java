@@ -181,10 +181,17 @@ public class NoteOverviewCtrl implements Initializable {
 
     /**
      * Adds a new note to the list and updates the server with the new note.
-     * If an error occurs during the server update, an error alert is displayed.
+     * Ensures that the title of the new note is unique.
      */
     public void addingNote() {
-        Note newNote = new Note("New Note", "");
+        String baseTitle = "New Note";
+        String uniqueTitle = baseTitle;
+        int counter = 1;
+        while (allTitles().contains(uniqueTitle)) {
+            uniqueTitle = baseTitle + " (" + counter + ")";
+            counter++;
+        }
+        Note newNote = new Note(uniqueTitle, "");
         try {
             newNote = server.addNote(newNote);
         } catch (WebApplicationException e) {
@@ -206,6 +213,7 @@ public class NoteOverviewCtrl implements Initializable {
         noteWriting.requestFocus();
         showNotification("Note added successfully!");
     }
+
 
 
     /**
