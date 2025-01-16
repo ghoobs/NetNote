@@ -2,8 +2,10 @@ package server.api;
 
 import commons.Note;
 import commons.Pair;
+import commons.Tag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -14,18 +16,21 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 class NoteControllerTest {
 
     //If you implement
     private TestNoteRepository testNoteRepository;
-
     private NoteController noteController;
+    private ApplicationEventPublisher mockedEventPublisher;
 
     @BeforeEach
     void setUp() {
         testNoteRepository = new TestNoteRepository();
         noteController = new NoteController(testNoteRepository);
+        mockedEventPublisher = mock(ApplicationEventPublisher.class);
+        noteController.setEventPublisher(mockedEventPublisher);
     }
 
     void putData() {
@@ -88,6 +93,29 @@ class NoteControllerTest {
         Set<Long> ids = notes.stream().map(x -> x.id).collect(Collectors.toSet());
         assertEquals(new HashSet<>(noteController.getAllIds()), ids);
     }
+
+    @Test
+    void getAllTags() {
+        ArrayList<Tag> tags1 = new ArrayList<>(),
+                tags2 = new ArrayList<>(),
+                tags3 = new ArrayList<>();
+        tags1.add(new Tag("Hello"));
+        tags1.add(new Tag("It's"));
+        tags2.add(new Tag("A"));
+        tags2.add(new Tag("Me"));
+        tags3.add(new Tag("Mario"));
+        noteController.addNote(new Note("Title", "Contents", tags1));
+        noteController.addNote(new Note("Title2", "Contents2", tags2));
+        noteController.addNote(new Note("Title3", "Contents3", tags3));
+
+        List<Tag> tags = noteController.getAllTags();
+        assertTrue(tags.contains(new Tag("Hello")));
+        assertTrue(tags.contains(new Tag("It's")));
+        assertTrue(tags.contains(new Tag("A")));
+        assertTrue(tags.contains(new Tag("Me")));
+        assertTrue(tags.contains(new Tag("Mario")));
+    }
+
 
     @Test
     void addNote() {
@@ -172,7 +200,7 @@ class NoteControllerTest {
         var updatedNote = new Note("Title2", "2");
 
 
-        updatedNote = noteController.updateNote(1,updatedNote).getBody();
+        updatedNote = noteController.updateNote((long) 1,updatedNote).getBody();
 
         assertEquals(updatedNote, noteController.getById(1).getBody());
     }

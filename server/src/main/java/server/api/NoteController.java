@@ -1,16 +1,21 @@
 package server.api;
 
+import java.util.AbstractSet;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-
 import commons.Pair;
+import commons.Tag;
+import events.AddEvent;
+import events.DeleteEvent;
+import events.UpdateEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import commons.Note;
-
-
+import server.websocket.WebSocketMessaging;
 import server.database.NoteRepository;
 
 /**
@@ -33,7 +38,8 @@ import server.database.NoteRepository;
 public class NoteController {
 
     private final NoteRepository notes;
-
+    private ApplicationEventPublisher eventPublisher;
+    private WebSocketMessaging messaging;
     /**
      * Instantiates a new Note controller.
      *
@@ -43,6 +49,20 @@ public class NoteController {
         this.notes = repo;
     }
 
+    /**
+     * setter for ApplicationEventPublisher
+     *
+     * @param eventPublisher the application event publisher
+     */
+    @Autowired
+    public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
+
+    @Autowired
+    public void setWebSocketMessaging(WebSocketMessaging messaging) {
+        this.messaging = messaging;
+    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Note> delete(@PathVariable("id") Long id){
@@ -50,8 +70,11 @@ public class NoteController {
         if (!notes.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-
+        Note toDelete = notes.findById(id).get();
         notes.deleteById(id);
+        DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
+        eventPublisher.publishEvent(deleteEvent);
+//        messaging.sendEvent(deleteEvent);
         return ResponseEntity.ok().build();
     }
 
@@ -93,7 +116,7 @@ public class NoteController {
     @GetMapping("/list")
     public List<Pair<String, Long>> getAllNamesIds(){
         return getAll().stream()
-                .map(note -> new Pair<String, Long>(note.title, note.id))
+                .map(note -> new Pair<>(note.title, note.id))
                 .toList();
     }
 
@@ -119,6 +142,18 @@ public class NoteController {
     }
 
     /**
+     * Get all tag list.
+     *
+     * @return the tags
+     */
+    @GetMapping("/tags")
+    public List<Tag> getAllTags() {
+        Set<Tag> tags = new HashSet<>();
+        getAll().forEach(note -> tags.addAll(note.tags));
+        return tags.stream().toList();
+    }
+
+    /**
      * Search through notes using a keyword/string
      * Is case-insensitive to allow for more keywords
      * @param keyword the keyword used to search through the notes
@@ -128,8 +163,7 @@ public class NoteController {
     public List<Note> searchNotes(@RequestParam String keyword){
             List<Note> allNotes = notes.findAll();
             return allNotes.stream()
-                    .filter(note -> note.getTitle().toLowerCase().contains(keyword.toLowerCase())
-                            || note.getText().toLowerCase().contains(keyword.toLowerCase()))
+                    .filter(note -> note.hasKeyword(keyword))
                     .collect(Collectors.toList());
     }
 
@@ -141,11 +175,13 @@ public class NoteController {
      */
     @PostMapping(path = {"", "/"})
     public ResponseEntity<Note> addNote(@RequestBody Note noteAdding) {
-
         if (noteAdding.text == null || noteAdding.title == null)
             return ResponseEntity.badRequest().build();
 
         Note savedNote = notes.save(noteAdding);
+        AddEvent addEvent = new AddEvent(this, savedNote);
+        eventPublisher.publishEvent(addEvent);
+//        messaging.sendEvent(addEvent);
         return ResponseEntity.ok(savedNote);
     }
 
@@ -158,13 +194,17 @@ public class NoteController {
      */
 
     @PutMapping("/{id}")
-    public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note updatedNote) {
+    public ResponseEntity<Note> updateNote(@PathVariable("id") Long id, @RequestBody Note updatedNote) {
         if (!notes.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
-        Note existingNote = notes.getReferenceById(id);
-        existingNote.title = updatedNote.title;
-        existingNote.text = updatedNote.text;
+        Note existingNote = notes.findById(id).get();
+        updatedNote.copyTo(existingNote);
+
+        notes.save(existingNote);
+        UpdateEvent updateEvent = new UpdateEvent(this, existingNote);
+        eventPublisher.publishEvent(updateEvent);
+//        messaging.sendEvent(updateEvent);
         return ResponseEntity.ok(existingNote);
     }
 
