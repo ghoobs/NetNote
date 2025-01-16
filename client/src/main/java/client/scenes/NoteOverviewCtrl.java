@@ -53,6 +53,9 @@ public class NoteOverviewCtrl implements Initializable {
      */
     @FXML
     TextArea noteWriting;
+    @FXML
+    private Menu languageMenu;
+    private final StringProperty currentLanguage = new SimpleStringProperty("Language");
     private ObservableList<Note> data;
     @FXML
     private ListView<Note> listNotes;
@@ -127,6 +130,7 @@ public class NoteOverviewCtrl implements Initializable {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+        languageMenu.textProperty().bind(currentLanguage);
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
         searchButton.textProperty().bind(propertySearchButton);
@@ -643,6 +647,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToEnglish() {
         switchLanguage(Locale.ENGLISH);
+        currentLanguage.set("English");
     }
 
     /**
@@ -650,6 +655,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToDutch() {
         switchLanguage(new Locale("nl"));
+        currentLanguage.set("Dutch");
     }
 
     /**
@@ -657,6 +663,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToSpanish() {
         switchLanguage(new Locale("es"));
+        currentLanguage.set("Spanish");
     }
 
     /**
