@@ -163,32 +163,22 @@ public class NoteOverviewCtrl implements Initializable {
             applyFilters(newValue);
             highlightSelectedNote(newValue);
         });
-
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
         updateMarkdown();
-        searchBar.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                listNotes.requestFocus();
-            }
-        });
+        if (searchBar.getOnKeyPressed() == null) {
+            searchBar.setOnKeyPressed(this::keyPressed);
+        }
+        if (listNotes.getOnKeyPressed() == null) {
+            listNotes.setOnKeyPressed(this::keyPressed);
+        }
+        if (noteWriting.getOnKeyPressed() == null) {
+            noteWriting.setOnKeyPressed(this::keyPressed);
+        }
+        if (titleWriting.getOnKeyPressed() == null) {
+            titleWriting.setOnKeyPressed(this::keyPressed);
+        }
 
-        listNotes.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                openSelectedNote();
-            }
-        });
-
-        noteWriting.setOnKeyPressed(event -> {
-            if (event.isControlDown() && event.getCode() == KeyCode.S) {
-                savingNote();
-            }
-        });
-        searchBar.setOnKeyPressed(event -> {
-            if (event.isControlDown() && event.getCode() == KeyCode.N) {
-                addNote();
-            }
-        });
     }
     private void openSelectedNote() {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
@@ -198,7 +188,7 @@ public class NoteOverviewCtrl implements Initializable {
             noteWriting.setText(noteSelected.getText());
             titleWriting.setText(noteSelected.getTitle());
             updateMarkdown();
-            noteWriting.requestFocus(); // Focus the text area for editing
+            noteWriting.requestFocus();
         }
     }
 
@@ -315,6 +305,7 @@ public class NoteOverviewCtrl implements Initializable {
                         data.remove(noteSelected);
                         filteredNotes.remove(noteSelected);
                         listNotes.refresh();
+                        listNotes.getSelectionModel().clearSelection();
                     } catch (Exception e) {
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
                         alert2.setTitle("Deletion Failed");
@@ -373,32 +364,38 @@ public class NoteOverviewCtrl implements Initializable {
         if (keyEvent.getCode() == KeyCode.ESCAPE) {
             searchBar.requestFocus();
         }
-        if (listNotes.isFocused() && keyEvent.getCode() == KeyCode.O) {
-            Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
-            if (noteSelected != null) {
-                makeNotEditable(noteWriting);
-                makeNotEditable(titleWriting);
-                noteWriting.setText(noteSelected.getText());
-                titleWriting.setText(noteSelected.getTitle());
+        if (listNotes.isFocused()) {
+            if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.DOWN) {
+            } else if (keyEvent.getCode() == KeyCode.ENTER) {
+                openSelectedNote();
+            }
+        }
+        if (keyEvent.isShortcutDown() && keyEvent.getCode() == KeyCode.D) {
+            if (listNotes.getSelectionModel().getSelectedItem() != null) {
+                deleteNote();
             }
         }
         if (keyEvent.isShortcutDown()) {
             switch (keyEvent.getCode()) {
+                case N:
+                    addNote();
+                    keyEvent.consume();
+                    break;
                 case S:
-                    System.out.println("calling savingnote");
                     savingNote();
+                    keyEvent.consume();
                     break;
                 case R:
                     refresh();
-                    break;
-                case N:
-                    addNote();
+                    keyEvent.consume();
                     break;
                 case E:
                     editedTheNote();
+                    keyEvent.consume();
                     break;
                 case D:
                     deleteNote();
+                    keyEvent.consume();
                     break;
             }
         }
