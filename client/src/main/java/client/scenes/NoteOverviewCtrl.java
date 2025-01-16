@@ -146,9 +146,7 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(true);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
         mdHandler.setWebEngine(markDownView.getEngine());
-        mdHandler.setHyperlinkCallback((String link) -> {
-            System.out.println("Webpage: " + link);
-        });
+
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
         listNotes.setCellFactory(listView -> new ListCell<>() {

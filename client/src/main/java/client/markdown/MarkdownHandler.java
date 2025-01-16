@@ -17,12 +17,15 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebEngine;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
+import org.w3c.dom.events.*;
+
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
 
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
 public class MarkdownHandler {
     // markdown related objects
@@ -31,7 +34,7 @@ public class MarkdownHandler {
     private HtmlRenderer mdRenderer;
     private String htmlCache;
 
-    private Consumer<String> hyperlinkCallback;
+    private IHyperlinkConsumer hyperlinkInterface;
 
     // asynchronous thread related objects
     private Thread asyncMarkdownWorker;
@@ -110,19 +113,19 @@ public class MarkdownHandler {
             return;
         }
         this.webEngine = webEngine;
-        createWebEngineStateHandler();
+        bindHyperlinkScripts();
     }
 
     /**
      * Allows manually determining what occurs upon clicking a hyperlink. If set to null, the default handler will be used.
      * The WebEngine MUST be set prior in order to modify the callback.
-     * @param callback The lambda that will be invoked when a hyperlink is clicked, provided with the link address
+     * @param hyperlinkInterface The interface that handles a hyperlink, provided with the link address
      */
-    public void setHyperlinkCallback(Consumer<String> callback) {
+    public void setHyperlinkInterface(IHyperlinkConsumer hyperlinkInterface) {
         if (webEngine == null) {
             throw new IllegalStateException("WebEngine has not been set!");
         }
-        hyperlinkCallback = callback;
+        this.hyperlinkInterface = hyperlinkInterface;
     }
 
     /**
@@ -196,6 +199,7 @@ public class MarkdownHandler {
         Node document = mdParser.parse(mdContents);
         // convert the markdown to HTML
         String html = mdRenderer.render(document);
+
         synchronized (mdReadyToDisplay) {
             mdReadyToDisplay.add(html);
         }
@@ -219,18 +223,28 @@ public class MarkdownHandler {
     }
 
     /**
+     * The action when clicking on a hyperlink
+     */
+    private void onClickHtmlAnchor(Event event) {
+        System.out.println("Attempting to block the click");
+        // Doesn't actually block the click
+        event.preventDefault();
+        event.stopPropagation();
+
+        var node = (org.w3c.dom.Node)event.getTarget();
+        System.out.println("LINK VALUE: " + node.getAttributes().getNamedItem("href").getNodeValue());
+    }
+
+    /**
      * Creates a new state listener for the webview engine which will deal with the hyperlink callback
      */
-    private void createWebEngineStateHandler() {
+    private void bindHyperlinkScripts() {
         webEngine.getLoadWorker().stateProperty()
             .addListener(
                 (_, _, newValue) -> {
-                    if (hyperlinkCallback == null) {
-                        return;
-                    }
                     if (Worker.State.SUCCEEDED.equals(newValue)) {
                         String location = webEngine.getLocation();
-                        hyperlinkCallback.accept(location);
+
                         if (htmlCache == null) {
                             return;
                         }
@@ -238,6 +252,16 @@ public class MarkdownHandler {
                         if (!location.isEmpty()) {
                            webEngine.loadContent(htmlCache); // restore the html page
                         }
+                         // Create the event listener
+                         EventListener listenerA = this::onClickHtmlAnchor;
+
+                         Document doc = webEngine.getDocument();
+                         // Add event handler to <a> hyperlinks.
+                         var nodeList = doc.getElementsByTagName("a");
+                         for (int i = 0; i < nodeList.getLength(); i++) {
+                             EventTarget hyperlink = (EventTarget)nodeList.item(i);
+                             hyperlink.addEventListener("click", listenerA, true);
+                         }
                     }
                 }
             );
