@@ -166,32 +166,7 @@ public class NoteOverviewCtrl implements Initializable {
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
         updateMarkdown();
-        if (searchBar.getOnKeyPressed() == null) {
-            searchBar.setOnKeyPressed(this::keyPressed);
-        }
-        if (listNotes.getOnKeyPressed() == null) {
-            listNotes.setOnKeyPressed(this::keyPressed);
-        }
-        if (noteWriting.getOnKeyPressed() == null) {
-            noteWriting.setOnKeyPressed(this::keyPressed);
-        }
-        if (titleWriting.getOnKeyPressed() == null) {
-            titleWriting.setOnKeyPressed(this::keyPressed);
-        }
-
     }
-    private void openSelectedNote() {
-        Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
-        if (noteSelected != null) {
-            makeEditable(noteWriting);
-            makeEditable(titleWriting);
-            noteWriting.setText(noteSelected.getText());
-            titleWriting.setText(noteSelected.getTitle());
-            updateMarkdown();
-            noteWriting.requestFocus();
-        }
-    }
-
     /**
      * Calls the addingnote function
      */
@@ -364,15 +339,13 @@ public class NoteOverviewCtrl implements Initializable {
         if (keyEvent.getCode() == KeyCode.ESCAPE) {
             searchBar.requestFocus();
         }
-        if (listNotes.isFocused()) {
-            if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.DOWN) {
-            } else if (keyEvent.getCode() == KeyCode.ENTER) {
-                openSelectedNote();
-            }
-        }
-        if (keyEvent.isShortcutDown() && keyEvent.getCode() == KeyCode.D) {
-            if (listNotes.getSelectionModel().getSelectedItem() != null) {
-                deleteNote();
+        if (listNotes.isFocused() && keyEvent.getCode() == KeyCode.O) {
+            Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
+            if (noteSelected != null) {
+                makeNotEditable(noteWriting);
+                makeNotEditable(titleWriting);
+                noteWriting.setText(noteSelected.getText());
+                titleWriting.setText(noteSelected.getTitle());
             }
         }
         if (keyEvent.isShortcutDown()) {
