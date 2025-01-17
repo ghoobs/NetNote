@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.markdown.IHyperlinkConsumer;
 import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
@@ -14,6 +15,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -23,11 +28,15 @@ import javafx.scene.text.TextFlow;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,7 +44,7 @@ import java.util.regex.Pattern;
 /**
  * The type Note overview ctrl.
  */
-public class NoteOverviewCtrl implements Initializable {
+public class NoteOverviewCtrl implements Initializable, IHyperlinkConsumer {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
@@ -146,7 +155,7 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(true);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
         mdHandler.setWebEngine(markDownView.getEngine());
-
+        mdHandler.setHyperlinkInterface(this);
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
         listNotes.setCellFactory(listView -> new ListCell<>() {
@@ -804,5 +813,30 @@ public class NoteOverviewCtrl implements Initializable {
             tags.add(matcher.group());
         }
         return tags;
+    }
+
+    @Override
+    public void onTagClick(String tag) {
+        System.out.println("Tag clicked: "+ tag);
+    }
+
+    @Override
+    public void onNoteClick(String note) {
+        Optional<Note> maybeNote = listNotes.getItems().stream()
+                .filter(tnote -> tnote.getTitle().equals(note))
+                .findFirst();
+        if (maybeNote.isPresent()) {
+            // Note exists, navigate
+            System.out.println("Navigate to note "+ note);
+        }
+    }
+
+    @Override
+    public void onUrlClick(String url) {
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }

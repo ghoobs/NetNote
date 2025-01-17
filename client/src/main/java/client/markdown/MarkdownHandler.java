@@ -17,7 +17,6 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebEngine;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import org.w3c.dom.events.*;
 
@@ -43,6 +42,9 @@ public class MarkdownHandler {
     private final ArrayDeque<String> mdUnrenderedTextQueue;
     private final ReentrantLock mdQueueLock;
     private final ReentrantLock asyncRendererLock;
+
+    private static final String legalRegexNoteNaming = "A-Za-z0-9\\s_\\.-";
+    private static final String legalRegexTagNaming = "A-Za-z0-9_\\.-";
 
     /**
      * Default list of extensions
@@ -199,7 +201,7 @@ public class MarkdownHandler {
         Node document = mdParser.parse(mdContents);
         // convert the markdown to HTML
         String html = mdRenderer.render(document);
-
+        html = regexReplaceAllTags(regexReplaceAllNoteRefs(html));
         synchronized (mdReadyToDisplay) {
             mdReadyToDisplay.add(html);
         }
@@ -226,13 +228,28 @@ public class MarkdownHandler {
      * The action when clicking on a hyperlink
      */
     private void onClickHtmlAnchor(Event event) {
-        System.out.println("Attempting to block the click");
-        // Doesn't actually block the click
         event.preventDefault();
         event.stopPropagation();
 
         var node = (org.w3c.dom.Node)event.getTarget();
-        System.out.println("LINK VALUE: " + node.getAttributes().getNamedItem("href").getNodeValue());
+        var hrefAttr = node.getAttributes().getNamedItem("href");
+
+        if (hrefAttr == null) {
+            return; // no link
+        }
+
+        if (hyperlinkInterface == null) return;
+        var noteRefValue = node.getAttributes().getNamedItem("notetype");
+        var tagRefValue = node.getAttributes().getNamedItem("tagtype");
+
+        // regular link
+        if (noteRefValue == null && tagRefValue == null) {
+            hyperlinkInterface.onUrlClick(hrefAttr.getNodeValue());
+        } else if (noteRefValue != null && tagRefValue == null) {
+            hyperlinkInterface.onNoteClick(noteRefValue.getNodeValue());
+        } else if (noteRefValue == null && tagRefValue != null) {
+            hyperlinkInterface.onTagClick(tagRefValue.getNodeValue());
+        }
     }
 
     /**
@@ -265,5 +282,17 @@ public class MarkdownHandler {
                     }
                 }
             );
+    }
+
+    private String regexReplaceAllNoteRefs(String htmlData) {
+        return htmlData.replaceAll(
+                "\\[\\[(["+legalRegexNoteNaming+"]+)]]",
+                "<a href=\"?NoteType\" notetype=\"$1\">$1</a>");
+    }
+
+    private String regexReplaceAllTags(String htmlData) {
+        return htmlData.replaceAll(
+                "#(["+legalRegexTagNaming+"]+)",
+                "<a href=\"?TagType\" tagtype=\"$1\">$1</a>");
     }
 }
