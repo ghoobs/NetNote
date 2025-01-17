@@ -11,7 +11,9 @@ to package and install the artifacts for the three subprojects. Afterwards, you 
 	cd server
 	mvn spring-boot:run
 
-to start the server or ...
+Then select the port that you want the server to be active on (e.g. 9090; default is 8080)
+
+or ...
 
 	cd client
 	mvn javafx:run
