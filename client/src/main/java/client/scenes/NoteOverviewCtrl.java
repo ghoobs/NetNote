@@ -1,6 +1,6 @@
 package client.scenes;
 
-import client.markdown.IHyperlinkConsumer;
+import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
@@ -33,7 +33,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -44,7 +43,7 @@ import java.util.regex.Pattern;
 /**
  * The type Note overview ctrl.
  */
-public class NoteOverviewCtrl implements Initializable, IHyperlinkConsumer {
+public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
@@ -155,7 +154,7 @@ public class NoteOverviewCtrl implements Initializable, IHyperlinkConsumer {
         titleWriting.setEditable(true);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
         mdHandler.setWebEngine(markDownView.getEngine());
-        mdHandler.setHyperlinkInterface(this);
+        mdHandler.setEventInterface(this);
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
         listNotes.setCellFactory(listView -> new ListCell<>() {
@@ -319,12 +318,21 @@ public class NoteOverviewCtrl implements Initializable, IHyperlinkConsumer {
     public void onNoteClicked(MouseEvent mouseEvent) {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
         if (noteSelected != null) {
-            makeEditable(noteWriting);
-            makeEditable(titleWriting);
-            noteWriting.setText(noteSelected.getText());
-            titleWriting.setText(noteSelected.getTitle());
-            updateMarkdown();
+            changeSelectedNote(noteSelected);
         }
+    }
+
+    /**
+     * Changes the selection of the current note
+     * @param note Note to select
+     */
+    public void changeSelectedNote(Note note) {
+        makeEditable(noteWriting);
+        makeEditable(titleWriting);
+        noteWriting.setText(note.getText());
+        titleWriting.setText(note.getTitle());
+        updateMarkdown();
+        listNotes.getSelectionModel().select(note);
     }
 
     /**
@@ -816,23 +824,21 @@ public class NoteOverviewCtrl implements Initializable, IHyperlinkConsumer {
     }
 
     @Override
-    public void onTagClick(String tag) {
+    public void onTagMdButtonClick(String tag) {
         System.out.println("Tag clicked: "+ tag);
     }
 
     @Override
-    public void onNoteClick(String note) {
+    public void onNoteMdButtonClick(String note) {
         Optional<Note> maybeNote = listNotes.getItems().stream()
                 .filter(tnote -> tnote.getTitle().equals(note))
                 .findFirst();
-        if (maybeNote.isPresent()) {
-            // Note exists, navigate
-            System.out.println("Navigate to note "+ note);
-        }
+        // Note exists, navigate
+        maybeNote.ifPresent(this::changeSelectedNote);
     }
 
     @Override
-    public void onUrlClick(String url) {
+    public void onUrlMdAnchorClick(String url) {
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (Exception ex) {

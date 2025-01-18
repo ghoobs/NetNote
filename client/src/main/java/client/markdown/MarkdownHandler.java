@@ -13,6 +13,8 @@ import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import com.vladsch.flexmark.util.misc.Extension;
+import commons.Note;
+import commons.Tag;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebEngine;
@@ -33,7 +35,7 @@ public class MarkdownHandler {
     private HtmlRenderer mdRenderer;
     private String htmlCache;
 
-    private IHyperlinkConsumer hyperlinkInterface;
+    private IMarkdownEvents events;
 
     // asynchronous thread related objects
     private Thread asyncMarkdownWorker;
@@ -42,9 +44,6 @@ public class MarkdownHandler {
     private final ArrayDeque<String> mdUnrenderedTextQueue;
     private final ReentrantLock mdQueueLock;
     private final ReentrantLock asyncRendererLock;
-
-    private static final String legalRegexNoteNaming = "A-Za-z0-9\\s_\\.-";
-    private static final String legalRegexTagNaming = "A-Za-z0-9_\\.-";
 
     /**
      * Default list of extensions
@@ -115,19 +114,19 @@ public class MarkdownHandler {
             return;
         }
         this.webEngine = webEngine;
-        bindHyperlinkScripts();
+        bindScripts();
     }
 
     /**
-     * Allows manually determining what occurs upon clicking a hyperlink. If set to null, the default handler will be used.
+     * Allows manually determining what occurs upon certain actions and events. If set to null, the default handler will be used.
      * The WebEngine MUST be set prior in order to modify the callback.
-     * @param hyperlinkInterface The interface that handles a hyperlink, provided with the link address
+     * @param events The interface that handles the events, provided with the link address
      */
-    public void setHyperlinkInterface(IHyperlinkConsumer hyperlinkInterface) {
+    public void setEventInterface(IMarkdownEvents events) {
         if (webEngine == null) {
             throw new IllegalStateException("WebEngine has not been set!");
         }
-        this.hyperlinkInterface = hyperlinkInterface;
+        this.events = events;
     }
 
     /**
@@ -226,6 +225,7 @@ public class MarkdownHandler {
 
     /**
      * The action when clicking on a hyperlink
+     * @param event Propagated event
      */
     private void onClickHtmlAnchor(Event event) {
         event.preventDefault();
@@ -238,24 +238,34 @@ public class MarkdownHandler {
             return; // no link
         }
 
-        if (hyperlinkInterface == null) return;
+        if (events == null) return;
+        events.onUrlMdAnchorClick(hrefAttr.getNodeValue());
+    }
+    /**
+     * The action when clicking on a button
+     * @param event Propagated event
+     */
+    private void onClickHtmlButton(Event event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var node = (org.w3c.dom.Node)event.getTarget();
+
+        if (events == null) return;
         var noteRefValue = node.getAttributes().getNamedItem("notetype");
         var tagRefValue = node.getAttributes().getNamedItem("tagtype");
 
-        // regular link
-        if (noteRefValue == null && tagRefValue == null) {
-            hyperlinkInterface.onUrlClick(hrefAttr.getNodeValue());
-        } else if (noteRefValue != null && tagRefValue == null) {
-            hyperlinkInterface.onNoteClick(noteRefValue.getNodeValue());
+        if (noteRefValue != null && tagRefValue == null) {
+            events.onNoteMdButtonClick(noteRefValue.getNodeValue());
         } else if (noteRefValue == null && tagRefValue != null) {
-            hyperlinkInterface.onTagClick(tagRefValue.getNodeValue());
+            events.onTagMdButtonClick(tagRefValue.getNodeValue());
         }
     }
 
     /**
-     * Creates a new state listener for the webview engine which will deal with the hyperlink callback
+     * Creates a new state listener for the webview engine which will deal with special callbacks
      */
-    private void bindHyperlinkScripts() {
+    private void bindScripts() {
         webEngine.getLoadWorker().stateProperty()
             .addListener(
                 (_, _, newValue) -> {
@@ -269,30 +279,53 @@ public class MarkdownHandler {
                         if (!location.isEmpty()) {
                            webEngine.loadContent(htmlCache); // restore the html page
                         }
-                         // Create the event listener
-                         EventListener listenerA = this::onClickHtmlAnchor;
+                        Document doc = webEngine.getDocument();
 
-                         Document doc = webEngine.getDocument();
-                         // Add event handler to <a> hyperlinks.
-                         var nodeList = doc.getElementsByTagName("a");
-                         for (int i = 0; i < nodeList.getLength(); i++) {
-                             EventTarget hyperlink = (EventTarget)nodeList.item(i);
-                             hyperlink.addEventListener("click", listenerA, true);
-                         }
+                        // Create the event listener for anchors
+                        EventListener listenerA = this::onClickHtmlAnchor;
+                        // Add event handler to <a> hyperlinks.
+                        var aNodeList = doc.getElementsByTagName("a");
+                        for (int i = 0; i < aNodeList.getLength(); i++) {
+                            EventTarget hyperlink = (EventTarget)aNodeList.item(i);
+                            hyperlink.addEventListener("click", listenerA, true);
+                        }
+
+                        // Create the event listener for anchors
+                        EventListener listenerBtn = this::onClickHtmlButton;
+                        // Add event handler to <a> hyperlinks.
+                        var btnNodeList = doc.getElementsByTagName("button");
+                        for (int i = 0; i < btnNodeList.getLength(); i++) {
+                            EventTarget hyperlink = (EventTarget)btnNodeList.item(i);
+                            hyperlink.addEventListener("click", listenerBtn, true);
+                        }
                     }
                 }
             );
     }
 
-    private String regexReplaceAllNoteRefs(String htmlData) {
+    /**
+     * Replaces all the [[Note]] with a button
+     * @param htmlData html code
+     * @return Updated html code
+     */
+    public static String regexReplaceAllNoteRefs(String htmlData) {
         return htmlData.replaceAll(
-                "\\[\\[(["+legalRegexNoteNaming+"]+)]]",
-                "<a href=\"?NoteType\" notetype=\"$1\">$1</a>");
+                "\\[\\[(["+ Note.REGEX_NAMING_FORMAT+"]+)]]",
+                "<button notetype=\"$1\">" +
+                      //"<span><img src=\"\"></span>" +
+                      //"<span>$1</span>" +
+                        "$1" +
+                        "</button>");
     }
 
-    private String regexReplaceAllTags(String htmlData) {
+    /**
+     * Replaces all the #Tag with a button
+     * @param htmlData html code
+     * @return Updated html code
+     */
+    public static String regexReplaceAllTags(String htmlData) {
         return htmlData.replaceAll(
-                "#(["+legalRegexTagNaming+"]+)",
-                "<a href=\"?TagType\" tagtype=\"$1\">$1</a>");
+                "#(["+ Tag.REGEX_NAMING_FORMAT+"]+)",
+                "<button tagtype=\"$1\"># $1</button>");
     }
 }

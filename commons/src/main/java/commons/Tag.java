@@ -7,6 +7,8 @@ import java.util.Objects;
 
 @Entity
 public class Tag {
+    public static final String REGEX_NAMING_FORMAT = "A-Za-z0-9\\_\\.\\-";
+
     @Id
     public String name;
 
