@@ -3,6 +3,7 @@ package client.utils;
 
 import commons.Collection;
 import commons.CollectionNote;
+import commons.Note;
 import commons.Pair;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -123,5 +124,18 @@ public class CollectionServerUtils {
         System.out.println(collection);
 
         addCollection(collection);
+    }
+
+    /**
+     * Retrieves all collections from the server.
+     *
+     * @return a list of {@link Collection} objects fetched from the server
+     */
+    public List<Collection> getCollections() {
+        return ClientBuilder.newClient(new ClientConfig()) //
+                .target(server).path("api/collections") //
+                .request(APPLICATION_JSON) //
+                .get(new GenericType<List<Collection>>() {
+                });
     }
 }

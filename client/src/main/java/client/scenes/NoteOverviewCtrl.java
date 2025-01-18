@@ -231,21 +231,13 @@ public class NoteOverviewCtrl implements Initializable {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Title Already Exists");
                     alert.setHeaderText("The title of your note has to be unique!");
-                    alert.showAndWait().ifPresent(response -> {
-                        if (response == ButtonType.OK) {
-                            System.out.println("test");
-                        }
-                    });
+                    alert.showAndWait();
                 }
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Empty Title");
                 alert.setHeaderText("The title of your note can't be empty!");
-                alert.showAndWait().ifPresent(response -> {
-                    if (response == ButtonType.OK) {
-                        System.out.println("test");
-                    }
-                });
+                alert.showAndWait();
             }
         }
     }

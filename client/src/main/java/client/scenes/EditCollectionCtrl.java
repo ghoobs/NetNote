@@ -1,14 +1,20 @@
 package client.scenes;
 
+import client.utils.CollectionServerUtils;
 import client.utils.ServerUtils2;
 import com.google.inject.Inject;
+import commons.Collection;
+import jakarta.ws.rs.WebApplicationException;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
 
 import java.net.URL;
 import java.util.Locale;
@@ -21,6 +27,7 @@ import java.io.IOException;
 public class EditCollectionCtrl implements Initializable {
     private final MainCtrl mainCtrl;
     private final ServerUtils2 server;
+    private final CollectionServerUtils collectionUtils;
 
     @FXML
     private Button deleteCollButton;
@@ -42,20 +49,33 @@ public class EditCollectionCtrl implements Initializable {
     private final StringProperty propertyTitleLabel = new SimpleStringProperty();
     private final StringProperty propertyServerNameLabel = new SimpleStringProperty();
     private final StringProperty propertyCollectionNameLabel = new SimpleStringProperty();
-    private final StringProperty propertystatusLabel = new SimpleStringProperty();
+    private final StringProperty propertyStatusLabel = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
+
+    @FXML
+    private TextField titleInput;
+    @FXML
+    private TextField serverInput;
+    @FXML
+    private TextField collectionInput;
+
+    @FXML
+    private ListView<Collection> collectionsList;
+    private ObservableList<Collection> collections;
 
     /**
      * Constructs an EditCollectionCtrl instance with the main controller
      *
      * @param server the server utils instance for interacting with the server
      * @param mainCtrl the main controller used for scene navigation
+     * @param collectionUtils more utils for interacting with the Collection part of the server
      */
     @Inject
-    public EditCollectionCtrl(ServerUtils2 server, MainCtrl mainCtrl) {
+    public EditCollectionCtrl(ServerUtils2 server, MainCtrl mainCtrl, CollectionServerUtils collectionUtils) {
         this.mainCtrl = mainCtrl;
         this.server = server;
+        this.collectionUtils = collectionUtils;
     }
 
     @Override
@@ -66,11 +86,86 @@ public class EditCollectionCtrl implements Initializable {
         title.textProperty().bind(propertyTitleLabel);
         serverName.textProperty().bind(propertyServerNameLabel);
         collectionName.textProperty().bind(propertyCollectionNameLabel);
-        status.textProperty().bind(propertystatusLabel);
+        status.textProperty().bind(propertyStatusLabel);
 
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
         setLocale(currentLocale);
+
+        collections = FXCollections.observableArrayList(collectionUtils.getCollections());
+        collectionsList.setItems(collections);
+        collectionsList.setOnMouseClicked(this::onCollectionClicked);
+    }
+
+    /**
+     * Goes back to the note overview scene
+     */
+    public void back(){
+        mainCtrl.showOverview();
+    }
+
+    /**
+     * Updates the selected collection with new data
+     */
+    public void updateCollection(){
+        String title = titleInput.getText();
+        String server = serverInput.getText();
+        String collection = collectionInput.getText();
+
+        if(collection.contains(" ")){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("The Collection field cannot contain spaces.");
+            alert.showAndWait();
+            return;
+        }
+
+        if(title == null || server == null || collection == null){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Empty Fields");
+            alert.setHeaderText("You have to fill out all of the fields!");
+            alert.showAndWait();
+        }
+        else {
+            try {
+                //collectionUtils.addCollection(new Collection(title)); // TODO: change to updateCollection!!
+            } catch (WebApplicationException e) {
+                var alert = new Alert(Alert.AlertType.ERROR);
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+                return;
+            }
+            collectionsList.refresh();
+        }
+    }
+
+    public void addCollection(){
+        Collection newCollection = new Collection("New Collection");
+        try {
+            newCollection = collectionUtils.addCollection(newCollection);
+        } catch (WebApplicationException e) {
+            var alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+            return;
+        }
+        collections.add(newCollection);
+        collectionsList.getSelectionModel().select(newCollection);
+        titleInput.setText(newCollection.name);
+    }
+
+    /**
+     * Handles collection selection in the list and displays the selected collection's details.
+     *
+     * @param mouseEvent the mouse event that triggered this action
+     */
+    public void onCollectionClicked(MouseEvent mouseEvent) {
+        Collection selected = collectionsList.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            titleInput.setText(selected.name);
+        }
     }
 
     /**
@@ -86,7 +181,7 @@ public class EditCollectionCtrl implements Initializable {
         propertyTitleLabel.set(rb.getString("label.title"));
         propertyServerNameLabel.set(rb.getString("label.serverName"));
         propertyCollectionNameLabel.set(rb.getString("label.collectionName"));
-        propertystatusLabel.set(rb.getString("label.status"));
+        propertyStatusLabel.set(rb.getString("label.status"));
     }
 
     /**
@@ -103,13 +198,6 @@ public class EditCollectionCtrl implements Initializable {
         } catch (IOException e) {
             return Locale.ENGLISH;
         }
-    }
-
-    /**
-     * Goes back to the note overview scene
-     */
-    public void back(){
-        mainCtrl.showOverview();
     }
 
     /**
