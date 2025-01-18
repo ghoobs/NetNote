@@ -19,11 +19,31 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
+import java.util.Optional;
+import java.util.Scanner;
+
+import static org.apache.commons.lang3.ArrayUtils.add;
+
 @SpringBootApplication
-@EntityScan(basePackages = { "commons", "server" })
+@EntityScan(basePackages = {"commons", "server"})
 public class Main {
 
     public static void main(String[] args) {
+        System.out.println("Enter port number: (default is 8080)");
+        var ln = new Scanner(System.in).nextLine();
+
+        Optional<Integer> port = Optional.empty();
+        try {
+            port = Optional.of(Integer.parseInt(ln));
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid port number");
+            System.out.println("Continuing with 8080");
+        }
+
+        if (port.isPresent()){
+            args = add(args, "--server.port=" + port.get());
+        }
+
         SpringApplication.run(Main.class, args);
     }
 }

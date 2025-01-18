@@ -7,6 +7,9 @@ import com.google.inject.Inject;
 import commons.Collection;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -18,10 +21,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -48,6 +53,9 @@ public class NoteOverviewCtrl implements Initializable {
      */
     @FXML
     TextArea noteWriting;
+    @FXML
+    private Menu languageMenu;
+    private final StringProperty currentLanguage = new SimpleStringProperty("Language");
     private ObservableList<Note> data;
     @FXML
     private ListView<Note> listNotes;
@@ -122,6 +130,7 @@ public class NoteOverviewCtrl implements Initializable {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+        languageMenu.textProperty().bind(currentLanguage);
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
         searchButton.textProperty().bind(propertySearchButton);
@@ -163,12 +172,10 @@ public class NoteOverviewCtrl implements Initializable {
             applyFilters(newValue);
             highlightSelectedNote(newValue);
         });
-
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
         updateMarkdown();
     }
-
     /**
      * Calls the addingnote function
      */
@@ -178,26 +185,40 @@ public class NoteOverviewCtrl implements Initializable {
 
     /**
      * Adds a new note to the list and updates the server with the new note.
-     * If an error occurs during the server update, an error alert is displayed.
+     * Ensures that the title of the new note is unique.
      */
     public void addingNote() {
-        Note newNote = new Note("New Note", "");
+        String baseTitle = "New Note";
+        String uniqueTitle = baseTitle;
+        int counter = 1;
+        while (allTitles().contains(uniqueTitle)) {
+            uniqueTitle = baseTitle + " (" + counter + ")";
+            counter++;
+        }
+        Note newNote = new Note(uniqueTitle, "");
         try {
             newNote = server.addNote(newNote);
         } catch (WebApplicationException e) {
-            var alert = new Alert(Alert.AlertType.ERROR);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(e.getMessage());
             alert.showAndWait();
             return;
         }
+
         data.add(newNote);
+        filteredNotes.add(newNote);
         listNotes.getSelectionModel().select(newNote);
         makeEditable(noteWriting);
         makeEditable(titleWriting);
         noteWriting.setText(newNote.getText());
         titleWriting.setText(newNote.getTitle());
+        updateMarkdown();
+        noteWriting.requestFocus();
+        showNotification("Note added successfully!");
     }
+
+
 
     /**
      * Calls the savingnote function
@@ -261,9 +282,6 @@ public class NoteOverviewCtrl implements Initializable {
                 .toList();
     }
 
-    /**
-     * Deletes the currently selected note from the server, and the list
-     */
     public void deleteNote() {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
 
@@ -277,10 +295,12 @@ public class NoteOverviewCtrl implements Initializable {
                 if (response == ButtonType.OK) {
                     try {
                         server.deleteNote(noteSelected);
-                        listNotes.getItems().remove(noteSelected);
+                        data.remove(noteSelected);
+                        filteredNotes.remove(noteSelected);
                         listNotes.refresh();
+                        listNotes.getSelectionModel().clearSelection();
+                        showNotification("Note deleted successfully!");
                     } catch (Exception e) {
-                        //error if delete fails
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
                         alert2.setTitle("Deletion Failed");
                         alert2.setHeaderText("Error occurred during deletion");
@@ -291,7 +311,6 @@ public class NoteOverviewCtrl implements Initializable {
             });
         }
     }
-
     /**
      * Updates markdown when input is typed into note contents
      */
@@ -325,6 +344,35 @@ public class NoteOverviewCtrl implements Initializable {
         listNotes.setItems(data);
         listNotes.getSelectionModel().select(0);
         onNoteClicked(null);
+        showNotification("Notes refreshed successfully!");
+    }
+    /**
+     * Displays a self-destructive popup notification.
+     *
+     * @param message the message to display in the popup.
+     */
+    private void showNotification(String message) {
+        Label notification = new Label(message);
+        notification.setStyle("-fx-background-color: #333; -fx-text-fill: white; -fx-padding: 10px; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+        notification.setOpacity(0);
+        if (searchBar.getScene() == null) {
+            System.err.println("Scene not found for the notification!");
+            return;
+        }
+        var root = (Pane) searchBar.getScene().getRoot();
+        notification.setLayoutX(420);
+        notification.setLayoutY(320);
+        root.getChildren().add(notification);
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(500), notification);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        PauseTransition delay = new PauseTransition(Duration.seconds(3));
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(500), notification);
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+        fadeOut.setOnFinished(event -> root.getChildren().remove(notification));
+        SequentialTransition sequentialTransition = new SequentialTransition(fadeIn, delay, fadeOut);
+        sequentialTransition.play();
     }
 
     /**
@@ -350,21 +398,25 @@ public class NoteOverviewCtrl implements Initializable {
         }
         if (keyEvent.isShortcutDown()) {
             switch (keyEvent.getCode()) {
+                case N:
+                    addNote();
+                    keyEvent.consume();
+                    break;
                 case S:
-                    System.out.println("calling savingnote");
                     savingNote();
+                    keyEvent.consume();
                     break;
                 case R:
                     refresh();
-                    break;
-                case N:
-                    addNote();
+                    keyEvent.consume();
                     break;
                 case E:
                     editedTheNote();
+                    keyEvent.consume();
                     break;
                 case D:
                     deleteNote();
+                    keyEvent.consume();
                     break;
             }
         }
@@ -595,6 +647,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToEnglish() {
         switchLanguage(Locale.ENGLISH);
+        currentLanguage.set("English");
     }
 
     /**
@@ -602,6 +655,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToDutch() {
         switchLanguage(new Locale("nl"));
+        currentLanguage.set("Dutch");
     }
 
     /**
@@ -609,6 +663,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToSpanish() {
         switchLanguage(new Locale("es"));
+        currentLanguage.set("Spanish");
     }
 
     /**
@@ -770,14 +825,11 @@ public class NoteOverviewCtrl implements Initializable {
                 .flatMap(content -> extractTags(content).stream()) // Flatten the tags
                 .distinct()
                 .toList();
-        List<String> mutableTags = new ArrayList<>(allTags);
-        mutableTags.removeAll(activeTagFilters);
-        tagBox.getItems().setAll(mutableTags);
+        List<String> availableTags = new ArrayList<>(allTags);
+        availableTags.removeAll(activeTagFilters);
+        tagBox.getItems().setAll(availableTags);
         tagBox.valueProperty().addListener((observable, oldValue, newValue) -> filterByTag(newValue));
     }
-    /**
-     * Clears all tag filters and resets the notes list.
-     */
     public void clearTags() {
         activeTagFilters.clear();
         tagFilters.clear();
@@ -787,9 +839,9 @@ public class NoteOverviewCtrl implements Initializable {
         tagFilters.add(initialComboBox);
         tagField.getChildren().add(initialComboBox);
         displayTags(initialComboBox);
-        applyFilters(searchBar.getText());
+        filteredNotes.setAll(data);
+        listNotes.setItems(filteredNotes);
     }
-
     /**
      * Filters notes based on the provided predicate.
      */
