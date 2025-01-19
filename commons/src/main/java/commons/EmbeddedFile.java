@@ -42,6 +42,14 @@ public class EmbeddedFile {
     public EmbeddedFile() {
     }
 
+    public EmbeddedFile(String filename, String filetype, String url, byte[] data, Note note) {
+        this.filename = filename;
+        this.filetype = filetype;
+        this.url = url;
+        this.data = data;
+        this.note = note;
+    }
+
     public String getFilename() {
         return filename;
     }
