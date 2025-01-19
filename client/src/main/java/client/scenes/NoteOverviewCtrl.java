@@ -638,10 +638,17 @@ public class NoteOverviewCtrl implements Initializable {
      * @param locale the {@code Locale} to save.
      */
     protected void saveLocale(Locale locale) {
-        try {
-            Properties props = new Properties();
+        Properties props = new Properties();
+
+        try (FileInputStream in = new FileInputStream("config.properties")) {
+            props.load(in);
+        } catch (IOException e) {
+            System.err.println("Unable to load properties file: " + e.getMessage());
+        }
+
+        try (FileOutputStream out = new FileOutputStream("config.properties")) {
             props.setProperty("language", locale.getLanguage());
-            props.store(new FileOutputStream("config.properties"), null);
+            props.store(out, null);
         } catch (IOException e) {
             e.printStackTrace();
         }

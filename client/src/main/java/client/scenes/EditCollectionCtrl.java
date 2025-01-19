@@ -16,6 +16,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 
+import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -35,6 +36,10 @@ public class EditCollectionCtrl implements Initializable {
     private Button addCollButton;
     @FXML
     private Button backButton;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button makeDefaultButton;
     @FXML
     private Label title;
     @FXML
@@ -140,6 +145,9 @@ public class EditCollectionCtrl implements Initializable {
         }
     }
 
+    /**
+     * Adds a new Collection to the server and to the displayed list
+     */
     public void addCollection(){
         Collection newCollection = new Collection("New Collection");
         try {
@@ -154,6 +162,27 @@ public class EditCollectionCtrl implements Initializable {
         collections.add(newCollection);
         collectionsList.getSelectionModel().select(newCollection);
         titleInput.setText(newCollection.name);
+    }
+
+    /**
+     * Sets the current collection as default and stores its id in config.properties
+     */
+    public void makeDefault(){
+        Collection selected = collectionsList.getSelectionModel().getSelectedItem();
+        Properties props = new Properties();
+
+        try (FileInputStream in = new FileInputStream("config.properties")) {
+            props.load(in);
+        } catch (IOException e) {
+            System.err.println("Unable to load properties file: " + e.getMessage());
+        }
+
+        try (FileOutputStream out = new FileOutputStream("config.properties")) {
+            props.setProperty("collection", String.valueOf(selected.id));
+            props.store(out, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
