@@ -36,6 +36,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
 
 /**
  * The type Note overview ctrl.
@@ -331,6 +333,7 @@ public class NoteOverviewCtrl implements Initializable {
      * Refreshes the note list by fetching the latest data from the server.
      */
     public void refresh() {
+        playFadeAnimation();
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
         listNotes.setItems(data);
@@ -338,11 +341,20 @@ public class NoteOverviewCtrl implements Initializable {
         onNoteClicked(null);
         showNotification("Notes refreshed successfully!");
     }
-    /**
-     * Displays a self-destructive popup notification.
-     *
-     * @param message the message to display in the popup.
-     */
+
+    private void playFadeAnimation() {
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(500), listNotes);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.3);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(500), listNotes);
+        fadeIn.setFromValue(0.3);
+        fadeIn.setToValue(1.0);
+
+        fadeOut.setOnFinished(event -> fadeIn.play());
+        fadeOut.play();
+    }
+
     private void showNotification(String message) {
         Label notification = new Label(message);
         notification.setStyle("-fx-background-color: #333; -fx-text-fill: white; -fx-padding: 10px; -fx-border-radius: 5px; -fx-background-radius: 5px;");
@@ -423,12 +435,12 @@ public class NoteOverviewCtrl implements Initializable {
         } else {
             filteredNotes.setAll(data.stream()
                     .filter(note -> {
+                        List<String> noteTags = extractTags(note.getText());
                         boolean matchesSearch = (searchWord == null || searchWord.isEmpty()) ||
                                 note.getTitle().toLowerCase().contains(searchWord.toLowerCase()) ||
                                 note.getText().toLowerCase().contains(searchWord.toLowerCase());
-
                         boolean matchesTags = activeTagFilters.isEmpty() ||
-                                activeTagFilters.stream().allMatch(tag -> note.getText().contains(tag));
+                                activeTagFilters.stream().allMatch(noteTags::contains);
 
                         return matchesSearch && matchesTags; // Must satisfy both
                     })
@@ -436,7 +448,6 @@ public class NoteOverviewCtrl implements Initializable {
         }
         listNotes.setItems(filteredNotes); // Update ListView
     }
-
     /**
      * Highlights the title and content of the currently selected note based on the search keyword.
      *
@@ -632,14 +643,29 @@ public class NoteOverviewCtrl implements Initializable {
         propertySearchBarPrompt.set(rb.getString("searchBar.prompt"));
         propertyEditCollButton.set(rb.getString("button.editCollection"));
         propertyCollectionLabel.set(rb.getString("label.collections"));
+        switch (locale.getLanguage()) {
+            case "en":
+                currentLanguage.set("🇬🇧");
+                break;
+            case "nl":
+                currentLanguage.set("🇳🇱");
+                break;
+            case "es":
+                currentLanguage.set("🇪🇸");
+                break;
+            default:
+                currentLanguage.set("🇬🇧");
+                break;
+        }
     }
+
 
     /**
      * Switches the application's language to English.
      */
     public void switchToEnglish() {
         switchLanguage(Locale.ENGLISH);
-        currentLanguage.set("English");
+        currentLanguage.set("🇬🇧");
     }
 
     /**
@@ -647,7 +673,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToDutch() {
         switchLanguage(new Locale("nl"));
-        currentLanguage.set("Dutch");
+        currentLanguage.set("🇳🇱");
     }
 
     /**
@@ -655,7 +681,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void switchToSpanish() {
         switchLanguage(new Locale("es"));
-        currentLanguage.set("Spanish");
+        currentLanguage.set("🇪🇸");
     }
 
     /**
@@ -853,7 +879,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     private List<String> extractTags(String content) {
         List<String> tags = new ArrayList<>();
-        Matcher matcher = Pattern.compile("#\\w+").matcher(content);
+        Matcher matcher = Pattern.compile("(?<=\\s|^)#\\w+\\b").matcher(content);
         while (matcher.find()) {
             tags.add(matcher.group());
         }
