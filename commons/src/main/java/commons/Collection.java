@@ -1,6 +1,5 @@
 package commons;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -21,7 +20,7 @@ public class Collection {
     public String name;
 
     //@JsonIgnoreProperties({"collection"})
-    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     public List<CollectionNote> notes;
 
     /**
@@ -44,8 +43,8 @@ public class Collection {
     /**
      * Instantiates a new Collection with a name and Notes.
      *
-     * @param name the name
-     * @param notes  the Notes
+     * @param name  the name
+     * @param notes the Notes
      */
     public Collection(String name, List<CollectionNote> notes) {
         this.name = name;
@@ -55,6 +54,12 @@ public class Collection {
         }
     }
 
+
+    /**
+     * Add note. Important to do it though this method to maintain the invariants
+     *
+     * @param note the note
+     */
     public void addNote(CollectionNote note) {
         notes.add(note);
         note.setCollection(this);
@@ -96,7 +101,7 @@ public class Collection {
         }
         result += "\n";
 
-        for(Note note : notes){
+        for (Note note : notes) {
             //System.out.println(note);
             if (note.title.isEmpty()) {
                 result += "Unnamed Note\n";
@@ -105,5 +110,18 @@ public class Collection {
             }
         }
         return result;
+    }
+
+    /**
+     * Update notes. Important to do it through this method to maintain the invariants
+     *
+     * @param notes the notes
+     */
+    public void updateNotes(List<CollectionNote> notes) {
+
+        for (CollectionNote note : notes) {
+            this.addNote(note);
+        }
+        this.notes = notes;
     }
 }
