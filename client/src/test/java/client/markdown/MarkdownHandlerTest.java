@@ -41,14 +41,35 @@ public class MarkdownHandlerTest {
     }
 
     @Test
-    void testRegexReplaceNoteReference() {
+    void testRegexReplaceNoteReferenceExists() {
         String srcHtml = "<p>[[!-My Other_n0te&&--=?]]</p>";
-        String expectedHtml = "<p>" + "<button notetype=\"!-My Other_n0te&&--=?\">" +
+        String expectedHtml = "<p>" + "<button notetype=\"!-My Other_n0te&&--=?\" "+
+        "style=\"font-weight: bold;\">" +
                 "!-My Other_n0te&&--=?" +
                 "</button>" +"</p>";
         assertEquals(
-            MarkdownHandler.regexReplaceAllNoteRefs(srcHtml, _->true),
-            expectedHtml
+                MarkdownHandler.regexReplaceAllNoteRefs(srcHtml, _->true),
+                expectedHtml
+        );
+    }
+    @Test
+    void testRegexReplaceNoteReferenceDoesNotExist() {
+        String srcHtml = "<p>[[!-My Other_n0te&&--=?]]</p>";
+        String expectedHtml = "<p>" + "<button notetype=\"!-My Other_n0te&&--=?\" "+
+                "style=\"font-weight: bold;color: red;\">" +
+                "!-My Other_n0te&&--=?" +
+                "</button>" +"</p>";
+        assertEquals(
+                MarkdownHandler.regexReplaceAllNoteRefs(srcHtml, _->false),
+                expectedHtml
+        );
+    }
+    @Test
+    void testRegexReplaceNoteReferenceInvalidString() {
+        String srcHtml = "<p>[[!-My Invalid/Note></p>";
+        assertEquals(
+                MarkdownHandler.regexReplaceAllNoteRefs(srcHtml, _->false),
+                srcHtml
         );
     }
     @Test
