@@ -1,5 +1,6 @@
 package client.markdown;
 
+import client.utils.StringReplacer;
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.ext.emoji.EmojiExtension;
@@ -27,6 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 public class MarkdownHandler {
     // markdown related objects
@@ -35,7 +38,7 @@ public class MarkdownHandler {
     private HtmlRenderer mdRenderer;
     private String htmlCache;
 
-    private IMarkdownEvents events;
+    private IMarkdownEvents markdownEvents;
 
     // asynchronous thread related objects
     private Thread asyncMarkdownWorker;
@@ -126,7 +129,7 @@ public class MarkdownHandler {
         if (webEngine == null) {
             throw new IllegalStateException("WebEngine has not been set!");
         }
-        this.events = events;
+        this.markdownEvents = events;
     }
 
     /**
@@ -200,7 +203,8 @@ public class MarkdownHandler {
         Node document = mdParser.parse(mdContents);
         // convert the markdown to HTML
         String html = mdRenderer.render(document);
-        html = regexReplaceAllTags(regexReplaceAllNoteRefs(html));
+        html = regexReplaceAllTags(regexReplaceAllNoteRefs(html,
+                markdownEvents::doesNoteExistWithinSameCollection));
         synchronized (mdReadyToDisplay) {
             mdReadyToDisplay.add(html);
         }
@@ -238,8 +242,8 @@ public class MarkdownHandler {
             return; // no link
         }
 
-        if (events == null) return;
-        events.onUrlMdAnchorClick(hrefAttr.getNodeValue());
+        if (markdownEvents == null) return;
+        markdownEvents.onUrlMdAnchorClick(hrefAttr.getNodeValue());
     }
     /**
      * The action when clicking on a button
@@ -251,14 +255,14 @@ public class MarkdownHandler {
 
         var node = (org.w3c.dom.Node)event.getTarget();
 
-        if (events == null) return;
+        if (markdownEvents == null) return;
         var noteRefValue = node.getAttributes().getNamedItem("notetype");
         var tagRefValue = node.getAttributes().getNamedItem("tagtype");
 
         if (noteRefValue != null && tagRefValue == null) {
-            events.onNoteMdButtonClick(noteRefValue.getNodeValue());
+            markdownEvents.onNoteMdButtonClick(noteRefValue.getNodeValue());
         } else if (noteRefValue == null && tagRefValue != null) {
-            events.onTagMdButtonClick(tagRefValue.getNodeValue());
+            markdownEvents.onTagMdButtonClick(tagRefValue.getNodeValue());
         }
     }
 
@@ -306,16 +310,24 @@ public class MarkdownHandler {
     /**
      * Replaces all the [[Note]] with a button
      * @param htmlData html code
+     * @param noteExists function that should check if a note exists within the given collection.
      * @return Updated html code
      */
-    public static String regexReplaceAllNoteRefs(String htmlData) {
-        return htmlData.replaceAll(
-                "\\[\\[(["+ Note.REGEX_NAMING_FORMAT+"]+)]]",
-                "<button notetype=\"$1\">" +
-                      //"<span><img src=\"\"></span>" +
-                      //"<span>$1</span>" +
-                        "$1" +
-                        "</button>");
+    public static String regexReplaceAllNoteRefs(String htmlData, Predicate<String> noteExists) {
+        return StringReplacer.replace(htmlData,
+                Pattern.compile("\\[\\[([" + Note.REGEX_NAMING_FORMAT + "]+)]]"),
+                (matcher) -> {
+                    String note = matcher.group(1);
+                    String style = "font-weight: bold;";
+                    if (!noteExists.test(note)) {
+                        style+="color: red;";
+                    }
+                    return "<button notetype=\""+note+"\" style=\"" + style + "\">" +
+                            //"<span><img src=\"\"></span>" +
+                            //"<span>$1</span>" +
+                            note +
+                            "</button>";
+                });
     }
 
     /**

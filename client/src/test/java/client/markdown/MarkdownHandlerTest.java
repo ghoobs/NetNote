@@ -26,6 +26,11 @@ public class MarkdownHandlerTest {
             public void onTagMdButtonClick(String tag) {}
             public void onNoteMdButtonClick(String note) {}
             public void onUrlMdAnchorClick(String url) {}
+
+            @Override
+            public boolean doesNoteExistWithinSameCollection(String note) {
+                return false;
+            }
         }));
     }
 
@@ -42,7 +47,7 @@ public class MarkdownHandlerTest {
                 "!-My Other_n0te&&--=?" +
                 "</button>" +"</p>";
         assertEquals(
-            MarkdownHandler.regexReplaceAllNoteRefs(srcHtml),
+            MarkdownHandler.regexReplaceAllNoteRefs(srcHtml, _->true),
             expectedHtml
         );
     }

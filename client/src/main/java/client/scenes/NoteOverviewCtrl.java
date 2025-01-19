@@ -845,4 +845,14 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             System.out.println(ex.getMessage());
         }
     }
+
+    @Override
+    public boolean doesNoteExistWithinSameCollection(String note) {
+        return listNotes.getItems()
+                .stream()
+                .anyMatch(tNote -> {
+                    return tNote.getTitle().equals(note);
+                }
+            );
+    }
 }

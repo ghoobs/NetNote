@@ -16,4 +16,12 @@ public interface IMarkdownEvents {
      * @param url Value of the url
      */
     void onUrlMdAnchorClick(String url);
+
+    /**
+     * Called to ask if a note with this name exists, within the same collection.
+     * This is used to determine the style of the button.
+     * @param note Name of the note, excluding the [[...]]
+     * @return Must return true if the note exists
+     */
+    boolean doesNoteExistWithinSameCollection(String note);
 }
