@@ -839,10 +839,22 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public void onUrlMdAnchorClick(String url) {
-        try {
-            Desktop.getDesktop().browse(new URI(url));
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+        if (Desktop.isDesktopSupported()) {
+            // Windows
+            try {
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(new URI(url));
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+        } else {
+            // Ubuntu
+            try {
+                Runtime runtime = Runtime.getRuntime();
+                runtime.exec(new String[]{"xdg-open", url});
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
         }
     }
 
