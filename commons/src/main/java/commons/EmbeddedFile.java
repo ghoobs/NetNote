@@ -30,7 +30,16 @@ public class EmbeddedFile {
     @JsonBackReference
     private Note note;
 
-    public EmbeddedFile () {
+    public EmbeddedFile(String filename, String filetype, String url, long id, byte[] data, Note note) {
+        this.filename = filename;
+        this.filetype = filetype;
+        this.url = url;
+        this.id = id;
+        this.data = data;
+        this.note = note;
+    }
+
+    public EmbeddedFile() {
     }
 
     public EmbeddedFile(String filename, String filetype, String url, byte[] data, Note note) {
