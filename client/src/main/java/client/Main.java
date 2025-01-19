@@ -7,8 +7,9 @@ import java.net.URISyntaxException;
 
 import client.scenes.*;
 import com.google.inject.Injector;
-import client.utils.ServerUtils;
+import client.utils.ServerUtils2;
 import javafx.application.Application;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 
@@ -40,10 +41,14 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        var serverUtils = INJECTOR.getInstance(ServerUtils.class);
+        var serverUtils = INJECTOR.getInstance(ServerUtils2.class);
         if (!serverUtils.isServerAvailable()) {
             var msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
             System.err.println(msg);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Server Not Available");
+            alert.setHeaderText("Server needs to be started before the client,\nbut it does not seem to be available. Shutting down.");
+            alert.showAndWait();
             return;
         }
 

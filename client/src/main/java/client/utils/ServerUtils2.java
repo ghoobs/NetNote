@@ -6,15 +6,9 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
-import org.checkerframework.checker.units.qual.C;
 import org.glassfish.jersey.client.ClientConfig;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -22,23 +16,6 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 public class ServerUtils2 {
     private static final String SERVER = "http://localhost:8080/";
 
-    /**
-     * Retrieves notes from the server using a low-level HTTP request.
-     * Reads and prints each line from the response.
-     *
-     * @throws IOException        if an I/O error occurs when reading the server response
-     * @throws URISyntaxException if the constructed URL is invalid
-     */
-
-    public void getNotesTheHardWay() throws IOException, URISyntaxException {
-        var url = new URI("http://localhost:8080/api/notes").toURL();
-        var is = url.openConnection().getInputStream();
-        var br = new BufferedReader(new InputStreamReader(is));
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.out.println(line);
-        }
-    }
 
     /**
      * Retrieves all notes from the server.
