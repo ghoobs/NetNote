@@ -825,7 +825,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public void onTagMdButtonClick(String tag) {
-        System.out.println("Tag clicked: "+ tag);
+        filterByTag(tag);
     }
 
     @Override
