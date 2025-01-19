@@ -1,5 +1,6 @@
 package server.api;
 import commons.Collection;
+import commons.CollectionNote;
 import commons.EmbeddedFile;
 import commons.Note;
 import org.apache.coyote.Response;
@@ -34,7 +35,7 @@ public class EmbeddedFileController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Note> notes = optionalCollection.get().notes;
+        List<CollectionNote> notes = optionalCollection.get().notes;
 
         Note noteWithTitle = null;
         for (Note note : notes) {
@@ -62,7 +63,7 @@ public class EmbeddedFileController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Note> notes = optionalCollection.get().notes;
+        List<CollectionNote> notes = optionalCollection.get().notes;
 
         Note noteWithTitle = null;
         for (Note note : notes) {
@@ -97,7 +98,7 @@ public class EmbeddedFileController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Note> notes = optionalCollection.get().notes;
+        List<CollectionNote> notes = optionalCollection.get().notes;
 
         Note noteWithTitle = null;
         for (Note note : notes) {
@@ -134,7 +135,7 @@ public class EmbeddedFileController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Note> notes = optionalCollection.get().notes;
+        List<CollectionNote> notes = optionalCollection.get().notes;
 
         Note noteWithTitle = null;
         for (Note note : notes) {
