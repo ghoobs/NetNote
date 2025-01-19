@@ -18,13 +18,11 @@ public class EmbeddedFileController {
 
     private final NoteRepository noteRepo;
     private final CollectionRepository collectionRepo;
-    private final EmbeddedFileRepository fileRepo;
 
     public EmbeddedFileController(NoteRepository noteRepo,
-                                  CollectionRepository collectionRepo, EmbeddedFileRepository fileRepo) {
+                                  CollectionRepository collectionRepo) {
         this.noteRepo = noteRepo;
         this.collectionRepo = collectionRepo;
-        this.fileRepo = fileRepo;
     }
 
     @GetMapping("/{collectionId}/{noteTitle}/files/upload")
