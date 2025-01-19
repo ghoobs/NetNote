@@ -1,5 +1,6 @@
 package client.utils;
 
+import commons.EmbeddedFile;
 import commons.Note;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -18,6 +19,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
 public class ServerUtils2 {
     private static final String SERVER = "http://localhost:8080/";
@@ -102,14 +104,6 @@ public class ServerUtils2 {
                 .put(Entity.entity(note, MediaType.APPLICATION_JSON), Note.class);
     }
 
-    public List<Note> searchNotes(String keyword) {
-        return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/notes/search")
-                .queryParam("keyword", keyword)
-                .request(APPLICATION_JSON)
-                .get(new GenericType<List<Note>>() {});
-    }
-
     /**
      * Delete an existing note on the server
      *
@@ -120,5 +114,33 @@ public class ServerUtils2 {
                 .target(SERVER).path("api/notes/delete/" + note.getId()) //Endpoint for deleting a note
                 .request(APPLICATION_JSON)
                 .delete();
+    }
+
+    public EmbeddedFile addFile(long collectionId, String noteTitle, EmbeddedFile embeddedFile) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/files/upload")
+                .request(APPLICATION_JSON)
+                .post(Entity.entity(embeddedFile, APPLICATION_JSON), EmbeddedFile.class);
+    }
+
+    public byte[] getData(long collectionId, String noteTitle, String fileName) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName)
+                .request(APPLICATION_OCTET_STREAM)
+                .get(byte[].class);
+    }
+
+    public Note deleteFile(long collectionId, String noteTitle, String fileName) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName + "/delete")
+                .request(APPLICATION_JSON)
+                .delete(Note.class);
+    }
+
+    public EmbeddedFile renameFile(long collectionId, String noteTitle, String fileName, String newFileName) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName + "/" + newFileName + "/rename")
+                .request(APPLICATION_JSON)
+                .put(Entity.entity(newFileName, APPLICATION_JSON), EmbeddedFile.class);
     }
 }
