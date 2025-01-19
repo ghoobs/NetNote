@@ -252,21 +252,13 @@ public class NoteOverviewCtrl implements Initializable {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Title Already Exists");
                     alert.setHeaderText("The title of your note has to be unique!");
-                    alert.showAndWait().ifPresent(response -> {
-                        if (response == ButtonType.OK) {
-                            System.out.println("test");
-                        }
-                    });
+                    alert.showAndWait();
                 }
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Empty Title");
                 alert.setHeaderText("The title of your note can't be empty!");
-                alert.showAndWait().ifPresent(response -> {
-                    if (response == ButtonType.OK) {
-                        System.out.println("test");
-                    }
-                });
+                alert.showAndWait();
             }
         }
     }
@@ -701,10 +693,17 @@ public class NoteOverviewCtrl implements Initializable {
      * @param locale the {@code Locale} to save.
      */
     protected void saveLocale(Locale locale) {
-        try {
-            Properties props = new Properties();
+        Properties props = new Properties();
+
+        try (FileInputStream in = new FileInputStream("config.properties")) {
+            props.load(in);
+        } catch (IOException e) {
+            System.err.println("Unable to load properties file: " + e.getMessage());
+        }
+
+        try (FileOutputStream out = new FileOutputStream("config.properties")) {
             props.setProperty("language", locale.getLanguage());
-            props.store(new FileOutputStream("config.properties"), null);
+            props.store(out, null);
         } catch (IOException e) {
             e.printStackTrace();
         }

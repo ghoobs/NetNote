@@ -12,7 +12,7 @@
    <children>
       <HBox layoutY="-1.0" prefHeight="372.0" prefWidth="139.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="461.0" AnchorPane.topAnchor="-1.0">
          <children>
-            <ListView fx:id="listNotes" prefHeight="335.0" prefWidth="139.0">
+            <ListView fx:id="collectionsList" prefHeight="335.0" prefWidth="139.0">
                <HBox.margin>
                   <Insets top="40.0" />
                </HBox.margin>
@@ -24,22 +24,24 @@
             <HBox layoutX="-147.0" layoutY="1.0" prefHeight="26.0" prefWidth="600.0" spacing="10.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="-147.0" AnchorPane.rightAnchor="-225.0">
                <children>
                   <Button fx:id="deleteCollButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="57.0" text="Delete" />
-                  <Button fx:id="addCollButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="57.0" text="Add" />
+                  <Button fx:id="addCollButton" mnemonicParsing="false" onAction="#addCollection" prefHeight="25.0" prefWidth="57.0" text="Add" />
                   <Button fx:id="backButton" mnemonicParsing="false" onAction="#back" prefHeight="25.0" prefWidth="57.0" text="Back" />
                </children>
             </HBox>
          </children>
       </AnchorPane>
-      <AnchorPane layoutX="137.0" layoutY="39.0" prefHeight="200.0" prefWidth="463.0">
+      <AnchorPane layoutX="137.0" layoutY="39.0" prefHeight="275.0" prefWidth="465.0">
          <children>
             <Label fx:id="title" layoutX="50.0" layoutY="36.0" prefHeight="25.0" prefWidth="60.0" text="Title" />
             <Label fx:id="serverName" layoutX="50.0" layoutY="63.0" prefHeight="25.0" prefWidth="60.0" text="Server" />
             <Label fx:id="collectionName" layoutX="50.0" layoutY="90.0" prefHeight="25.0" text="Collection" />
             <Label fx:id="status" layoutX="50.0" layoutY="117.0" prefHeight="25.0" prefWidth="60.0" text="Status" />
-            <TextField layoutX="116.0" layoutY="36.0" />
-            <TextField layoutX="116.0" layoutY="63.0" />
-            <TextField layoutX="116.0" layoutY="90.0" />
-            <TextField layoutX="116.0" layoutY="117.0" />
+            <TextField fx:id="titleInput" layoutX="116.0" layoutY="36.0" />
+            <TextField fx:id="serverInput" layoutX="116.0" layoutY="63.0" />
+            <TextField fx:id="collectionInput" layoutX="116.0" layoutY="90.0" />
+            <Label layoutX="116.0" layoutY="117.0" prefHeight="25.0" prefWidth="150.0" text="OK (hardcoded)" />
+            <Button fx:id="makeDefaultButton" onAction="#makeDefault" layoutX="116.0" layoutY="206.0" mnemonicParsing="false" text="Make Default" />
+            <Button fx:id="saveButton" onAction="#updateCollection" layoutX="221.0" layoutY="206.0" mnemonicParsing="false" text="Save" />
          </children>
       </AnchorPane>
    </children>
