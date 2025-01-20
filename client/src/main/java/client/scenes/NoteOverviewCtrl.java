@@ -11,10 +11,13 @@ import jakarta.ws.rs.WebApplicationException;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -182,6 +185,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             highlightSelectedNote(newValue);
         });
         listNotes.setOnMouseClicked(this::onNoteClicked);
+        createNoteTextInputContextMenu();
+
         refresh();
         updateMarkdown();
     }
@@ -900,6 +905,44 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             tags.add(matcher.group());
         }
         return tags;
+    }
+
+    /**
+     * Creates a right-click context popup for the note text input.
+     */
+    private void createNoteTextInputContextMenu() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem menuItemAddFile = new MenuItem("Upload file");
+        MenuItem menuItemAddNoteReference = new MenuItem("Reference Note");
+        MenuItem menuItemAddTag = new MenuItem("Add tag");
+
+        contextMenu.getItems().add(menuItemAddFile);
+        contextMenu.getItems().add(menuItemAddNoteReference);
+        contextMenu.getItems().add(menuItemAddTag);
+
+        menuItemAddFile.setOnAction(this::onNoteTextInputCtxMenuUploadFile);
+        menuItemAddNoteReference.setOnAction(this::onNoteTextInputCtxMenuAddNoteRef);
+        menuItemAddTag.setOnAction(this::onNoteTextInputCtxMenuAddNoteTag);
+
+        noteWriting.setContextMenu(contextMenu);
+    }
+
+    private void onNoteTextInputCtxMenuUploadFile(ActionEvent event) {
+
+    }
+
+    private void onNoteTextInputCtxMenuAddNoteRef(ActionEvent event) {
+        Platform.runLater(()->{
+            int caretPosition = noteWriting.getCaretPosition();
+            noteWriting.insertText(caretPosition, "]]");
+            noteWriting.insertText(caretPosition, "[[");
+        });
+    }
+
+    private void onNoteTextInputCtxMenuAddNoteTag(ActionEvent event) {
+        int caretPosition = noteWriting.getCaretPosition();
+        noteWriting.insertText(caretPosition, "#");
     }
 
     @Override
