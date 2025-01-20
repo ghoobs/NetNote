@@ -20,6 +20,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -33,7 +34,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.util.Duration;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
