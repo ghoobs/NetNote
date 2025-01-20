@@ -14,6 +14,10 @@ import java.util.Objects;
 
 @Entity
 public class EmbeddedFile {
+    // prevent illegal Windows file names + whitespaces excl. spaces
+    public static final String REGEX_NAMING_FORMAT = "[^\\n\\r\\t\\\\:\\\\*\\\\/" +
+            "\\\\|\\\\?\\\\\"\\\\<\\\\>\\\\\\\\]*";
+
     private String filename;
     private String filetype;
     private String url;
@@ -30,6 +34,21 @@ public class EmbeddedFile {
     @JsonBackReference
     private Note note;
 
+
+    public EmbeddedFile() {}
+
+    /**
+     * Constructs an EmbeddedFile for client side usage.
+     * @param filename name of the file (no directory)
+     * @param filetype file extension
+     * @param data contents of the file.
+     */
+    public EmbeddedFile(String filename, String filetype, byte[] data) {
+        this.filename = filename;
+        this.filetype = filetype;
+        this.data = data;
+    }
+
     public EmbeddedFile(String filename, String filetype, String url, long id, byte[] data, Note note) {
         this.filename = filename;
         this.filetype = filetype;
@@ -38,10 +57,6 @@ public class EmbeddedFile {
         this.data = data;
         this.note = note;
     }
-
-    public EmbeddedFile() {
-    }
-
     public EmbeddedFile(String filename, String filetype, String url, byte[] data, Note note) {
         this.filename = filename;
         this.filetype = filetype;
@@ -49,6 +64,7 @@ public class EmbeddedFile {
         this.data = data;
         this.note = note;
     }
+
 
     public String getFilename() {
         return filename;

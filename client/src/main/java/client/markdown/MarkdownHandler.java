@@ -14,6 +14,7 @@ import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import com.vladsch.flexmark.util.misc.Extension;
+import commons.EmbeddedFile;
 import commons.Note;
 import commons.Tag;
 import javafx.application.Platform;
@@ -339,5 +340,19 @@ public class MarkdownHandler {
         return htmlData.replaceAll(
                 "#(["+ Tag.REGEX_NAMING_FORMAT+"]+)",
                 "<button tagtype=\"$1\"># $1</button>");
+    }
+
+    /**
+     * Replaces all the ![alt](url) with an embed
+     * @param htmlData html code
+     * @param serverUrl full server URL including the port
+     * @param noteId id of the current note
+     * @return Updated html code
+     */
+    public static String regexReplaceAllEmbeds(String htmlData, String serverUrl, long noteId) {
+        return htmlData.replaceAll(
+                "#\\!\\[["+ EmbeddedFile.REGEX_NAMING_FORMAT+"]\\]" +
+                        "(["+ EmbeddedFile.REGEX_NAMING_FORMAT+"]+)",
+                "<embed src="serverUrl+"embeds/files/"+noteId+"/\"$2\">");
     }
 }

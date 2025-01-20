@@ -4,8 +4,11 @@ import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import commons.Collection;
+import commons.EmbeddedFile;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
 import javafx.animation.FadeTransition;
@@ -34,15 +37,15 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.util.Duration;
 
 import java.awt.Desktop;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.nio.CharBuffer;
 import java.util.*;
 import java.util.List;
 import java.util.function.Predicate;
@@ -50,6 +53,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.animation.FadeTransition;
 import javafx.util.Duration;
+import org.checkerframework.checker.units.qual.C;
 
 /**
  * The type Note overview ctrl.
@@ -928,10 +932,68 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         noteWriting.setContextMenu(contextMenu);
     }
 
-    private void onNoteTextInputCtxMenuUploadFile(ActionEvent event) {
+    /**
+     * Shows a file browser dialogue, and requests the user to select a file.
+     * @return File that the user selected. May be null if the user cancelled the operation!
+     */
+    private File askUserForEmbeddedFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select File to Embed");
 
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image Files",
+                        "*.png", ".jpg", ".jpeg")
+        );
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("All Files",
+                        "*.*")
+        );
+        return fileChooser.showOpenDialog(null);
     }
 
+    /**
+     * Called when ContextMenu->Upload file is clicked.
+     * This will open a file browser dialogue, and will embed it into the current note.
+     * @param event event
+     */
+    private void onNoteTextInputCtxMenuUploadFile(ActionEvent event) {
+        File file = askUserForEmbeddedFile();
+        if (file == null || !file.exists()) {
+            return; // user cancelled the operation
+        }
+
+        byte[] contents;
+        try {
+            contents = Files.toByteArray(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Note currentNote = listNotes.getSelectionModel().getSelectedItem();
+        String fileName = file.getName();
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        EmbeddedFile embed = new EmbeddedFile(
+            fileName,
+            extension,
+            contents
+        );
+        long collectionId = 1;// currentCollection.id
+        Platform.runLater(()->{
+            server.addFile(collectionId, currentNote.title, embed);
+        });
+
+        Platform.runLater(()->{
+            int caretPosition = noteWriting.getCaretPosition();
+            String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf("."));
+            noteWriting.insertText(caretPosition, "!["+fileNameNoExt+"]("+fileName+")");
+        });
+    }
+
+    /**
+     * Called when ContextMenu->Reference Note is clicked. Surrounds the caret with [[...]]
+     * @param event event
+     */
     private void onNoteTextInputCtxMenuAddNoteRef(ActionEvent event) {
         Platform.runLater(()->{
             int caretPosition = noteWriting.getCaretPosition();
@@ -940,6 +1002,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         });
     }
 
+    /**
+     * Called when ContextMenu->Add tag is clicked. Prepends the caret with #...
+     * @param event event
+     */
     private void onNoteTextInputCtxMenuAddNoteTag(ActionEvent event) {
         int caretPosition = noteWriting.getCaretPosition();
         noteWriting.insertText(caretPosition, "#");

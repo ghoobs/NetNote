@@ -26,8 +26,7 @@ public class EmbeddedFileController {
         this.collectionRepo = collectionRepo;
     }
 
-    @GetMapping("/{collectionId}/{noteTitle}/files/upload")
-    @PostMapping
+    @PostMapping("/{collectionId}/{noteTitle}/files/upload")
     public ResponseEntity<EmbeddedFile> addFile(@PathVariable long collectionId, @PathVariable String noteTitle,
                                                 @RequestBody EmbeddedFile embeddedFile) {
         Optional<Collection> optionalCollection = collectionRepo.findById(collectionId);
@@ -47,8 +46,10 @@ public class EmbeddedFileController {
             return ResponseEntity.notFound().build();
         }
 
+        String url = "files/" + embeddedFile.getFilename();
+
         EmbeddedFile toSave = new EmbeddedFile(embeddedFile.getFilename(),
-                embeddedFile.getFiletype(), embeddedFile.getUrl(), embeddedFile.getData(), noteWithTitle);
+                embeddedFile.getFiletype(), url, embeddedFile.getData(), noteWithTitle);
 
         noteWithTitle.addEmbeddedFile(toSave);
         noteRepo.save(noteWithTitle);
