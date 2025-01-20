@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Collection;
+import commons.CollectionNote;
 import commons.EmbeddedFile;
 import commons.Note;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,7 @@ class EmbeddedFileControllerTest {
     private TestNoteRepository testNoteRepository;
     private TestCollectionRepository testCollectionRepository;
     private Collection testCollection;
-    private Note testNote;
+    private CollectionNote testNote;
     private EmbeddedFile testEmbeddedFile;
 
     @BeforeEach
@@ -27,7 +28,7 @@ class EmbeddedFileControllerTest {
         testCollectionRepository = new TestCollectionRepository();
         embeddedFileController = new EmbeddedFileController(testNoteRepository, testCollectionRepository);
         testCollection = new Collection("TestCollection");
-        testNote = new Note("TestNote", "Some String");
+        testNote = new CollectionNote("TestNote", "Some String");
         testEmbeddedFile = new EmbeddedFile("TestFile", "TestFiletype",
                 "TestURL", "data".getBytes(), testNote);
         List<Note> testNoteList = new ArrayList<>();
