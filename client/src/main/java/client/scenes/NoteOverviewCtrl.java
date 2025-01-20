@@ -978,9 +978,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             extension,
             contents
         );
-        long collectionId = 1;// currentCollection.id
         Platform.runLater(()->{
-            server.addFile(collectionId, currentNote.title, embed);
+            server.addFile(currentNote.id, embed);
         });
 
         Platform.runLater(()->{

@@ -351,8 +351,8 @@ public class MarkdownHandler {
      */
     public static String regexReplaceAllEmbeds(String htmlData, String serverUrl, long noteId) {
         return htmlData.replaceAll(
-                "#\\!\\[["+ EmbeddedFile.REGEX_NAMING_FORMAT+"]\\]" +
+                "#!\\[["+ EmbeddedFile.REGEX_NAMING_FORMAT+"]]" +
                         "(["+ EmbeddedFile.REGEX_NAMING_FORMAT+"]+)",
-                "<embed src="serverUrl+"embeds/files/"+noteId+"/\"$2\">");
+                "<embed src="+serverUrl+"/api/" + noteId+ "/files/data\"$2\">");
     }
 }
