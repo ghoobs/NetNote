@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
@@ -17,6 +18,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -28,11 +33,14 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.util.Duration;
 
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +50,7 @@ import javafx.util.Duration;
 /**
  * The type Note overview ctrl.
  */
-public class NoteOverviewCtrl implements Initializable {
+public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     private final ServerUtils2 server;
     private final MainCtrl mainCtrl;
@@ -152,9 +160,7 @@ public class NoteOverviewCtrl implements Initializable {
         titleWriting.setEditable(true);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
         mdHandler.setWebEngine(markDownView.getEngine());
-        mdHandler.setHyperlinkCallback((String link) -> {
-            System.out.println("Webpage: " + link);
-        });
+        mdHandler.setEventInterface(this);
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 //        searchButton.setOnAction(event -> searchNotes());
         listNotes.setCellFactory(listView -> new ListCell<>() {
@@ -321,12 +327,21 @@ public class NoteOverviewCtrl implements Initializable {
     public void onNoteClicked(MouseEvent mouseEvent) {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
         if (noteSelected != null) {
-            makeEditable(noteWriting);
-            makeEditable(titleWriting);
-            noteWriting.setText(noteSelected.getText());
-            titleWriting.setText(noteSelected.getTitle());
-            updateMarkdown();
+            changeSelectedNote(noteSelected);
         }
+    }
+
+    /**
+     * Changes the selection of the current note
+     * @param note Note to select
+     */
+    public void changeSelectedNote(Note note) {
+        makeEditable(noteWriting);
+        makeEditable(titleWriting);
+        noteWriting.setText(note.getText());
+        titleWriting.setText(note.getTitle());
+        updateMarkdown();
+        listNotes.getSelectionModel().select(note);
     }
 
     /**
@@ -884,5 +899,50 @@ public class NoteOverviewCtrl implements Initializable {
             tags.add(matcher.group());
         }
         return tags;
+    }
+
+    @Override
+    public void onTagMdButtonClick(String tag) {
+        filterByTag(tag);
+    }
+
+    @Override
+    public void onNoteMdButtonClick(String note) {
+        Optional<Note> maybeNote = listNotes.getItems().stream()
+                .filter(tnote -> tnote.getTitle().equals(note))
+                .findFirst();
+        // Note exists, navigate
+        maybeNote.ifPresent(this::changeSelectedNote);
+    }
+
+    @Override
+    public void onUrlMdAnchorClick(String url) {
+        if (Desktop.isDesktopSupported()) {
+            // Windows
+            try {
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(new URI(url));
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+        } else {
+            // Ubuntu
+            try {
+                Runtime runtime = Runtime.getRuntime();
+                runtime.exec(new String[]{"xdg-open", url});
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public boolean doesNoteExistWithinSameCollection(String note) {
+        return listNotes.getItems()
+                .stream()
+                .anyMatch(tNote -> {
+                    return tNote.getTitle().equals(note);
+                }
+            );
     }
 }

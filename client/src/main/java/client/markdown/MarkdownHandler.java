@@ -1,5 +1,6 @@
 package client.markdown;
 
+import client.utils.StringReplacer;
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.ext.emoji.EmojiExtension;
@@ -13,16 +14,22 @@ import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import com.vladsch.flexmark.util.misc.Extension;
+import commons.Note;
+import commons.Tag;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebEngine;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.events.*;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
 
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 public class MarkdownHandler {
     // markdown related objects
@@ -31,7 +38,7 @@ public class MarkdownHandler {
     private HtmlRenderer mdRenderer;
     private String htmlCache;
 
-    private Consumer<String> hyperlinkCallback;
+    private IMarkdownEvents markdownEvents;
 
     // asynchronous thread related objects
     private Thread asyncMarkdownWorker;
@@ -110,19 +117,19 @@ public class MarkdownHandler {
             return;
         }
         this.webEngine = webEngine;
-        createWebEngineStateHandler();
+        bindScripts();
     }
 
     /**
-     * Allows manually determining what occurs upon clicking a hyperlink. If set to null, the default handler will be used.
+     * Allows manually determining what occurs upon certain actions and events. If set to null, the default handler will be used.
      * The WebEngine MUST be set prior in order to modify the callback.
-     * @param callback The lambda that will be invoked when a hyperlink is clicked, provided with the link address
+     * @param events The interface that handles the events, provided with the link address
      */
-    public void setHyperlinkCallback(Consumer<String> callback) {
+    public void setEventInterface(IMarkdownEvents events) {
         if (webEngine == null) {
             throw new IllegalStateException("WebEngine has not been set!");
         }
-        hyperlinkCallback = callback;
+        this.markdownEvents = events;
     }
 
     /**
@@ -196,6 +203,8 @@ public class MarkdownHandler {
         Node document = mdParser.parse(mdContents);
         // convert the markdown to HTML
         String html = mdRenderer.render(document);
+        html = regexReplaceAllTags(regexReplaceAllNoteRefs(html,
+                markdownEvents::doesNoteExistWithinSameCollection));
         synchronized (mdReadyToDisplay) {
             mdReadyToDisplay.add(html);
         }
@@ -219,18 +228,54 @@ public class MarkdownHandler {
     }
 
     /**
-     * Creates a new state listener for the webview engine which will deal with the hyperlink callback
+     * The action when clicking on a hyperlink
+     * @param event Propagated event
      */
-    private void createWebEngineStateHandler() {
+    private void onClickHtmlAnchor(Event event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var node = (org.w3c.dom.Node)event.getTarget();
+        var hrefAttr = node.getAttributes().getNamedItem("href");
+
+        if (hrefAttr == null) {
+            return; // no link
+        }
+
+        if (markdownEvents == null) return;
+        markdownEvents.onUrlMdAnchorClick(hrefAttr.getNodeValue());
+    }
+    /**
+     * The action when clicking on a button
+     * @param event Propagated event
+     */
+    private void onClickHtmlButton(Event event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var node = (org.w3c.dom.Node)event.getTarget();
+
+        if (markdownEvents == null) return;
+        var noteRefValue = node.getAttributes().getNamedItem("notetype");
+        var tagRefValue = node.getAttributes().getNamedItem("tagtype");
+
+        if (noteRefValue != null && tagRefValue == null) {
+            markdownEvents.onNoteMdButtonClick(noteRefValue.getNodeValue());
+        } else if (noteRefValue == null && tagRefValue != null) {
+            markdownEvents.onTagMdButtonClick(tagRefValue.getNodeValue());
+        }
+    }
+
+    /**
+     * Creates a new state listener for the webview engine which will deal with special callbacks
+     */
+    private void bindScripts() {
         webEngine.getLoadWorker().stateProperty()
             .addListener(
                 (_, _, newValue) -> {
-                    if (hyperlinkCallback == null) {
-                        return;
-                    }
                     if (Worker.State.SUCCEEDED.equals(newValue)) {
                         String location = webEngine.getLocation();
-                        hyperlinkCallback.accept(location);
+
                         if (htmlCache == null) {
                             return;
                         }
@@ -238,8 +283,61 @@ public class MarkdownHandler {
                         if (!location.isEmpty()) {
                            webEngine.loadContent(htmlCache); // restore the html page
                         }
+                        Document doc = webEngine.getDocument();
+
+                        // Create the event listener for anchors
+                        EventListener listenerA = this::onClickHtmlAnchor;
+                        // Add event handler to <a> hyperlinks.
+                        var aNodeList = doc.getElementsByTagName("a");
+                        for (int i = 0; i < aNodeList.getLength(); i++) {
+                            EventTarget hyperlink = (EventTarget)aNodeList.item(i);
+                            hyperlink.addEventListener("click", listenerA, true);
+                        }
+
+                        // Create the event listener for anchors
+                        EventListener listenerBtn = this::onClickHtmlButton;
+                        // Add event handler to <a> hyperlinks.
+                        var btnNodeList = doc.getElementsByTagName("button");
+                        for (int i = 0; i < btnNodeList.getLength(); i++) {
+                            EventTarget hyperlink = (EventTarget)btnNodeList.item(i);
+                            hyperlink.addEventListener("click", listenerBtn, true);
+                        }
                     }
                 }
             );
+    }
+
+    /**
+     * Replaces all the [[Note]] with a button
+     * @param htmlData html code
+     * @param noteExists function that should check if a note exists within the given collection.
+     * @return Updated html code
+     */
+    public static String regexReplaceAllNoteRefs(String htmlData, Predicate<String> noteExists) {
+        return StringReplacer.replace(htmlData,
+                Pattern.compile("\\[\\[([" + Note.REGEX_NAMING_FORMAT + "]+)]]"),
+                (matcher) -> {
+                    String note = matcher.group(1);
+                    String style = "font-weight: bold;";
+                    if (!noteExists.test(note)) {
+                        style+="color: red;";
+                    }
+                    return "<button notetype=\""+note+"\" style=\"" + style + "\">" +
+                            //"<span><img src=\"\"></span>" +
+                            //"<span>$1</span>" +
+                            note +
+                            "</button>";
+                });
+    }
+
+    /**
+     * Replaces all the #Tag with a button
+     * @param htmlData html code
+     * @return Updated html code
+     */
+    public static String regexReplaceAllTags(String htmlData) {
+        return htmlData.replaceAll(
+                "#(["+ Tag.REGEX_NAMING_FORMAT+"]+)",
+                "<button tagtype=\"$1\"># $1</button>");
     }
 }

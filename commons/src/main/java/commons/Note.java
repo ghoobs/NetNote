@@ -14,6 +14,8 @@ import java.util.List;
 // Entity needed for Spring to be able to create a Database
 @Entity
 public class Note {
+    public static final String REGEX_NAMING_FORMAT = "A-Za-z0-9\\s_\\.\\!\\?\\&\\=\\+\\-\\)\\(";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     public long id;
