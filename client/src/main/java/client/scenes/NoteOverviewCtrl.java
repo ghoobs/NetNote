@@ -4,7 +4,6 @@ import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import commons.Collection;
@@ -20,7 +19,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -45,7 +43,6 @@ import java.awt.Desktop;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
-import java.nio.CharBuffer;
 import java.util.*;
 import java.util.List;
 import java.util.function.Predicate;
@@ -938,15 +935,11 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     private File askUserForEmbeddedFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select File to Embed");
+        fileChooser.setTitle("Select Image To Upload");
 
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Image Files",
-                        "*.png", ".jpg", ".jpeg")
-        );
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("All Files",
-                        "*.*")
+                        "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
         return fileChooser.showOpenDialog(null);
     }
@@ -1053,5 +1046,15 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                     return tNote.getTitle().equals(note);
                 }
             );
+    }
+
+    @Override
+    public Note getSelectedNote() {
+        return listNotes.getSelectionModel().getSelectedItem();
+    }
+
+    @Override
+    public String getServerUrl() {
+        return "http://localhost:8080";
     }
 }

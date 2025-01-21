@@ -200,12 +200,19 @@ public class MarkdownHandler {
      * @param mdContents Markdown data to render and display on the webview
      */
     private void dispatchWebViewUpdate(String mdContents) {
+        if (markdownEvents != null) {
+            mdContents = regexReplaceAllEmbeds(mdContents,
+                    markdownEvents.getServerUrl(),
+                    markdownEvents.getSelectedNote().id);
+        }
         // parse the markdown contents
         Node document = mdParser.parse(mdContents);
         // convert the markdown to HTML
         String html = mdRenderer.render(document);
-        html = regexReplaceAllTags(regexReplaceAllNoteRefs(html,
-                markdownEvents::doesNoteExistWithinSameCollection));
+        html = regexReplaceAllNoteRefs(
+                regexReplaceAllTags(html),
+                markdownEvents::doesNoteExistWithinSameCollection
+        );
         synchronized (mdReadyToDisplay) {
             mdReadyToDisplay.add(html);
         }
@@ -351,8 +358,8 @@ public class MarkdownHandler {
      */
     public static String regexReplaceAllEmbeds(String htmlData, String serverUrl, long noteId) {
         return htmlData.replaceAll(
-                "#!\\[["+ EmbeddedFile.REGEX_NAMING_FORMAT+"]]" +
-                        "(["+ EmbeddedFile.REGEX_NAMING_FORMAT+"]+)",
-                "<embed src="+serverUrl+"/api/" + noteId+ "/files/data\"$2\">");
+                 "!\\[([^\\n\\r\\t]+)\\]" +
+                        "\\((["+ EmbeddedFile.REGEX_NAMING_FORMAT +"]+)\\)",
+                "<img alt=\"$1\" src=\""+serverUrl+"/api/" + noteId+ "/files/$2/data\">");
     }
 }

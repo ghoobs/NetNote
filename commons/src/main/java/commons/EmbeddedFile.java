@@ -15,8 +15,8 @@ import java.util.Objects;
 @Entity
 public class EmbeddedFile {
     // prevent illegal Windows file names + whitespaces excl. spaces
-    public static final String REGEX_NAMING_FORMAT = "[^\\n\\r\\t\\\\:\\\\*\\\\/" +
-            "\\\\|\\\\?\\\\\"\\\\<\\\\>\\\\\\\\]*";
+    public static final String REGEX_NAMING_FORMAT = "^\\n\\r\\t\\:\\*\\/" +
+            "\\\"\\|\\?\\\"\\<\\>\\\\";
 
     private String filename;
     private String filetype;
