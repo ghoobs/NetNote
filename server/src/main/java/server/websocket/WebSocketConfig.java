@@ -11,12 +11,8 @@ import org.springframework.web.socket.config.annotation.*;
  * This web socket will function as a way to push updates to the client
  */
 @Configuration
-@EnableWebSocket
+@EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-    @Autowired
-    private WebSocketHandler webSocketHandler;
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic");
@@ -27,9 +23,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
     }
-
-    public void registerWebSocketHandler(WebSocketHandlerRegistry registry) {
-        registry.addHandler(webSocketHandler, "/ws/notes")
-                .setAllowedOrigins("*");
-    }
 }
+

@@ -1,32 +1,24 @@
 package server.websocket;
 
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.TextMessage;
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class WebSocketMessaging {
+    private final SimpMessagingTemplate messagingTemplate;
 
-    // List to keep track of all active WebSocket sessions
-    private final List<WebSocketSession> sessions = new ArrayList<>();
-
+    @Autowired
+    public WebSocketMessaging(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
     /**
-     * Sends a message to all connected WebSocket clients
+     * sends a message to all connected WebSocket clients
      *
      * @param event the event object to be sent to clients
      */
-    public void sendEvent(Object event) {
-        String eventMessage = event.toString();
-
-        for (WebSocketSession session : sessions) {
-            try {
-                session.sendMessage(new TextMessage(eventMessage));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    public void sendEvent(Object event, String destination) {
+        messagingTemplate.convertAndSend(destination, event);
     }
 }
+

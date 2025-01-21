@@ -74,7 +74,7 @@ public class NoteController {
         notes.deleteById(id);
         DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
         eventPublisher.publishEvent(deleteEvent);
-//        messaging.sendEvent(deleteEvent);
+        messaging.sendEvent(id, "/topic/notes");
         return ResponseEntity.ok().build();
     }
 
@@ -181,7 +181,7 @@ public class NoteController {
         Note savedNote = notes.save(noteAdding);
         AddEvent addEvent = new AddEvent(this, savedNote);
         eventPublisher.publishEvent(addEvent);
-//        messaging.sendEvent(addEvent);
+        messaging.sendEvent(savedNote, "/topic/notes");
         return ResponseEntity.ok(savedNote);
     }
 
@@ -204,7 +204,7 @@ public class NoteController {
         notes.save(existingNote);
         UpdateEvent updateEvent = new UpdateEvent(this, existingNote);
         eventPublisher.publishEvent(updateEvent);
-//        messaging.sendEvent(updateEvent);
+        messaging.sendEvent(existingNote, "/topic/notes");
         return ResponseEntity.ok(existingNote);
     }
 

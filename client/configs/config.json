@@ -1,0 +1,6 @@
+{
+  "serversToIds" : {
+    "http://localhost:8080/" : [ 0 ],
+    "http://localhost:8090/" : [ 1 ]
+  }
+}
