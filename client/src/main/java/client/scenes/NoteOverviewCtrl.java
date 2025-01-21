@@ -42,6 +42,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -132,15 +133,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        webSocketClient = new WebSocketClient2();
-//        webSocketClient.addWebSocketListener(message -> {
-//            refresh();
-//        });
-//        try {
-//            webSocketClient.connect("ws://localhost:8080/ws/notes");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         languageMenu.textProperty().bind(currentLanguage);
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);

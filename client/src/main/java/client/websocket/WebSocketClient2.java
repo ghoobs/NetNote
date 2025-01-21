@@ -1,13 +1,12 @@
 package client.websocket;
 
 import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.web.socket.*;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.messaging.simp.stomp.StompClientSupport;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.messaging.converter.StringMessageConverter;
+import java.lang.reflect.Type;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
@@ -21,18 +20,30 @@ public class WebSocketClient2 {
         this.client.setMessageConverter(new StringMessageConverter());
     }
 
-    public void connect(String url, Consumer<String> handlerMessage) throws ExecutionException, InterruptedException {
-        this.session = client.connect(url, new StompSessionHandlerAdapter() {
 
-            public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-                System.out.println("websocket server connected succesfully");
-                session.subscribe("/topic/notes", new StompSessionHandlerAdapter() {
+    public void connect(String url, Consumer<String> handlerMessage) {
+        try {
+            this.session = client.connect(url, new StompSessionHandlerAdapter() {
 
-                    public void handlerFrame(StompHeaders headers, Object payload) {
-                        handlerMessage.accept(payload.toString());
-                    }
-                });
-            }
-        }).get();
+                @Override
+                public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                    System.out.println("WebSocket server connected successfully");
+                    session.subscribe("/topic/notes", new StompSessionHandlerAdapter() {
+
+                        @Override
+                        public Type getPayloadType(StompHeaders stompHeaders) {
+                            return String.class;
+                        }
+
+                        @Override
+                        public void handleFrame(StompHeaders headers, Object payload) {
+                            handlerMessage.accept(payload.toString());
+                        }
+                    });
+                }
+            }).get();
+        } catch (ExecutionException | InterruptedException e) {
+            System.err.println("Failed to connect to WebSocket server: " + e.getMessage());
+        }
     }
 }
