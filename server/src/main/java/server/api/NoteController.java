@@ -209,7 +209,9 @@ public class NoteController {
         if (titleChanged) {
             renameAllNoteReferences(existingNote.title, updatedNote.title,
                     null /* TODO: add note collection here in the future*/);
-            messaging.sendEvent("refresh"); // update client
+            if (messaging != null) {
+                messaging.sendEvent("refresh"); // update client
+            }
         }
         updatedNote.copyTo(existingNote);
 
