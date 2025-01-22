@@ -1,5 +1,6 @@
 package server.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
 import server.websocket.WebSocketMessaging;
 import server.database.NoteRepository;
@@ -208,10 +210,14 @@ public class NoteController {
         Note existingNote = notes.findById(id).get();
         boolean titleChanged = !existingNote.title.equals(updatedNote.title);
         if (titleChanged) {
-            renameAllNoteReferences(existingNote.title, updatedNote.title,
+            List<Note> renamedNotes = renameAllNoteReferences(existingNote.title, updatedNote.title,
                     null /* TODO: add note collection here in the future*/);
             if (messaging != null) {
-                messaging.sendEvent("refresh"); // update client
+                renamedNotes.forEach(
+                    (note) -> { // send update for notes that have been modified
+                        messaging.sendEvent(note, "/topic/notes");
+                    }
+                );
             }
         }
         updatedNote.copyTo(existingNote);
@@ -246,15 +252,24 @@ public class NoteController {
      * @param oldTitle Old title of the note reference to rename
      * @param newTitle New title of the note reference to set
      * @param collection Collection in which the note is situated
+     * @return List of notes that have been modified
      */
-    private void renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
+    private List<Note> renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
         List<Note> allNotes = getNotesFromCollection(collection);
-        allNotes.forEach(note ->
-            note.text = note.text.replace(
-                "[[" + oldTitle + "]]",
-                "[[" + newTitle + "]]"
-            )
+        List<Note> modifiedNotes = new ArrayList<Note>() ;
+        allNotes.forEach(
+            (note) -> {
+                String oldText = note.text;
+                note.text = note.text.replace(
+                    "[[" + oldTitle + "]]",
+                    "[[" + newTitle + "]]"
+                );
+                if (!oldText.equals(note.text)) {
+                    modifiedNotes.add(note);
+                }
+            }
         );
+        return modifiedNotes;
     }
 
 }
