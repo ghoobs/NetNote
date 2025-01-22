@@ -2,8 +2,12 @@ package client;
 
 import static com.google.inject.Guice.createInjector;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 import client.scenes.*;
 import com.google.inject.Injector;
@@ -40,14 +44,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("bundle", loadSavedLocale());
 
         var serverUtils = INJECTOR.getInstance(ServerUtils2.class);
         if (!serverUtils.isServerAvailable()) {
             var msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Server Not Available");
-            alert.setHeaderText("Server needs to be started before the client,\nbut it does not seem to be available. Shutting down.");
+            alert.setTitle(resourceBundle.getString("alert.serverError1"));
+            alert.setHeaderText(resourceBundle.getString("alert.serverError2"));
             alert.showAndWait();
             return;
         }
@@ -57,5 +62,21 @@ public class Main extends Application {
 
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
         mainCtrl.initialize(primaryStage, overview, editCollections);
+    }
+
+    /**
+     * Loads the saved locale from the configuration file.
+     * If no locale is saved, defaults to English.
+     *
+     * @return the {@code Locale} loaded from the configuration file or the default {@code Locale.ENGLISH}.
+     */
+    protected Locale loadSavedLocale() {
+        try {
+            Properties props = new Properties();
+            props.load(new FileInputStream("config.properties"));
+            return new Locale(props.getProperty("language", "en"));
+        } catch (IOException e) {
+            return Locale.ENGLISH;
+        }
     }
 }
