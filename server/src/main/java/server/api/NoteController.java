@@ -1,9 +1,13 @@
 package server.api;
 
-import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
+
+import commons.Collection;
+import commons.Note;
+import commons.CollectionNote;
 import commons.Pair;
 import commons.Tag;
 import events.AddEvent;
@@ -14,7 +18,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import commons.Note;
 import server.websocket.WebSocketMessaging;
 import server.database.NoteRepository;
 
@@ -199,6 +202,11 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
         }
         Note existingNote = notes.findById(id).get();
+        boolean titleChanged = !existingNote.title.equals(updatedNote.title);
+        if (titleChanged) {
+            renameAllNoteReferences(existingNote.title, updatedNote.title,
+                    ((CollectionNote)existingNote).collection);
+        }
         updatedNote.copyTo(existingNote);
 
         notes.save(existingNote);
@@ -206,6 +214,38 @@ public class NoteController {
         eventPublisher.publishEvent(updateEvent);
 //        messaging.sendEvent(updateEvent);
         return ResponseEntity.ok(existingNote);
+    }
+
+    /**
+     * Gets all notes pertaining to a specific collection
+     * @param collection Collection to search in
+     * @return List of notes contained in the collection
+     */
+    private List<Note> getNotesFromCollection(Collection collection) {
+        if (collection == null) {
+            throw new IllegalArgumentException("Collection must not be null!");
+        }
+        return notes.findAll()
+                .stream()
+                .map(note -> (CollectionNote)note)
+                .filter(note -> note.collection.id==collection.id)
+                .map(note -> (Note)note)
+                .toList();
+    }
+
+    /**
+     * Renames all references [[...]] inside of notes that match the old title to the new title
+     * @param oldTitle Old title of the note reference to rename
+     * @param newTitle New title of the note reference to set
+     * @param collection Collection in which the note is situated
+     */
+    private void renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
+        List<Note> allNotes = getNotesFromCollection(collection);
+        allNotes.forEach(note ->
+            note.text = note.text.replaceAll(
+                Note.getMarkdownRegex(oldTitle),
+        "[[" + newTitle + "]]"
+        ));
     }
 
 }

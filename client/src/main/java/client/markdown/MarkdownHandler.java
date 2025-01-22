@@ -323,7 +323,7 @@ public class MarkdownHandler {
      */
     public static String regexReplaceAllNoteRefs(String htmlData, Predicate<String> noteExists) {
         return StringReplacer.replace(htmlData,
-                Pattern.compile("\\[\\[([" + Note.REGEX_NAMING_FORMAT + "]+)]]"),
+                Pattern.compile(Note.REGEX_MD_NOTE_REFERENCE),
                 (matcher) -> {
                     String note = matcher.group(1);
                     String style = "font-weight: bold;";
@@ -345,7 +345,7 @@ public class MarkdownHandler {
      */
     public static String regexReplaceAllTags(String htmlData) {
         return htmlData.replaceAll(
-                "#(["+ Tag.REGEX_NAMING_FORMAT+"]+)",
+                Tag.REGEX_MD_TAG_REFERENCE,
                 "<button tagtype=\"$1\"># $1</button>");
     }
 
@@ -358,8 +358,7 @@ public class MarkdownHandler {
      */
     public static String regexReplaceAllEmbeds(String htmlData, String serverUrl, long noteId) {
         return htmlData.replaceAll(
-                 "!\\[([^\\n\\r\\t]+)\\]" +
-                        "\\((["+ EmbeddedFile.REGEX_NAMING_FORMAT +"]+)\\)",
+                 EmbeddedFile.REGEX_MD_EMBED_REFERENCE,
                 "<img alt=\"$1\" src=\""+serverUrl+"/api/" + noteId+ "/files/$2/data\">");
     }
 }
