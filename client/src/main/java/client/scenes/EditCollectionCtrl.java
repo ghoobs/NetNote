@@ -38,6 +38,7 @@ public class EditCollectionCtrl implements Initializable {
     private Button backButton;
     @FXML
     private Button saveButton;
+    @FXML Button createButton;
     @FXML
     private Button makeDefaultButton;
     @FXML
@@ -162,6 +163,56 @@ public class EditCollectionCtrl implements Initializable {
         collections.add(newCollection);
         collectionsList.getSelectionModel().select(newCollection);
         titleInput.setText(newCollection.name);
+    }
+
+    private Collection createCollection(Collection collection){
+
+        try {
+            collection = collectionUtils.addCollection(collection);
+        } catch (WebApplicationException e) {
+            var alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+            return null;
+        }
+        collections.add(collection);
+        collectionsList.getSelectionModel().select(collection);
+        titleInput.setText(collection.name);
+
+        return collection;
+
+    }
+
+
+    public void addCollectionFromInfo(){
+        String name = titleInput.getText();
+
+        Collection collectionAdding;
+
+        if (name.isEmpty()){
+            collectionAdding =createCollection(new Collection("New collection"));
+        }
+        else {
+            Collection newCollection = new Collection(name);
+            collectionAdding = createCollection(newCollection);
+        }
+        if (collectionAdding == null){
+            Alert alert = new Alert(Alert.AlertType.ERROR,"Something went wrong!, collection might not have been created");
+            alert.setTitle("Something went wrong server side!");
+            alert.setHeaderText("Something went wrong server side!");
+
+            alert.showAndWait();
+            return;
+        }
+
+
+        var alert = new Alert(Alert.AlertType.INFORMATION
+                , "Created new collection: " + collectionAdding.name);
+        alert.setTitle("Created new collection");
+        alert.setHeaderText("Created new collection");
+        alert.showAndWait();
+
     }
 
     /**

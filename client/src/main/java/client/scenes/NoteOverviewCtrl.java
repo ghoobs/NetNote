@@ -173,8 +173,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
 
 
-        collectionMenu.getItems().addAll(colServer.getAllCollectionNameIds().stream().map(x -> new MenuItem(x.getFirst())).toList());
-//        searchButton.setOnAction(event -> searchNotes());
+        refreshCollectionList();
         listNotes.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(Note note, boolean empty) {
@@ -196,6 +195,12 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         refresh();
         updateMarkdown();
     }
+
+    private void refreshCollectionList() {
+        collectionMenu.getItems().addAll(colServer.getAllCollectionNameIds().stream().map(x -> new MenuItem(x.getFirst())).toList());
+//        searchButton.setOnAction(event -> searchNotes());
+    }
+
     /**
      * Calls the addingnote function
      */
@@ -361,13 +366,16 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     public void refresh() {
         playFadeAnimation();
+
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
+        refreshCollectionList();
         listNotes.setItems(data);
         listNotes.getSelectionModel().select(0);
         onNoteClicked(null);
         showNotification("Notes refreshed successfully!");
     }
+
 
     private void playFadeAnimation() {
         FadeTransition fadeOut = new FadeTransition(Duration.millis(500), listNotes);
