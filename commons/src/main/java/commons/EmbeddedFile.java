@@ -18,6 +18,10 @@ import java.util.Objects;
  */
 @Entity
 public class EmbeddedFile {
+    // prevent illegal Windows file names + whitespaces excl. spaces
+    public static final String REGEX_NAMING_FORMAT = "^\\n\\r\\t\\:\\*\\/" +
+            "\\\"\\|\\?\\\"\\<\\>\\\\";
+
     private String filename;
     private String filetype;
     private String url;
@@ -34,16 +38,21 @@ public class EmbeddedFile {
     @JsonBackReference
     private Note note;
 
+
+    public EmbeddedFile() {}
+
     /**
-     * Constructs an EmbeddedFile with all attributes.
-     *
-     * @param filename the name of the file
-     * @param filetype the type of the file (e.g., MIME type)
-     * @param url      the URL associated with the file
-     * @param id       the unique identifier of the file
-     * @param data     the binary data of the file
-     * @param note     the note to which this file belongs
+     * Constructs an EmbeddedFile for client side usage.
+     * @param filename name of the file (no directory)
+     * @param filetype file extension
+     * @param data contents of the file.
      */
+    public EmbeddedFile(String filename, String filetype, byte[] data) {
+        this.filename = filename;
+        this.filetype = filetype;
+        this.data = data;
+    }
+
     public EmbeddedFile(String filename, String filetype, String url, long id, byte[] data, Note note) {
         this.filename = filename;
         this.filetype = filetype;
@@ -52,23 +61,6 @@ public class EmbeddedFile {
         this.data = data;
         this.note = note;
     }
-
-    /**
-     * Default constructor for JPA.
-     */
-    public EmbeddedFile() {
-    }
-
-    /**
-     * Constructs an EmbeddedFile with all attributes except the ID.
-     * The ID will be generated automatically.
-     *
-     * @param filename the name of the file
-     * @param filetype the type of the file (e.g., MIME type)
-     * @param url      the URL associated with the file
-     * @param data     the binary data of the file
-     * @param note     the note to which this file belongs
-     */
     public EmbeddedFile(String filename, String filetype, String url, byte[] data, Note note) {
         this.filename = filename;
         this.filetype = filetype;
@@ -77,11 +69,7 @@ public class EmbeddedFile {
         this.note = note;
     }
 
-    /**
-     * Gets the filename of the embedded file.
-     *
-     * @return the filename
-     */
+
     public String getFilename() {
         return filename;
     }

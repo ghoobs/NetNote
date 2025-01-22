@@ -14,6 +14,7 @@ import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import com.vladsch.flexmark.util.misc.Extension;
+import commons.EmbeddedFile;
 import commons.Note;
 import commons.Tag;
 import javafx.application.Platform;
@@ -199,12 +200,19 @@ public class MarkdownHandler {
      * @param mdContents Markdown data to render and display on the webview
      */
     private void dispatchWebViewUpdate(String mdContents) {
+        if (markdownEvents != null) {
+            mdContents = regexReplaceAllEmbeds(mdContents,
+                    markdownEvents.getServerUrl(),
+                    markdownEvents.getSelectedNote().id);
+        }
         // parse the markdown contents
         Node document = mdParser.parse(mdContents);
         // convert the markdown to HTML
         String html = mdRenderer.render(document);
-        html = regexReplaceAllTags(regexReplaceAllNoteRefs(html,
-                markdownEvents::doesNoteExistWithinSameCollection));
+        html = regexReplaceAllNoteRefs(
+                regexReplaceAllTags(html),
+                markdownEvents::doesNoteExistWithinSameCollection
+        );
         synchronized (mdReadyToDisplay) {
             mdReadyToDisplay.add(html);
         }
@@ -339,5 +347,19 @@ public class MarkdownHandler {
         return htmlData.replaceAll(
                 "#(["+ Tag.REGEX_NAMING_FORMAT+"]+)",
                 "<button tagtype=\"$1\"># $1</button>");
+    }
+
+    /**
+     * Replaces all the ![alt](url) with an embed
+     * @param htmlData html code
+     * @param serverUrl full server URL including the port
+     * @param noteId id of the current note
+     * @return Updated html code
+     */
+    public static String regexReplaceAllEmbeds(String htmlData, String serverUrl, long noteId) {
+        return htmlData.replaceAll(
+                 "!\\[([^\\n\\r\\t]+)\\]" +
+                        "\\((["+ EmbeddedFile.REGEX_NAMING_FORMAT +"]+)\\)",
+                "<img alt=\"$1\" src=\""+serverUrl+"/api/" + noteId+ "/files/$2/data\">");
     }
 }
