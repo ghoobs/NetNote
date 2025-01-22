@@ -46,7 +46,7 @@
         </SplitPane>
         <AnchorPane layoutX="0.0" layoutY="371.0" prefHeight="31.0" prefWidth="600.0" AnchorPane.bottomAnchor="-2.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="371.0">
             <children>
-                <HBox layoutX="10.0" layoutY="1.0" prefHeight="26.0" prefWidth="600.0" spacing="10.0" alignment="CENTER_LEFT" AnchorPane.leftAnchor="10.0">
+                <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="1.0" prefHeight="26.0" prefWidth="600.0" spacing="10.0" AnchorPane.leftAnchor="10.0">
                     <children>
                         <!-- Delete Button -->
                         <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteNote" text="Delete">
@@ -132,7 +132,7 @@
                 <Label fx:id="collectionLabel" alignment="CENTER" prefHeight="26.0" prefWidth="83.0" text="Collection:" />
                 <MenuBar prefHeight="26.0" prefWidth="91.0">
                     <menus>
-                        <Menu mnemonicParsing="false" text="Select">
+                        <Menu fx:id="collectionMenu" mnemonicParsing="false" text="Select">
                             <items>
                                 <MenuItem mnemonicParsing="false" text="All" />
                                 <MenuItem mnemonicParsing="false" text="Default" />

@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
+import client.utils.CollectionServerUtils;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
 import com.google.inject.Inject;
@@ -58,6 +59,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private final MarkdownHandler mdHandler;
     private WebSocketClient2 webSocketClient;
 
+    private CollectionServerUtils colServer = new CollectionServerUtils() ;
+
     private Collection currentCollection;
     /**
      * The Note writing.
@@ -92,6 +95,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private ComboBox<String> tagComboBox; // Initial ComboBox for tags
     @FXML
     private Button clearTagsButton; // Button to reset filters
+
+    @FXML
+    private Menu collectionMenu;
+
     private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
     private List<ComboBox<String>> tagFilters = new ArrayList<>();
     private ObservableList<Note> filteredNotes;
@@ -103,6 +110,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private final StringProperty propertyCollectionLabel = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
+
 
     /**
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
@@ -163,6 +171,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         mdHandler.setWebEngine(markDownView.getEngine());
         mdHandler.setEventInterface(this);
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
+
+
+        collectionMenu.getItems().addAll(colServer.getAllCollectionNameIds().stream().map(x -> new MenuItem(x.getFirst())).toList());
 //        searchButton.setOnAction(event -> searchNotes());
         listNotes.setCellFactory(listView -> new ListCell<>() {
             @Override
