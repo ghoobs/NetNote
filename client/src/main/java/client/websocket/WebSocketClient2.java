@@ -20,9 +20,6 @@ public class WebSocketClient2 {
         this.client.setMessageConverter(new StringMessageConverter());
     }
 
-    /**
-     * NOTE: HERE ABOVE LIES THE ISSUE
-     */
 
     public void connect(String url, Consumer<String> handlerMessage) {
         try {
