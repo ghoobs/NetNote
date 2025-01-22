@@ -1,5 +1,6 @@
 package client.markdown;
 
+import commons.Note;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -30,6 +31,16 @@ public class MarkdownHandlerTest {
             @Override
             public boolean doesNoteExistWithinSameCollection(String note) {
                 return false;
+            }
+
+            @Override
+            public Note getSelectedNote() {
+                return null;
+            }
+
+            @Override
+            public String getServerUrl() {
+                return "";
             }
         }));
     }
@@ -66,7 +77,7 @@ public class MarkdownHandlerTest {
     }
     @Test
     void testRegexReplaceNoteReferenceInvalidString() {
-        String srcHtml = "<p>[[!-My Invalid/Note></p>";
+        String srcHtml = "<p>[[!-My Invalid\nNote>]]</p>";
         assertEquals(
                 MarkdownHandler.regexReplaceAllNoteRefs(srcHtml, _->false),
                 srcHtml
@@ -87,6 +98,22 @@ public class MarkdownHandlerTest {
         String expectedHtml = "<p><button tagtype=\"Myyy\"># Myyy</button> Tag</p>";
         assertEquals(
                 MarkdownHandler.regexReplaceAllTags(srcHtml),
+                expectedHtml
+        );
+    }
+
+    @Test
+    void testRegexReplaceEmbeddedFile() {
+        String serverUrl = "https://imaginary-server.com";
+        long noteId = 1;
+        String resourceName = "my complex-image_name! [1].png";
+        String altName = "test/thing";
+        String srcHtml = "<p>!["+altName+"]("+resourceName+")</p>";
+        String expectedHtml = "<p><img alt=\""+altName+"\" src=\""+serverUrl+"/api/" +
+                noteId+ "/files/"+resourceName+"/data\"></p>";
+        String result = MarkdownHandler.regexReplaceAllEmbeds(srcHtml, serverUrl, noteId);
+        assertEquals(
+                result ,
                 expectedHtml
         );
     }
