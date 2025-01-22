@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Entity
 public class Tag {
-    public static final String REGEX_NAMING_FORMAT = "A-Za-z0-9\\_\\.\\-";
+    public static final String REGEX_NAMING_FORMAT = "[A-Za-z0-9\\_\\.\\-]+";
     public static final String REGEX_MD_TAG_REFERENCE = getMarkdownRegex(REGEX_NAMING_FORMAT);
 
     /**
@@ -16,7 +16,7 @@ public class Tag {
      * @return Regular expression
      */
     public static String getMarkdownRegex(String matcher) {
-        return "#(["+ matcher+"]+)";
+        return "#("+ matcher+")";
     }
 
     @Id

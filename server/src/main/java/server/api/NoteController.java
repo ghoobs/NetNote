@@ -18,6 +18,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 import server.websocket.WebSocketMessaging;
 import server.database.NoteRepository;
 
@@ -205,7 +208,8 @@ public class NoteController {
         boolean titleChanged = !existingNote.title.equals(updatedNote.title);
         if (titleChanged) {
             renameAllNoteReferences(existingNote.title, updatedNote.title,
-                    ((CollectionNote)existingNote).collection);
+                    null /* TODO: add note collection here in the future*/);
+            messaging.sendEvent("refresh"); // update client
         }
         updatedNote.copyTo(existingNote);
 
@@ -223,7 +227,8 @@ public class NoteController {
      */
     private List<Note> getNotesFromCollection(Collection collection) {
         if (collection == null) {
-            throw new IllegalArgumentException("Collection must not be null!");
+            //throw new IllegalArgumentException("Collection must not be null!");
+            return notes.findAll();
         }
         return notes.findAll()
                 .stream()
@@ -242,10 +247,11 @@ public class NoteController {
     private void renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
         List<Note> allNotes = getNotesFromCollection(collection);
         allNotes.forEach(note ->
-            note.text = note.text.replaceAll(
-                Note.getMarkdownRegex(oldTitle),
-        "[[" + newTitle + "]]"
-        ));
+            note.text = note.text.replace(
+                "[[" + oldTitle + "]]",
+                "[[" + newTitle + "]]"
+            )
+        );
     }
 
 }
