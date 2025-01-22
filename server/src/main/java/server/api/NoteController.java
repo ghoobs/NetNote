@@ -71,6 +71,11 @@ public class NoteController {
             return ResponseEntity.notFound().build();
         }
         Note toDelete = notes.findById(id).get();
+
+        // destroy orphans
+        toDelete.getEmbeddedFiles().clear();
+        notes.save(toDelete); // destroy orphans by clearing list and saving
+
         notes.deleteById(id);
         DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
         eventPublisher.publishEvent(deleteEvent);

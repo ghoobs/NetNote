@@ -917,19 +917,42 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void createNoteTextInputContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem menuItemAddFile = new MenuItem("Upload file");
+        Menu menuItemEmbedFile = new Menu("Embed file");
         MenuItem menuItemAddNoteReference = new MenuItem("Reference Note");
         MenuItem menuItemAddTag = new MenuItem("Add tag");
 
-        contextMenu.getItems().add(menuItemAddFile);
+        MenuItem menuSubUploadFile = new MenuItem("Upload File");
+        Menu menuSubSelectExistingFile = new Menu("Existing File");
+
+        menuItemEmbedFile.getItems().add(menuSubUploadFile);
+        menuItemEmbedFile.getItems().add(menuSubSelectExistingFile);
+
+        contextMenu.getItems().add(menuItemEmbedFile);
         contextMenu.getItems().add(menuItemAddNoteReference);
         contextMenu.getItems().add(menuItemAddTag);
 
-        menuItemAddFile.setOnAction(this::onNoteTextInputCtxMenuUploadFile);
+
+        menuSubUploadFile.setOnAction(this::onNoteTextInputCtxMenuUploadFile);
         menuItemAddNoteReference.setOnAction(this::onNoteTextInputCtxMenuAddNoteRef);
         menuItemAddTag.setOnAction(this::onNoteTextInputCtxMenuAddNoteTag);
 
         noteWriting.setContextMenu(contextMenu);
+        contextMenu.setOnShown((_) -> {
+            menuSubSelectExistingFile.getItems().clear();
+            getSelectedNote()
+                    .getEmbeddedFiles()
+                    .forEach((file) -> {
+                        MenuItem item = new MenuItem(file.getFilename());
+                        item.setOnAction((_) -> {
+                            embedFileAtCaret(file.getFilename());
+                        });
+                        menuSubSelectExistingFile.getItems().add(item);
+                    }
+            );
+            menuSubSelectExistingFile.setDisable(
+                menuSubSelectExistingFile.getItems().isEmpty()
+            );
+        });
     }
 
     /**
@@ -957,31 +980,53 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         if (file == null || !file.exists()) {
             return; // user cancelled the operation
         }
-
+        String fileName = file.getName();
+        if (getSelectedNote()
+                .getEmbeddedFiles()
+                .stream()
+                .map(EmbeddedFile::getFilename)
+                .anyMatch(name -> name.equals(fileName))
+        ) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText("Embedded file \"" + fileName + "\" already exists!");
+            alert.showAndWait();
+            return;
+        }
         byte[] contents;
         try {
             contents = Files.toByteArray(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText("Failed to read file!");
+            alert.showAndWait();
             return;
         }
 
         Note currentNote = listNotes.getSelectionModel().getSelectedItem();
-        String fileName = file.getName();
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
         EmbeddedFile embed = new EmbeddedFile(
             fileName,
             extension,
             contents
         );
-        Platform.runLater(()->{
-            server.addFile(currentNote.id, embed);
-        });
+        currentNote.addEmbeddedFile(
+            server.addFile(currentNote.id, embed)
+        );
+        embedFileAtCaret(fileName);
+    }
 
+    /**
+     * Adds an ![alt](url) embed at the current caret position
+     * @param fileName Embed file name
+     */
+    private void embedFileAtCaret(String fileName) {
         Platform.runLater(()->{
             int caretPosition = noteWriting.getCaretPosition();
             String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf("."));
             noteWriting.insertText(caretPosition, "!["+fileNameNoExt+"]("+fileName+")");
+            updateMarkdown();
         });
     }
 
