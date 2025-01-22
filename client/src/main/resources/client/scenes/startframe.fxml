@@ -44,7 +44,7 @@
                 </AnchorPane>
             </items>
         </SplitPane>
-        <AnchorPane layoutX="0.0" layoutY="371.0" prefHeight="31.0" prefWidth="600.0" AnchorPane.bottomAnchor="-2.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="371.0">
+        <AnchorPane layoutX="0.0" layoutY="371.0" prefHeight="31.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <children>
                 <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="1.0" prefHeight="26.0" prefWidth="600.0" spacing="10.0" AnchorPane.leftAnchor="10.0">
                     <children>
@@ -57,6 +57,9 @@
                                     </image>
                                 </ImageView>
                             </graphic>
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
                         </Button>
 
                         <!-- Add Button -->
@@ -68,6 +71,9 @@
                                     </image>
                                 </ImageView>
                             </graphic>
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
                         </Button>
 
                         <!-- Refresh Button -->
@@ -79,12 +85,20 @@
                                     </image>
                                 </ImageView>
                             </graphic>
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
                         </Button>
 
-                        <Button fx:id="clearTagsButton" text="Clear Filters" />
-                        <HBox fx:id="tagField" spacing="10.0">
-                            <ComboBox fx:id="tagComboBox" promptText="Select a tag" />
-                        </HBox>
+                        <Button fx:id="clearTagsButton" text="Clear Filters">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin></Button>
+                         <ComboBox fx:id="tagComboBox" prefHeight="21.0" prefWidth="110.0" promptText="Select a tag">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </ComboBox>
                     </children>
                 </HBox>
             </children>

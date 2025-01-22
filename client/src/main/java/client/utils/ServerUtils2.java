@@ -93,6 +93,14 @@ public class ServerUtils2 {
                 .delete();
     }
 
+    /**
+     * Adds a new embedded file to a specific note within a collection.
+     *
+     * @param collectionId the ID of the collection
+     * @param noteTitle    the title of the note
+     * @param embeddedFile the embedded file to add
+     * @return the added EmbeddedFile returned from the server
+     */
     public EmbeddedFile addFile(long collectionId, String noteTitle, EmbeddedFile embeddedFile) {
         return ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/files/upload")
@@ -100,6 +108,14 @@ public class ServerUtils2 {
                 .post(Entity.entity(embeddedFile, APPLICATION_JSON), EmbeddedFile.class);
     }
 
+    /**
+     * Retrieves the binary data of a specific embedded file within a note.
+     *
+     * @param collectionId the ID of the collection
+     * @param noteTitle    the title of the note
+     * @param fileName     the name of the file to retrieve
+     * @return a byte array containing the file's binary data
+     */
     public byte[] getData(long collectionId, String noteTitle, String fileName) {
         return ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName)
@@ -107,6 +123,14 @@ public class ServerUtils2 {
                 .get(byte[].class);
     }
 
+    /**
+     * Deletes a specific embedded file from a note within a collection.
+     *
+     * @param collectionId the ID of the collection
+     * @param noteTitle    the title of the note
+     * @param fileName     the name of the file to delete
+     * @return the updated Note returned from the server after the file is deleted
+     */
     public Note deleteFile(long collectionId, String noteTitle, String fileName) {
         return ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName + "/delete")
@@ -114,6 +138,15 @@ public class ServerUtils2 {
                 .delete(Note.class);
     }
 
+    /**
+     * Renames a specific embedded file within a note.
+     *
+     * @param collectionId the ID of the collection
+     * @param noteTitle    the title of the note
+     * @param fileName     the current name of the file
+     * @param newFileName  the new name for the file
+     * @return the updated EmbeddedFile returned from the server after renaming
+     */
     public EmbeddedFile renameFile(long collectionId, String noteTitle, String fileName, String newFileName) {
         return ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName + "/" + newFileName + "/rename")
