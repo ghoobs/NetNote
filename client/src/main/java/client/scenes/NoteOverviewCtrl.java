@@ -1,16 +1,13 @@
 package client.scenes;
 
-import client.markdown.IMarkdownEvents;
-import client.markdown.MarkdownHandler;
+import client.markdown.*;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
 import com.google.inject.Inject;
 import commons.Collection;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
-import javafx.animation.SequentialTransition;
+import javafx.animation.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -18,31 +15,16 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.*;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
-import javafx.util.Duration;
-
 import java.awt.Desktop;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -133,6 +115,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        WebSocketClient2 webSocketClient2 = new WebSocketClient2();
         languageMenu.textProperty().bind(currentLanguage);
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
