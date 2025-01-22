@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.animation.FadeTransition;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.checkerframework.checker.units.qual.C;
 
@@ -53,6 +54,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private CollectionServerUtils colServer = new CollectionServerUtils() ;
 
     private Collection currentCollection;
+
+    @FXML
+    AnchorPane root;
+
     /**
      * The Note writing.
      */
@@ -177,6 +182,16 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         listNotes.setOnMouseClicked(this::onNoteClicked);
         createNoteTextInputContextMenu();
 
+        //when the root node is deleted from the scene, the destructor is called
+        Platform.runLater(() -> {
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setOnCloseRequest(event -> {
+
+                destructor();
+
+            });
+        });
+
         refresh();
         updateMarkdown();
     }
@@ -184,6 +199,12 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void refreshCollectionList() {
         collectionMenu.getItems().addAll(colServer.getAllCollectionNameIds().stream().map(x -> new MenuItem(x.getFirst())).toList());
 //        searchButton.setOnAction(event -> searchNotes());
+    }
+
+
+    private void destructor(){
+
+        mdHandler.disposeAsyncWorker();
     }
 
     private void setupWebSocketClient() {

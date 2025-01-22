@@ -162,11 +162,17 @@ public class MarkdownHandler {
         synchronized(asyncRendererLock) {
             asyncRendererLock.notify();
         }
+        //signals to thread to stop running
+        workerActive=false;
         try {
-            asyncMarkdownWorker.join();
+            //wait for it for 100 milliseconds to stop
+            asyncMarkdownWorker.join(100);
+            //if it doesnt kill it
+            asyncMarkdownWorker.interrupt();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            System.out.println("Markdown worker thread interrupted.");
         }
+
     }
 
     /**
