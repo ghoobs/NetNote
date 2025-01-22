@@ -8,6 +8,7 @@ import commons.Collection;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -115,7 +116,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        WebSocketClient2 webSocketClient2 = new WebSocketClient2();
         languageMenu.textProperty().bind(currentLanguage);
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
@@ -152,6 +152,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
+//        setupWebSocketClient();
         searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilters(newValue);
             highlightSelectedNote(newValue);
@@ -159,6 +160,23 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         listNotes.setOnMouseClicked(this::onNoteClicked);
         refresh();
         updateMarkdown();
+    }
+    private void setupWebSocketClient() {
+        WebSocketClient2 webSocketClient2 = new WebSocketClient2();
+
+        new Thread(() -> {
+            try {
+                webSocketClient2.connect("ws://your-websocket-url", this::handleWebSocketMessage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void handleWebSocketMessage(String message) {
+        Platform.runLater(() -> {
+            refresh(); // triggering refresh for automated change synchronization
+        });
     }
     /**
      * Calls the addingnote function
