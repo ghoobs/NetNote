@@ -57,3 +57,46 @@
 - **Feedback Round:** What went well and what could have been better *(2 min)*
 - **Question Round:** Does anyone have anything to add before the meeting closes? *(2 min)*
 - **Closure:** Final remarks by the Chair and meeting adjournment. *(1 min)*
+
+
+## Notes:
+#### Meeting started at 16:45
+- **Recent progress/problems**
+  - Web Sockets - help needed with figuring out how to implement them, however even if they don't fully work they should still be kept for a possibly higher Technology grade
+  - Embedded files - almost done, renaming files left
+  - Tags - completed, but there is a small bug
+  - Collections - should be done by Friday, 
+  - Translations - add one more language for an excellent grade (extra feature) + translate everything(scene title, popups, confirmations (Alerts))
+
+
+#### 2. TA Announcements:
+- Buddycheck deadline is Friday in week 10
+- Need to make a README
+  - shortcuts
+  - adding files by right-clicking
+  - keyboard navigation
+  - all important additions (extra features)
+- Program must compile for everyone, pull everything from scratch (delete setup or test with another) to find possible bugs.
+
+
+#### 3. Team announcements:
+- Gitlab will be very slow on Sunday, especially during the evening so we agreed on an internal deadline - Saturday night
+- Everything from the Accessibility document is implemented (not counting the undo, which we decided not to do)
+- Meeting on Friday during the WDT labs to go over all rubrics again
+
+
+#### 5. Bugs:
+- Application does not fully close because of Markdown.
+- When a tag gets clicked the "Select tags" text disappears (possibly not a big problem)
+- When filtering, you can add a note with a title that already exists, but got filtered out - there should be a list of notes that doesn't get changed and a separate one for filtered
+- The language of the EditCollections Scene gets initialized once at the beginning, but doesn't get updated when the language gets changed
+
+
+#### 6. Division of tasks:
+- Everyone will continue with their tasks from the previous week
+- Additionally:
+  - Femke - adding the .css file, while keeping in mind a high contrast
+  - Kosmas and/or Tristan: from the Technology rubric: Services are not used, meaning that Controllers directly interact with the repositories.
+  - Tristan - make the API "more RESTful"
+
+#### Meeting closed at 17:32. 
