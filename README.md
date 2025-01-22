@@ -21,3 +21,16 @@ or ...
 to run the client. Please note that the server needs to be running, before you can start the client.
 
 Once this is working, you can try importing the project into your favorite IDE.
+
+### Useful Shortcuts:
+- CTRL + S - to save a Note
+- CTRL + N - to create a new Note
+- CTRL + D - to delete a Note
+- CTRL + R - to refresh the client view
+
+### Keyboard Navigation:
+- Pressing the escape key sets the input focus to the search bar.
+- After you typed your keyword(s) in the search bar, pressing ENTER will set the input focus to the list of notes.
+- You can then navigate through the list of notes using arrow keys (up and down)
+- To select a Note from the list, press SHIFT
+
