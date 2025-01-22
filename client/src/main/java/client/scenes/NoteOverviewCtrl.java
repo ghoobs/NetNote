@@ -689,6 +689,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             case "es":
                 currentLanguage.set("🇪🇸");
                 break;
+            case "pl":
+                currentLanguage.set("\uD83C\uDDF5\uD83C\uDDF1");
+                break;
             default:
                 currentLanguage.set("🇬🇧");
                 break;
@@ -718,6 +721,14 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     public void switchToSpanish() {
         switchLanguage(new Locale("es"));
         currentLanguage.set("🇪🇸");
+    }
+
+    /**
+     * Switches the application's language to Polish.
+     */
+    public void switchToPolish() {
+        switchLanguage(new Locale("pl"));
+        currentLanguage.set("\uD83C\uDDF5\uD83C\uDDF1");
     }
 
     /**

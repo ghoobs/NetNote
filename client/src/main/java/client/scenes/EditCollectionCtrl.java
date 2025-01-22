@@ -55,6 +55,8 @@ public class EditCollectionCtrl implements Initializable {
     private final StringProperty propertyServerNameLabel = new SimpleStringProperty();
     private final StringProperty propertyCollectionNameLabel = new SimpleStringProperty();
     private final StringProperty propertyStatusLabel = new SimpleStringProperty();
+    private final StringProperty propertySaveButton = new SimpleStringProperty();
+    private final StringProperty propertyDefaultButton = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
 
@@ -92,6 +94,8 @@ public class EditCollectionCtrl implements Initializable {
         serverName.textProperty().bind(propertyServerNameLabel);
         collectionName.textProperty().bind(propertyCollectionNameLabel);
         status.textProperty().bind(propertyStatusLabel);
+        saveButton.textProperty().bind(propertySaveButton);
+        makeDefaultButton.textProperty().bind(propertyDefaultButton);
 
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
@@ -211,6 +215,8 @@ public class EditCollectionCtrl implements Initializable {
         propertyServerNameLabel.set(rb.getString("label.serverName"));
         propertyCollectionNameLabel.set(rb.getString("label.collectionName"));
         propertyStatusLabel.set(rb.getString("label.status"));
+        propertySaveButton.set(rb.getString("button.save"));
+        propertyDefaultButton.set(rb.getString("button.default"));
     }
 
     /**
