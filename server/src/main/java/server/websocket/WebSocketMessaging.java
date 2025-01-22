@@ -2,9 +2,9 @@ package server.websocket;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class WebSocketMessaging {
 
     private final SimpMessagingTemplate messagingTemplate;

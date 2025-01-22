@@ -28,7 +28,7 @@ public class WebSocketClient2 {
                 @Override
                 public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                     System.out.println("WebSocket server connected successfully");
-                    session.subscribe("/api/notes", new StompSessionHandlerAdapter() {
+                    session.subscribe("/topic/notes", new StompSessionHandlerAdapter() {
 
                         @Override
                         public Type getPayloadType(StompHeaders stompHeaders) {

@@ -152,7 +152,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
-        setupWebSocketClient();
+        //setupWebSocketClient();
         searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilters(newValue);
             highlightSelectedNote(newValue);
