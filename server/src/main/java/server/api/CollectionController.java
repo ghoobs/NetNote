@@ -1,15 +1,13 @@
 package server.api;
 
+import commons.Collection;
 import commons.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.database.CollectionRepository;
 import server.database.NoteRepository;
-import commons.Collection;
-import commons.Note;
+
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 /**
@@ -104,21 +102,27 @@ public class CollectionController {
      * @param id                the ID of the collection to be updated
      * @param updatedCollection the {@link Collection} object containing the updated title
      * @return a ResponseEntity containing the updated object if successful,
-     *         or a ResponseEntity with a bad request status if the collection does not exist
+     * or a ResponseEntity with a bad request status if the collection does not exist
      */
     @PutMapping("/{id}")
     public ResponseEntity<Collection> updateCollection(
             @PathVariable("id") long id,
             @RequestBody Collection updatedCollection
     ) {
+
+
         if (!collections.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
         Collection existingCollection = collections.getReferenceById(id);
-        existingCollection.name=updatedCollection.name;
+
+        existingCollection.name = updatedCollection.name;
+
         if (updatedCollection.notes != null) {
-            existingCollection.notes=updatedCollection.notes;
+            existingCollection.updateNotes(updatedCollection.notes);
         }
-        return ResponseEntity.ok(existingCollection);
+
+
+        return ResponseEntity.ok(collections.save(existingCollection));
     }
 }
