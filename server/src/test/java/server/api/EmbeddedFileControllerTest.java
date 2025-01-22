@@ -43,15 +43,14 @@ class EmbeddedFileControllerTest {
     void addFile() {
         EmbeddedFile testFile2 = new EmbeddedFile("TestFile2", "TestFiletype2",
                 "TestURL2", "data2".getBytes(), null);
-        EmbeddedFile result = embeddedFileController.addFile(testCollection.id,
-                testNote.getTitle(), testFile2).getBody();
+        EmbeddedFile result = embeddedFileController.addFile(testNote.id, testFile2).getBody();
         assertNotNull(result);
         assertEquals(testFile2, result);
     }
 
     @Test
     void getData() {
-        byte[] data = embeddedFileController.getData(testCollection.id, testNote.getTitle(),
+        byte[] data = embeddedFileController.getData(testNote.id,
                 testEmbeddedFile.getFilename()).getBody();
         assertNotNull(data);
         assertArrayEquals(testEmbeddedFile.getData(), data);
@@ -68,8 +67,8 @@ class EmbeddedFileControllerTest {
     @Test
     void renameFile() {
         String newFilename = "RenamedTestFile";
-        EmbeddedFile renamedFile = embeddedFileController.renameFile(testCollection.id,
-                testNote.getTitle(), testEmbeddedFile.getFilename(), newFilename).getBody();
+        EmbeddedFile renamedFile = embeddedFileController.renameFile(testNote.id,
+                testEmbeddedFile.getFilename(), newFilename).getBody();
         assertNotNull(renamedFile);
         assertEquals(newFilename, renamedFile.getFilename());
     }

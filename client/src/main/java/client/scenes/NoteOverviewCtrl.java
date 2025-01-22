@@ -3,8 +3,10 @@ package client.scenes;
 import client.markdown.*;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import commons.Collection;
+import commons.EmbeddedFile;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
 import javafx.animation.*;
@@ -13,6 +15,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -20,6 +23,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import java.awt.Desktop;
 import java.io.*;
@@ -31,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.animation.FadeTransition;
 import javafx.util.Duration;
+import org.checkerframework.checker.units.qual.C;
 
 /**
  * The type Note overview ctrl.
@@ -158,6 +163,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             highlightSelectedNote(newValue);
         });
         listNotes.setOnMouseClicked(this::onNoteClicked);
+        createNoteTextInputContextMenu();
+
         refresh();
         updateMarkdown();
     }
@@ -896,6 +903,101 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         return tags;
     }
 
+    /**
+     * Creates a right-click context popup for the note text input.
+     */
+    private void createNoteTextInputContextMenu() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem menuItemAddFile = new MenuItem("Upload file");
+        MenuItem menuItemAddNoteReference = new MenuItem("Reference Note");
+        MenuItem menuItemAddTag = new MenuItem("Add tag");
+
+        contextMenu.getItems().add(menuItemAddFile);
+        contextMenu.getItems().add(menuItemAddNoteReference);
+        contextMenu.getItems().add(menuItemAddTag);
+
+        menuItemAddFile.setOnAction(this::onNoteTextInputCtxMenuUploadFile);
+        menuItemAddNoteReference.setOnAction(this::onNoteTextInputCtxMenuAddNoteRef);
+        menuItemAddTag.setOnAction(this::onNoteTextInputCtxMenuAddNoteTag);
+
+        noteWriting.setContextMenu(contextMenu);
+    }
+
+    /**
+     * Shows a file browser dialogue, and requests the user to select a file.
+     * @return File that the user selected. May be null if the user cancelled the operation!
+     */
+    private File askUserForEmbeddedFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Image To Upload");
+
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image Files",
+                        "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+        );
+        return fileChooser.showOpenDialog(null);
+    }
+
+    /**
+     * Called when ContextMenu->Upload file is clicked.
+     * This will open a file browser dialogue, and will embed it into the current note.
+     * @param event event
+     */
+    private void onNoteTextInputCtxMenuUploadFile(ActionEvent event) {
+        File file = askUserForEmbeddedFile();
+        if (file == null || !file.exists()) {
+            return; // user cancelled the operation
+        }
+
+        byte[] contents;
+        try {
+            contents = Files.toByteArray(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Note currentNote = listNotes.getSelectionModel().getSelectedItem();
+        String fileName = file.getName();
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        EmbeddedFile embed = new EmbeddedFile(
+            fileName,
+            extension,
+            contents
+        );
+        Platform.runLater(()->{
+            server.addFile(currentNote.id, embed);
+        });
+
+        Platform.runLater(()->{
+            int caretPosition = noteWriting.getCaretPosition();
+            String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf("."));
+            noteWriting.insertText(caretPosition, "!["+fileNameNoExt+"]("+fileName+")");
+        });
+    }
+
+    /**
+     * Called when ContextMenu->Reference Note is clicked. Surrounds the caret with [[...]]
+     * @param event event
+     */
+    private void onNoteTextInputCtxMenuAddNoteRef(ActionEvent event) {
+        Platform.runLater(()->{
+            int caretPosition = noteWriting.getCaretPosition();
+            noteWriting.insertText(caretPosition, "]]");
+            noteWriting.insertText(caretPosition, "[[");
+        });
+    }
+
+    /**
+     * Called when ContextMenu->Add tag is clicked. Prepends the caret with #...
+     * @param event event
+     */
+    private void onNoteTextInputCtxMenuAddNoteTag(ActionEvent event) {
+        int caretPosition = noteWriting.getCaretPosition();
+        noteWriting.insertText(caretPosition, "#");
+    }
+
     @Override
     public void onTagMdButtonClick(String tag) {
         filterByTag(tag);
@@ -939,5 +1041,15 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                     return tNote.getTitle().equals(note);
                 }
             );
+    }
+
+    @Override
+    public Note getSelectedNote() {
+        return listNotes.getSelectionModel().getSelectedItem();
+    }
+
+    @Override
+    public String getServerUrl() {
+        return "http://localhost:8080";
     }
 }

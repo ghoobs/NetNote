@@ -3,7 +3,6 @@ package client.utils;
 
 import commons.Collection;
 import commons.CollectionNote;
-import commons.Note;
 import commons.Pair;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -14,18 +13,35 @@ import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
+/**
+ * The type Collection server utils.
+ */
 public class CollectionServerUtils {
     private final String server;
 
 
+    /**
+     * Instantiates a new Collection server utils.
+     *
+     * @param server the server link
+     */
     public CollectionServerUtils(String server) {
         this.server = server;
     }
 
+    /**
+     * Instantiates a new Collection server utils. With default "<a href="http://localhost:8080/">link</a>"
+     */
     public CollectionServerUtils() {
         this.server = "http://localhost:8080/";
     }
 
+    /**
+     * Get from config all corresponding collection server utils
+     *
+     * @param config the config
+     * @return the server utils
+     */
     public static CollectionServerUtils[] getFromConfig(Config config) {
         return config
                 .getAllServers()
@@ -34,6 +50,11 @@ public class CollectionServerUtils {
                 .toArray(CollectionServerUtils[]::new);
     }
 
+    /**
+     * Just some tests that need the server to be running
+     *
+     * @param args args
+     */
     public static void main(String[] args) {
 
         CollectionServerUtils collectionServerUtils = new CollectionServerUtils("http://localhost:8080/");
@@ -46,7 +67,7 @@ public class CollectionServerUtils {
             System.out.println(collectionServerUtils.getCollection(lr.getSecond()));
         }
 
-        var oneDeleting = ids.getLast();
+       var oneDeleting = ids.getLast();
         System.out.println(oneDeleting);
         collectionServerUtils.deleteCollection(oneDeleting.getSecond());
         ids = collectionServerUtils.getAllCollectionNameIds();
@@ -54,11 +75,12 @@ public class CollectionServerUtils {
     }
 
 
-
-    /*
+    /**
+     * Test 1.
+     */
     public static void test1() {
 
-    CollectionServerUtils collectionServerUtils = new CollectionServerUtils("http://localhost:8080/");
+        CollectionServerUtils collectionServerUtils = new CollectionServerUtils("http://localhost:8080/");
         collectionServerUtils.addTestCollection();
 
         var colId = collectionServerUtils.getAllCollectionNameIds().getFirst().getSecond();
@@ -70,18 +92,41 @@ public class CollectionServerUtils {
         collectionServerUtils.updateCollection(collection);
 
     }
-    
 
+
+    /**
+     * Update collection to the server.
+     *
+     * @param collection the collection
+     * @return the collection from the server
+     */
     public Collection updateCollection(Collection collection) {
 
         return ClientBuilder.newClient(new ClientConfig())
                 .target(server)
-                .path("api/collections/"+collection.id)
+                .path("api/collections/" + collection.id)
                 .request(APPLICATION_JSON)
                 .put(Entity.entity(collection, APPLICATION_JSON), Collection.class);
 
-    } */
+    }
 
+    /**
+     * Add note to collection and save it to the server
+     *
+     * @param collection     the collection
+     * @param collectionNote the collection note
+     * @return the collection returned from the server
+     */
+    public Collection addNoteToCollection(Collection collection,CollectionNote collectionNote) {
+        collection.addNote(collectionNote);
+        return updateCollection(collection);
+    }
+
+    /**
+     * Delete collection from the server.
+     *
+     * @param collectionId the collection id
+     */
     public void deleteCollection(long collectionId) {
         ClientBuilder.newClient(new ClientConfig())
                 .target(server)
@@ -91,6 +136,12 @@ public class CollectionServerUtils {
     }
 
 
+    /**
+     * Gets collection from the server from id.
+     *
+     * @param collectionId the collection id
+     * @return the collection
+     */
     public Collection getCollection(long collectionId) {
         return ClientBuilder.newClient().target(server)
                 .path("api/collections/id/" + collectionId)
@@ -98,6 +149,11 @@ public class CollectionServerUtils {
                 .get(Collection.class);
     }
 
+    /**
+     * Gets all collection name ids.
+     *
+     * @return the collection name ids
+     */
     public List<Pair<String, Long>> getAllCollectionNameIds() {
         return ClientBuilder.newClient().target(server)
                 .path("api/collections/list")
@@ -108,6 +164,12 @@ public class CollectionServerUtils {
 
     }
 
+    /**
+     * Add a collection
+     *
+     * @param collection the collection
+     * @return the collection added
+     */
     public Collection addCollection(Collection collection) {
         return ClientBuilder.newClient(new ClientConfig())
                 .target(server)
@@ -116,6 +178,9 @@ public class CollectionServerUtils {
                 .post(Entity.entity(collection, APPLICATION_JSON), Collection.class);
     }
 
+    /**
+     * Add test collection.
+     */
     public void addTestCollection() {
         CollectionNote note = new CollectionNote("Hello", "World");
 

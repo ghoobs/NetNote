@@ -14,7 +14,8 @@ import java.util.List;
 // Entity needed for Spring to be able to create a Database
 @Entity
 public class Note {
-    public static final String REGEX_NAMING_FORMAT = "A-Za-z0-9\\s_\\.\\!\\?\\&\\=\\+\\-\\)\\(";
+    //public static final String REGEX_NAMING_FORMAT = "A-Za-z0-9\\s_\\.\\!\\?\\&\\=\\+\\-\\)\\(";
+    public static final String REGEX_NAMING_FORMAT = "^\\n\\r\\t";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -171,19 +172,43 @@ public class Note {
         this.title = title;
     }
 
+    /**
+     * Retrieves the list of embedded files associated with this note.
+     *
+     * @return a list of {@link EmbeddedFile} objects associated with the note
+     */
     public List<EmbeddedFile> getEmbeddedFiles() {
         return embeddedFiles;
     }
 
+    /**
+     * Sets the list of embedded files for this note.
+     *
+     * @param embeddedFiles the new list of {@link EmbeddedFile} objects to associate with the note
+     */
     public void setEmbeddedFiles(ArrayList<EmbeddedFile> embeddedFiles) {
         this.embeddedFiles = embeddedFiles;
     }
 
+    /**
+     * Adds an embedded file to the list of files associated with this note.
+     * The file's note reference is updated to point to this note.
+     *
+     * @param file the {@link EmbeddedFile} to add
+     * @return true if the file was successfully added, false otherwise
+     */
     public boolean addEmbeddedFile(EmbeddedFile file) {
         file.setNote(this);
         return embeddedFiles.add(file);
     }
 
+    /**
+     * Removes an embedded file from the list of files associated with this note.
+     * The file's note reference is cleared.
+     *
+     * @param file the {@link EmbeddedFile} to remove
+     * @return true if the file was successfully removed, false otherwise
+     */
     public boolean removeEmbeddedFile(EmbeddedFile file) {
         file.setNote(null);
         return embeddedFiles.remove(file);

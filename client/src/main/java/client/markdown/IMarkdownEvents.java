@@ -1,5 +1,7 @@
 package client.markdown;
 
+import commons.Note;
+
 public interface IMarkdownEvents {
     /**
      * Called when a #Tag is clicked.
@@ -24,4 +26,16 @@ public interface IMarkdownEvents {
      * @return Must return true if the note exists
      */
     boolean doesNoteExistWithinSameCollection(String note);
+
+    /**
+     * Called to get the currently editing note
+     * @return Valid note
+     */
+    Note getSelectedNote();
+
+    /**
+     * Called to get the url of the remote server
+     * @return A valid HTTP url pointing to the server.
+     */
+    String getServerUrl();
 }

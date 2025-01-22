@@ -93,30 +93,30 @@ public class ServerUtils2 {
                 .delete();
     }
 
-    public EmbeddedFile addFile(long collectionId, String noteTitle, EmbeddedFile embeddedFile) {
+    public EmbeddedFile addFile(long noteId, EmbeddedFile embeddedFile) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/files/upload")
+                .target(SERVER).path("api/" + noteId + "/files")
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(embeddedFile, APPLICATION_JSON), EmbeddedFile.class);
     }
 
-    public byte[] getData(long collectionId, String noteTitle, String fileName) {
+    public byte[] getData(long noteId, String fileName) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName)
+                .target(SERVER).path("api/" + noteId + "/files/" + fileName + "/data")
                 .request(APPLICATION_OCTET_STREAM)
                 .get(byte[].class);
     }
 
-    public Note deleteFile(long collectionId, String noteTitle, String fileName) {
+    public Note deleteFile(long noteId, String fileName) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName + "/delete")
+                .target(SERVER).path("api/" + noteId + "/files/" + fileName)
                 .request(APPLICATION_JSON)
                 .delete(Note.class);
     }
 
-    public EmbeddedFile renameFile(long collectionId, String noteTitle, String fileName, String newFileName) {
+    public EmbeddedFile renameFile(long noteId, String noteTitle, String fileName, String newFileName) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + collectionId + "/" + noteTitle + "/" + fileName + "/" + newFileName + "/rename")
+                .target(SERVER).path("api/" + noteId + "/files/" + fileName + "/rename/" + newFileName)
                 .request(APPLICATION_JSON)
                 .put(Entity.entity(newFileName, APPLICATION_JSON), EmbeddedFile.class);
     }
