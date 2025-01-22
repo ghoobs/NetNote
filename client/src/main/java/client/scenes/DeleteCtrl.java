@@ -1,7 +1,6 @@
 package client.scenes;
 
 import com.google.inject.Inject;
-import commons.Note;
 import javafx.scene.input.KeyEvent;
 
 public class DeleteCtrl {

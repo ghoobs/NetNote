@@ -1,7 +1,5 @@
 package server.api;
 
-import java.util.AbstractSet;
-import java.util.ArrayList;
 import java.util.*;
 import java.util.stream.Collectors;
 import commons.Pair;
@@ -12,6 +10,7 @@ import events.UpdateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import commons.Note;
@@ -74,7 +73,7 @@ public class NoteController {
         notes.deleteById(id);
         DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
         eventPublisher.publishEvent(deleteEvent);
-//        messaging.sendEvent(deleteEvent);
+        messaging.sendEvent(id, "/topic/notes");
         return ResponseEntity.ok().build();
     }
 
@@ -181,7 +180,7 @@ public class NoteController {
         Note savedNote = notes.save(noteAdding);
         AddEvent addEvent = new AddEvent(this, savedNote);
         eventPublisher.publishEvent(addEvent);
-//        messaging.sendEvent(addEvent);
+        messaging.sendEvent(savedNote, "/topic/notes");
         return ResponseEntity.ok(savedNote);
     }
 
@@ -204,7 +203,7 @@ public class NoteController {
         notes.save(existingNote);
         UpdateEvent updateEvent = new UpdateEvent(this, existingNote);
         eventPublisher.publishEvent(updateEvent);
-//        messaging.sendEvent(updateEvent);
+        messaging.sendEvent(existingNote, "/topic/notes");
         return ResponseEntity.ok(existingNote);
     }
 

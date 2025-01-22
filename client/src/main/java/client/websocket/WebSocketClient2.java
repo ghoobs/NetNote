@@ -1,61 +1,49 @@
 package client.websocket;
 
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.messaging.simp.stomp.StompHeaders;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
+import org.springframework.messaging.converter.StringMessageConverter;
+import java.lang.reflect.Type;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-public class WebSocketClient2 implements WebSocketHandler {
+public class WebSocketClient2 {
 
-    private final WebSocketClient client;
-    private WebSocketSession session;
-    private Consumer<String> listener;
+    private final WebSocketStompClient client;
+    private StompSession session;
 
     public WebSocketClient2() {
-        client = new StandardWebSocketClient();
+        this.client = new WebSocketStompClient(new StandardWebSocketClient());
+        this.client.setMessageConverter(new StringMessageConverter());
     }
 
-    /**
-     * this connects with the websocket server
-     * @param uri the uri to connect
-     * @throws Exception in case of exception found
-     */
-    public void connect(String uri) throws Exception {
-        session = client.doHandshake(this, uri).get();
-    }
 
-    public void addWebSocketListener(Consumer<String> listener) {
-        this.listener = listener;
-    }
+    public void connect(String url, Consumer<String> handlerMessage) {
+        try {
+            this.session = client.connect(url, new StompSessionHandlerAdapter() {
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        System.out.println("Connected to WebSocket successfully");
-    }
+                @Override
+                public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                    System.out.println("WebSocket server connected successfully");
+                    session.subscribe("/topic/notes", new StompSessionHandlerAdapter() {
 
-    @Override
-    public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        if (listener != null) {
-            listener.accept(message.getPayload().toString());
+                        @Override
+                        public Type getPayloadType(StompHeaders stompHeaders) {
+                            return String.class;
+                        }
+
+                        @Override
+                        public void handleFrame(StompHeaders headers, Object payload) {
+                            handlerMessage.accept(payload.toString());
+                        }
+                    });
+                }
+            }).get();
+        } catch (ExecutionException | InterruptedException e) {
+            System.err.println("Failed to connect to WebSocket server: " + e.getMessage());
         }
-    }
-
-    @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        System.err.println("WebSocket error: " + exception.getMessage());
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        System.out.println("Connection closed successfully");
-    }
-
-    @Override
-    public boolean supportsPartialMessages() {
-        return false;
     }
 }
