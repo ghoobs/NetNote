@@ -152,7 +152,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
-//        setupWebSocketClient();
+        setupWebSocketClient();
         searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilters(newValue);
             highlightSelectedNote(newValue);
@@ -162,11 +162,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         updateMarkdown();
     }
     private void setupWebSocketClient() {
-        WebSocketClient2 webSocketClient2 = new WebSocketClient2();
-
         new Thread(() -> {
             try {
-                webSocketClient2.connect("ws://your-websocket-url", this::handleWebSocketMessage);
+                webSocketClient.connect("ws://your-websocket-url", this::handleWebSocketMessage);
             } catch (Exception e) {
                 e.printStackTrace();
             }
