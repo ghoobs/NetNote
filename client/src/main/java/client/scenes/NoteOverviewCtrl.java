@@ -413,38 +413,41 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         if (keyEvent.getCode() == KeyCode.ESCAPE) {
             searchBar.requestFocus();
         }
-        if (listNotes.isFocused() && keyEvent.getCode() == KeyCode.O) {
+        if (listNotes.isFocused() && keyEvent.getCode() == KeyCode.SHIFT) {
+            keyEvent.consume();
             Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
             if (noteSelected != null) {
-                makeNotEditable(noteWriting);
-                makeNotEditable(titleWriting);
+                makeEditable(noteWriting);
+                makeEditable(titleWriting);
                 noteWriting.setText(noteSelected.getText());
                 titleWriting.setText(noteSelected.getTitle());
+                noteWriting.requestFocus();
             }
+        }
+        if (searchBar.isFocused() && keyEvent.getCode() == KeyCode.ENTER){
+            keyEvent.consume();
+            listNotes.requestFocus();
+            listNotes.getSelectionModel().select(0);
         }
         if (keyEvent.isShortcutDown()) {
             switch (keyEvent.getCode()) {
                 case N:
                     addNote();
-                    keyEvent.consume();
                     break;
                 case S:
                     savingNote();
-                    keyEvent.consume();
                     break;
                 case R:
                     refresh();
-                    keyEvent.consume();
                     break;
                 case E:
                     editedTheNote();
-                    keyEvent.consume();
                     break;
                 case D:
                     deleteNote();
-                    keyEvent.consume();
                     break;
             }
+            keyEvent.consume();
         }
     }
 

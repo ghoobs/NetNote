@@ -12,6 +12,10 @@ import jakarta.persistence.JoinColumn;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Represents an embedded file associated with a note.
+ * The file can include metadata such as filename, file type, URL, and binary data.
+ */
 @Entity
 public class EmbeddedFile {
     // prevent illegal Windows file names + whitespaces excl. spaces
@@ -70,50 +74,112 @@ public class EmbeddedFile {
         return filename;
     }
 
+    /**
+     * Sets the filename of the embedded file.
+     *
+     * @param filename the new filename
+     */
     public void setFilename(String filename) {
         this.filename = filename;
     }
 
+    /**
+     * Gets the file type of the embedded file.
+     *
+     * @return the file type
+     */
     public String getFiletype() {
         return filetype;
     }
 
+    /**
+     * Sets the file type of the embedded file.
+     *
+     * @param filetype the new file type
+     */
     public void setFiletype(String filetype) {
         this.filetype = filetype;
     }
 
+    /**
+     * Gets the URL associated with the embedded file.
+     *
+     * @return the URL
+     */
     public String getUrl() {
         return url;
     }
 
+
+    /**
+     * Sets the URL associated with the embedded file.
+     *
+     * @param url the new URL
+     */
     public void setUrl(String url) {
         this.url = url;
     }
 
+    /**
+     * Gets the unique identifier of the embedded file.
+     *
+     * @return the ID
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * Sets the unique identifier of the embedded file.
+     *
+     * @param id the new ID
+     */
     public void setId(long id) {
         this.id = id;
     }
 
+    /**
+     * Gets the binary data of the embedded file.
+     *
+     * @return the binary data as a byte array
+     */
     public byte[] getData() {
         return data;
     }
 
+    /**
+     * Sets the binary data of the embedded file.
+     *
+     * @param data the new binary data
+     */
     public void setData(byte[] data) {
         this.data = data;
     }
 
+    /**
+     * Gets the note to which this file belongs.
+     *
+     * @return the associated note
+     */
     public Note getNote() {
         return note;
     }
 
+    /**
+     * Sets the note to which this file belongs.
+     *
+     * @param note the new associated note
+     */
     public void setNote(Note note) {
         this.note = note;
     }
 
+    /**
+     * Checks if this EmbeddedFile is equal to another object.
+     *
+     * @param o the object to compare
+     * @return true if the objects are equal, false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -126,12 +192,22 @@ public class EmbeddedFile {
         && Objects.equals(getNote(), that.getNote());
     }
 
+    /**
+     * Computes the hash code for this EmbeddedFile.
+     *
+     * @return the hash code
+     */
     @Override
     public int hashCode() {
         return Objects.hash(getFilename(), getFiletype(), getUrl(), getId(),
         Arrays.hashCode(getData()), getNote());
     }
 
+    /**
+     * Returns a string representation of the EmbeddedFile.
+     *
+     * @return a string containing the filename, file type, URL, ID, and associated note
+     */
     @Override
     public String toString() {
         return "EmbeddedFile{" + "filename='" + filename + '\'' + ", filetype='" + filetype + '\'' +

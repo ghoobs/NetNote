@@ -14,6 +14,10 @@ import server.database.NoteRepository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * REST controller for managing embedded files within notes of a collection.
+ * Provides endpoints to add, retrieve, delete, and rename files associated with specific notes.
+ */
 @RestController
 @RequestMapping("/api")
 public class EmbeddedFileController {
@@ -21,6 +25,12 @@ public class EmbeddedFileController {
     private final NoteRepository noteRepo;
     private final CollectionRepository collectionRepo;
 
+    /**
+     * Constructs an EmbeddedFileController with the specified repositories.
+     *
+     * @param noteRepo       the repository for managing notes
+     * @param collectionRepo the repository for managing collections
+     */
     public EmbeddedFileController(NoteRepository noteRepo,
                                   CollectionRepository collectionRepo) {
         this.noteRepo = noteRepo;
