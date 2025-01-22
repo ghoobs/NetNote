@@ -40,8 +40,9 @@
             <TextField fx:id="serverInput" layoutX="116.0" layoutY="63.0" />
             <TextField fx:id="collectionInput" layoutX="116.0" layoutY="90.0" />
             <Label layoutX="116.0" layoutY="117.0" prefHeight="25.0" prefWidth="150.0" text="OK (hardcoded)" />
-            <Button fx:id="makeDefaultButton" onAction="#makeDefault" layoutX="116.0" layoutY="206.0" mnemonicParsing="false" text="Make Default" />
-            <Button fx:id="saveButton" onAction="#updateCollection" layoutX="221.0" layoutY="206.0" mnemonicParsing="false" text="Save" />
+            <Button fx:id="makeDefaultButton" layoutX="116.0" layoutY="206.0" mnemonicParsing="false" onAction="#makeDefault" text="Make Default" />
+            <Button fx:id="saveButton" layoutX="221.0" layoutY="206.0" mnemonicParsing="false" onAction="#updateCollection" text="Save" />
+            <Button fx:id="createButton" layoutX="278.0" layoutY="206.0" mnemonicParsing="false" onAction="#addCollectionFromInfo" text="Create" />
          </children>
       </AnchorPane>
    </children>

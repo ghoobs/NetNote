@@ -1,5 +1,8 @@
 package client.scenes;
 
+import client.markdown.IMarkdownEvents;
+import client.markdown.MarkdownHandler;
+import client.utils.CollectionServerUtils;
 import client.markdown.*;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
@@ -47,6 +50,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private final MarkdownHandler mdHandler;
     private WebSocketClient2 webSocketClient;
 
+    private CollectionServerUtils colServer = new CollectionServerUtils() ;
+
     private Collection currentCollection;
     /**
      * The Note writing.
@@ -81,6 +86,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private ComboBox<String> tagComboBox; // Initial ComboBox for tags
     @FXML
     private Button clearTagsButton; // Button to reset filters
+
+    @FXML
+    private Menu collectionMenu;
+
     private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
     private List<ComboBox<String>> tagFilters = new ArrayList<>();
     private ObservableList<Note> filteredNotes;
@@ -92,6 +101,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private final StringProperty propertyCollectionLabel = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
+
 
     /**
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
@@ -143,7 +153,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         mdHandler.setWebEngine(markDownView.getEngine());
         mdHandler.setEventInterface(this);
         mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
-//        searchButton.setOnAction(event -> searchNotes());
+
+
+        refreshCollectionList();
         listNotes.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(Note note, boolean empty) {
@@ -168,6 +180,12 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         refresh();
         updateMarkdown();
     }
+
+    private void refreshCollectionList() {
+        collectionMenu.getItems().addAll(colServer.getAllCollectionNameIds().stream().map(x -> new MenuItem(x.getFirst())).toList());
+//        searchButton.setOnAction(event -> searchNotes());
+    }
+
     private void setupWebSocketClient() {
         new Thread(() -> {
             try {
@@ -348,13 +366,16 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     public void refresh() {
         playFadeAnimation();
+
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
+        refreshCollectionList();
         listNotes.setItems(data);
         listNotes.getSelectionModel().select(0);
         onNoteClicked(null);
         showNotification("Notes refreshed successfully!");
     }
+
 
     private void playFadeAnimation() {
         FadeTransition fadeOut = new FadeTransition(Duration.millis(500), listNotes);

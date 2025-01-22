@@ -18,6 +18,11 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
  */
 public class CollectionServerUtils {
     private final String server;
+    
+
+    public String getServer(){
+       return this.server;
+   }
 
 
     /**
