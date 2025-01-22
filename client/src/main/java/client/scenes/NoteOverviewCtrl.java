@@ -1,7 +1,6 @@
 package client.scenes;
 
-import client.markdown.IMarkdownEvents;
-import client.markdown.MarkdownHandler;
+import client.markdown.*;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
 import com.google.common.io.Files;
@@ -10,9 +9,7 @@ import commons.Collection;
 import commons.EmbeddedFile;
 import commons.Note;
 import jakarta.ws.rs.WebApplicationException;
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
-import javafx.animation.SequentialTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -22,29 +19,17 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.*;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
-import javafx.util.Duration;
-
 import java.awt.Desktop;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,15 +121,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        webSocketClient = new WebSocketClient2();
-//        webSocketClient.addWebSocketListener(message -> {
-//            refresh();
-//        });
-//        try {
-//            webSocketClient.connect("ws://localhost:8080/ws/notes");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         languageMenu.textProperty().bind(currentLanguage);
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
@@ -181,6 +157,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
+        //setupWebSocketClient();
         searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilters(newValue);
             highlightSelectedNote(newValue);
@@ -190,6 +167,21 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
         refresh();
         updateMarkdown();
+    }
+    private void setupWebSocketClient() {
+        new Thread(() -> {
+            try {
+                webSocketClient.connect("ws://your-websocket-url", this::handleWebSocketMessage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void handleWebSocketMessage(String message) {
+        Platform.runLater(() -> {
+            refresh(); // triggering refresh for automated change synchronization
+        });
     }
     /**
      * Calls the addingnote function
