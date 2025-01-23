@@ -1,9 +1,14 @@
 package server.api;
 
-import java.util.AbstractSet;
 import java.util.ArrayList;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
+
+import commons.Collection;
+import commons.Note;
+import commons.CollectionNote;
 import commons.Pair;
 import commons.Tag;
 import events.AddEvent;
@@ -12,9 +17,13 @@ import events.UpdateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
-import commons.Note;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.stream.Stream;
+
 import server.websocket.WebSocketMessaging;
 import server.database.NoteRepository;
 
@@ -79,7 +88,7 @@ public class NoteController {
         notes.deleteById(id);
         DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
         eventPublisher.publishEvent(deleteEvent);
-//        messaging.sendEvent(deleteEvent);
+        messaging.sendEvent(id, "/topic/notes");
         return ResponseEntity.ok().build();
     }
 
@@ -186,7 +195,7 @@ public class NoteController {
         Note savedNote = notes.save(noteAdding);
         AddEvent addEvent = new AddEvent(this, savedNote);
         eventPublisher.publishEvent(addEvent);
-//        messaging.sendEvent(addEvent);
+        messaging.sendEvent(savedNote, "/topic/notes");
         return ResponseEntity.ok(savedNote);
     }
 
@@ -204,13 +213,68 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
         }
         Note existingNote = notes.findById(id).get();
+        boolean titleChanged = !existingNote.title.equals(updatedNote.title);
+        if (titleChanged) {
+            List<Note> renamedNotes = renameAllNoteReferences(existingNote.title, updatedNote.title,
+                    null /* TODO: add note collection here in the future*/);
+            if (messaging != null) {
+                renamedNotes.forEach(
+                    (note) -> { // send update for notes that have been modified
+                        messaging.sendEvent(note, "/topic/notes");
+                    }
+                );
+            }
+        }
         updatedNote.copyTo(existingNote);
 
         notes.save(existingNote);
         UpdateEvent updateEvent = new UpdateEvent(this, existingNote);
         eventPublisher.publishEvent(updateEvent);
-//        messaging.sendEvent(updateEvent);
+        messaging.sendEvent(existingNote, "/topic/notes");
         return ResponseEntity.ok(existingNote);
+    }
+
+    /**
+     * Gets all notes pertaining to a specific collection
+     * @param collection Collection to search in
+     * @return List of notes contained in the collection
+     */
+    private List<Note> getNotesFromCollection(Collection collection) {
+        if (collection == null) {
+            //throw new IllegalArgumentException("Collection must not be null!");
+            return notes.findAll();
+        }
+        return notes.findAll()
+                .stream()
+                .map(note -> (CollectionNote)note)
+                .filter(note -> note.collection.id==collection.id)
+                .map(note -> (Note)note)
+                .toList();
+    }
+
+    /**
+     * Renames all references [[...]] inside of notes that match the old title to the new title
+     * @param oldTitle Old title of the note reference to rename
+     * @param newTitle New title of the note reference to set
+     * @param collection Collection in which the note is situated
+     * @return List of notes that have been modified
+     */
+    private List<Note> renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
+        List<Note> allNotes = getNotesFromCollection(collection);
+        List<Note> modifiedNotes = new ArrayList<Note>() ;
+        allNotes.forEach(
+            (note) -> {
+                String oldText = note.text;
+                note.text = note.text.replace(
+                    "[[" + oldTitle + "]]",
+                    "[[" + newTitle + "]]"
+                );
+                if (!oldText.equals(note.text)) {
+                    modifiedNotes.add(note);
+                }
+            }
+        );
+        return modifiedNotes;
     }
 
 }

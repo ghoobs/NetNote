@@ -14,8 +14,18 @@ import java.util.List;
 // Entity needed for Spring to be able to create a Database
 @Entity
 public class Note {
-    //public static final String REGEX_NAMING_FORMAT = "A-Za-z0-9\\s_\\.\\!\\?\\&\\=\\+\\-\\)\\(";
-    public static final String REGEX_NAMING_FORMAT = "^\\n\\r\\t";
+    //public static final String REGEX_NAMING_FORMAT = "[A-Za-z0-9\\s_\\.\\!\\?\\&\\=\\+\\-\\)\\(]+";
+    public static final String REGEX_NAMING_FORMAT = "[^\\n\\r\\t]+";
+    public static final String REGEX_MD_NOTE_REFERENCE = getMarkdownRegex(Note.REGEX_NAMING_FORMAT);
+
+    /**
+     * Constructs a markdown regex
+     * @param matcher What to match
+     * @return Regular expression
+     */
+    public static String getMarkdownRegex(String matcher) {
+        return "\\[\\[(" + matcher+ ")]]";
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -186,7 +196,7 @@ public class Note {
      *
      * @param embeddedFiles the new list of {@link EmbeddedFile} objects to associate with the note
      */
-    public void setEmbeddedFiles(ArrayList<EmbeddedFile> embeddedFiles) {
+    public void setEmbeddedFiles(List<EmbeddedFile> embeddedFiles) {
         this.embeddedFiles = embeddedFiles;
     }
 

@@ -7,23 +7,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import server.websocket.WebSocketMessaging;
 
+@SpringJUnitConfig
 class NoteControllerTest {
 
     //If you implement
     private TestNoteRepository testNoteRepository;
     private NoteController noteController;
     private ApplicationEventPublisher mockedEventPublisher;
+    @MockBean
+    private WebSocketMessaging webSocketMessaging;
 
     @BeforeEach
     void setUp() {
@@ -31,6 +33,7 @@ class NoteControllerTest {
         noteController = new NoteController(testNoteRepository);
         mockedEventPublisher = mock(ApplicationEventPublisher.class);
         noteController.setEventPublisher(mockedEventPublisher);
+        noteController.setWebSocketMessaging(webSocketMessaging);
     }
 
     void putData() {

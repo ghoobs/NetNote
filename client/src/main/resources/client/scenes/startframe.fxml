@@ -120,7 +120,7 @@
                                         </ImageView>
                                     </graphic>
                                 </MenuItem>
-                                <MenuItem onAction="#switchToDutch" text="Dutch">
+                                <MenuItem onAction="#switchToDutch" text="Nederland">
                                     <graphic>
                                         <ImageView fitHeight="15" fitWidth="20">
                                             <image>
@@ -129,11 +129,20 @@
                                         </ImageView>
                                     </graphic>
                                 </MenuItem>
-                                <MenuItem onAction="#switchToSpanish" text="Spanish">
+                                <MenuItem onAction="#switchToSpanish" text="Español">
                                     <graphic>
                                         <ImageView fitHeight="15" fitWidth="20">
                                             <image>
                                                 <Image url="@/images/spanishflag.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem onAction="#switchToPolish" text="Polski">
+                                    <graphic>
+                                        <ImageView fitHeight="15" fitWidth="20">
+                                            <image>
+                                                <Image url="@/images/polishflag.png" />
                                             </image>
                                         </ImageView>
                                     </graphic>
@@ -146,7 +155,7 @@
                 <Label fx:id="collectionLabel" alignment="CENTER" prefHeight="26.0" prefWidth="83.0" text="Collection:" />
                 <MenuBar prefHeight="26.0" prefWidth="91.0">
                     <menus>
-                        <Menu mnemonicParsing="false" text="Select">
+                        <Menu fx:id="collectionMenu" mnemonicParsing="false" text="Select">
                             <items>
                                 <MenuItem mnemonicParsing="false" text="All" />
                                 <MenuItem mnemonicParsing="false" text="Default" />

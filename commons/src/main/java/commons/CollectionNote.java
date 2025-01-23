@@ -30,6 +30,12 @@ public class CollectionNote extends Note {
         this.collection = collection;
     }
 
+    public CollectionNote(Note super_, Collection collection) {
+        super(super_.title, super_.text, super_.tags);
+        setEmbeddedFiles(super_.getEmbeddedFiles());
+        this.collection = collection;
+    }
+
     public void setCollection(Collection collection) {
         this.collection = collection;
     }
