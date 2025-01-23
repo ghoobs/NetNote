@@ -4,8 +4,8 @@ import commons.Collection;
 import commons.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import server.database.CollectionRepository;
-import server.database.NoteRepository;
+import server.services.CollectionService;
+import server.services.NoteService;
 
 import java.util.List;
 
@@ -23,25 +23,29 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/collections")
 public class CollectionController {
-    private final CollectionRepository collections;
+    private final CollectionService collectionService;
+    private final NoteService noteService;
 
     /**
      * Instantiates a new Collection controller.
      *
-     * @param collectionsRepo the collection repository
-     * @param noteRepo        the note repository
+     * @param collectionService the collection service
+     * @param noteService       the note service
      */
-    public CollectionController(CollectionRepository collectionsRepo, NoteRepository noteRepo) {
-        this.collections = collectionsRepo;
+    public CollectionController(
+            CollectionService collectionService,
+            NoteService noteService) {
+        this.collectionService = collectionService;
+        this.noteService = noteService;
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Collection> delete(@PathVariable("id") Long id) {
-        if (!collections.existsById(id)) {
+        if (!collectionService.doesCollectionExist(id)) {
             return ResponseEntity.notFound().build();
         }
 
-        collections.deleteById(id);
+        collectionService.eraseCollectionById(id);
         return ResponseEntity.ok().build();
     }
 
@@ -52,7 +56,7 @@ public class CollectionController {
      */
     @GetMapping(path = {"", "/"})
     public List<Collection> getAll() {
-        return collections.findAll();
+        return collectionService.getAllCollections();
     }
 
     /**
@@ -63,9 +67,10 @@ public class CollectionController {
      */
     @GetMapping("id/{id}")
     public ResponseEntity<Collection> getById(@PathVariable("id") long id) {
-        if (id < 0 || !collections.existsById(id))
+        Collection collection = collectionService.getCollectionById(id);
+        if (id < 0 || collection == null)
             return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(collections.findById(id).get());
+        return ResponseEntity.ok(collection);
     }
 
     /**
@@ -89,10 +94,10 @@ public class CollectionController {
      */
     @PostMapping(path = {"", "/"})
     public ResponseEntity<Collection> addCollection(@RequestBody Collection collectionAdding) {
-        if (collectionAdding.name == null) {
+        if (collectionAdding == null || collectionAdding.name == null) {
             return ResponseEntity.badRequest().build();
         }
-        Collection savedCollection = collections.save(collectionAdding);
+        Collection savedCollection = collectionService.saveCollection(collectionAdding);
         return ResponseEntity.ok(savedCollection);
     }
 
@@ -109,12 +114,10 @@ public class CollectionController {
             @PathVariable("id") long id,
             @RequestBody Collection updatedCollection
     ) {
-
-
-        if (!collections.existsById(id)) {
+        Collection existingCollection = collectionService.getCollectionById(id);
+        if (existingCollection == null) {
             return ResponseEntity.badRequest().build();
         }
-        Collection existingCollection = collections.getReferenceById(id);
 
         existingCollection.name = updatedCollection.name;
 
@@ -123,6 +126,6 @@ public class CollectionController {
         }
 
 
-        return ResponseEntity.ok(collections.save(existingCollection));
+        return ResponseEntity.ok(collectionService.saveCollection(existingCollection));
     }
 }

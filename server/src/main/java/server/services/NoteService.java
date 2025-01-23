@@ -3,6 +3,8 @@ package server.services;
 import commons.Collection;
 import commons.CollectionNote;
 import commons.Note;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import server.database.NoteRepository;
 
@@ -17,8 +19,65 @@ public class NoteService {
      * Instantiates this service
      * @param noteRepository Note repository
      */
-    public NoteService(NoteRepository noteRepository) {
+    public NoteService(
+            NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
+    }
+
+    /**
+     * Gets note by id
+     * @param noteId Primary key of the note
+     * @return A valid Note if it exists, null otherwise
+     */
+    public @Nullable Note getNoteById(long noteId) {
+        return noteRepository.findById(noteId).orElse(null);
+    }
+
+    /**
+     * Saves the provided note to the database
+     * @param note A valid non-null Note
+     * @return Updated note
+     */
+    public @NotNull Note saveNote(@NotNull Note note) {
+        return noteRepository.save(note);
+    }
+
+    /**
+     * Updates the provided note in the database
+     * @param noteId Primary key of the note
+     * @return Updated note if note exists, null otherwise
+     */
+    public @Nullable Note updateNoteById(long noteId) {
+        Note note = getNoteById(noteId);
+        if (note == null) {
+            return null;
+        }
+        return noteRepository.save(note);
+    }
+
+    /**
+     * Erases the provided note from the database
+     * @param noteId A valid note id
+     */
+    public void eraseNoteById(long noteId) {
+        noteRepository.deleteById(noteId);
+    }
+
+    /**
+     * Checks if the provided note exists in the database
+     * @param noteId A valid note id
+     * @return True if the note exists.
+     */
+    public boolean doesNoteExist(long noteId) {
+        return noteRepository.existsById(noteId);
+    }
+
+    /**
+     * Gets all the notes in the repository
+     * @return Valid list of notes
+     */
+    public @NotNull List<Note> getAllNotes() {
+        return noteRepository.findAll();
     }
 
     /**
@@ -26,7 +85,7 @@ public class NoteService {
      * @param collection Collection to search in
      * @return List of notes contained in the collection
      */
-    public List<Note> getNotesFromCollection(Collection collection) {
+    public @NotNull List<Note> getNotesFromCollection(Collection collection) {
         if (collection == null) {
             //throw new IllegalArgumentException("Collection must not be null!");
             return noteRepository.findAll();
@@ -46,9 +105,9 @@ public class NoteService {
      * @param collection Collection in which the note is situated
      * @return List of notes that have been modified
      */
-    public List<Note> renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
+    public @NotNull List<Note> renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
         List<Note> allNotes = getNotesFromCollection(collection);
-        List<Note> modifiedNotes = new ArrayList<Note>() ;
+        List<Note> modifiedNotes = new ArrayList<>() ;
         allNotes.forEach(
                 (note) -> {
                     String oldText = note.text;

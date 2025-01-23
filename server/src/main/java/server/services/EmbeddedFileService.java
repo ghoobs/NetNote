@@ -2,7 +2,7 @@ package server.services;
 
 import commons.EmbeddedFile;
 import commons.Note;
-import jakarta.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import server.database.NoteRepository;
 

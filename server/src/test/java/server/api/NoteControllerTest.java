@@ -33,7 +33,7 @@ class NoteControllerTest {
     void setUp() {
         testNoteRepository = new TestNoteRepository();
         testNoteService = new NoteService(testNoteRepository);
-        noteController = new NoteController(testNoteRepository, testNoteService);
+        noteController = new NoteController(testNoteService);
         mockedEventPublisher = mock(ApplicationEventPublisher.class);
         noteController.setEventPublisher(mockedEventPublisher);
         noteController.setWebSocketMessaging(webSocketMessaging);

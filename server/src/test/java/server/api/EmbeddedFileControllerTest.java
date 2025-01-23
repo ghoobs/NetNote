@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import server.services.EmbeddedFileService;
+import server.services.NoteService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ class EmbeddedFileControllerTest {
     private EmbeddedFileController embeddedFileController;
     private TestNoteRepository testNoteRepository;
     private EmbeddedFileService testEmbeddedFileService;
+    private NoteService testNoteService;
     private Collection testCollection;
     private CollectionNote testNote;
     private EmbeddedFile testEmbeddedFile;
@@ -27,9 +29,10 @@ class EmbeddedFileControllerTest {
     void setUp() {
         testNoteRepository = new TestNoteRepository();
         testEmbeddedFileService = new EmbeddedFileService(testNoteRepository);
+        testNoteService = new NoteService(testNoteRepository);
         embeddedFileController = new EmbeddedFileController(
-            testNoteRepository,
-            testEmbeddedFileService
+                testEmbeddedFileService,
+                testNoteService
         );
         testCollection = new Collection("TestCollection");
         testNote = new CollectionNote("TestNote", "Some String");

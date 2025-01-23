@@ -3,8 +3,8 @@ import commons.EmbeddedFile;
 import commons.Note;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import server.database.NoteRepository;
 import server.services.EmbeddedFileService;
+import server.services.NoteService;
 
 /**
  * REST controller for managing embedded files within notes of a collection.
@@ -13,26 +13,26 @@ import server.services.EmbeddedFileService;
 @RestController
 @RequestMapping("/api")
 public class EmbeddedFileController {
-
-    private final NoteRepository noteRepository;
-    private final EmbeddedFileService service;
+    private final EmbeddedFileService embeddedFileService;
+    private final NoteService noteService;
 
     /**
-     * Constructs an EmbeddedFileController with the specified repositories.
+     * Constructs an EmbeddedFileController
      *
-     * @param noteRepo       the repository for managing notes
-     * @param service        the embedded file service
+     * @param embeddedFileService   the embedded file service
+     * @param noteService           the note services
      */
-    public EmbeddedFileController(NoteRepository noteRepo,
-                                  EmbeddedFileService service) {
-        this.noteRepository = noteRepo;
-        this.service = service;
+    public EmbeddedFileController(
+            EmbeddedFileService embeddedFileService,
+            NoteService noteService) {
+        this.embeddedFileService = embeddedFileService;
+        this.noteService = noteService;
     }
 
     @PostMapping("/{noteId}/files")
     public ResponseEntity<EmbeddedFile> addFile(@PathVariable long noteId,
                                                 @RequestBody EmbeddedFile embeddedFile) {
-        Note note = noteRepository.findById(noteId).orElse(null);
+        Note note = noteService.getNoteById(noteId);
         if (note==null) {
             return ResponseEntity.notFound().build();
         }
@@ -41,13 +41,13 @@ public class EmbeddedFileController {
                 embeddedFile.getFiletype(), url, embeddedFile.getData(), note);
 
         note.addEmbeddedFile(toSave);
-        noteRepository.save(note);
+        noteService.saveNote(note);
         return ResponseEntity.ok(embeddedFile);
     }
 
     @GetMapping("/{noteId}/files/{filename}/data")
     public ResponseEntity<byte[]> getData(@PathVariable long noteId, @PathVariable String filename) {
-        EmbeddedFile file = service.getEmbeddedFileFromNote(noteId, filename);
+        EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
         if(file == null) {
             return ResponseEntity.notFound().build();
         }
@@ -58,29 +58,29 @@ public class EmbeddedFileController {
 
     @DeleteMapping("/{noteId}/files/{filename}")
     public ResponseEntity<Note> deleteFile(@PathVariable long noteId, @PathVariable String filename) {
-        Note note = noteRepository.findById(noteId).orElse(null);
+        Note note = noteService.getNoteById(noteId);
         if (note==null) {
             return ResponseEntity.notFound().build();
         }
-        EmbeddedFile file = service.getEmbeddedFileFromNote(noteId, filename);
+        EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
         if(file == null) {
             return ResponseEntity.notFound().build();
         }
 
         note.removeEmbeddedFile(file);
-        noteRepository.save(note);
+        noteService.saveNote(note);
         return ResponseEntity.ok(note);
     }
     @PutMapping("/{noteId}/files/{filename}/rename/{newFilename}")
     public ResponseEntity<EmbeddedFile> renameFile(@PathVariable long noteId,
                                                    @PathVariable String filename, @PathVariable String newFilename) {
-        EmbeddedFile file = service.getEmbeddedFileFromNote(noteId, filename);
+        EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
         if (file == null) {
             return ResponseEntity.notFound().build();
         }
 
         file.setFilename(newFilename);
-        noteRepository.save(noteRepository.findById(noteId).get());
+        noteService.updateNoteById(noteId);
         return ResponseEntity.ok(file);
     }
 

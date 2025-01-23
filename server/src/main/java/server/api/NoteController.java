@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import server.services.NoteService;
 import server.websocket.WebSocketMessaging;
-import server.database.NoteRepository;
 
 /**
  * A basic Rest Controller for Notes
@@ -38,8 +37,6 @@ import server.database.NoteRepository;
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
-
-    private final NoteRepository noteRepository;
     private final NoteService service;
     private ApplicationEventPublisher eventPublisher;
     private WebSocketMessaging messaging;
@@ -47,13 +44,9 @@ public class NoteController {
     /**
      * Instantiates a new Note controller.
      *
-     * @param noteRepository Note repository
      * @param service Note service
      */
-    public NoteController(NoteRepository noteRepository,
-                          NoteService service
-    ) {
-        this.noteRepository = noteRepository;
+    public NoteController(NoteService service) {
         this.service = service;
     }
 
@@ -74,13 +67,12 @@ public class NoteController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Note> delete(@PathVariable("id") Long id){
-
-        if (!noteRepository.existsById(id)) {
+        Note note = service.getNoteById(id);
+        if (note == null) {
             return ResponseEntity.notFound().build();
         }
-        Note toDelete = noteRepository.findById(id).get();
-        noteRepository.deleteById(id);
-        DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
+        service.eraseNoteById(id);
+        DeleteEvent deleteEvent = new DeleteEvent(this, note);
         eventPublisher.publishEvent(deleteEvent);
         messaging.sendEvent(id, "/topic/notes");
         return ResponseEntity.ok().build();
@@ -98,7 +90,7 @@ public class NoteController {
      */
     @GetMapping(path = {"", "/"})
     public List<Note> getAll() {
-        return noteRepository.findAll();
+        return service.getAllNotes();
     }
 
 
@@ -110,10 +102,11 @@ public class NoteController {
      */
     @GetMapping("id/{id}")
     public ResponseEntity<Note> getById(@PathVariable("id") long id) {
-        if (id < 0 || !noteRepository.existsById(id))
+        Note note = service.getNoteById(id);
+        if (id < 0 || note == null)
             return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok(noteRepository.findById(id).get());
+        return ResponseEntity.ok(note);
     }
 
     /**
@@ -169,7 +162,7 @@ public class NoteController {
      */
     @GetMapping("/search")
     public List<Note> searchNotes(@RequestParam String keyword){
-            List<Note> allNotes = noteRepository.findAll();
+            List<Note> allNotes = service.getAllNotes();
             return allNotes.stream()
                     .filter(note -> note.hasKeyword(keyword))
                     .collect(Collectors.toList());
@@ -186,7 +179,7 @@ public class NoteController {
         if (noteAdding.text == null || noteAdding.title == null)
             return ResponseEntity.badRequest().build();
 
-        Note savedNote = noteRepository.save(noteAdding);
+        Note savedNote = service.saveNote(noteAdding);
         AddEvent addEvent = new AddEvent(this, savedNote);
         eventPublisher.publishEvent(addEvent);
         messaging.sendEvent(savedNote, "/topic/notes");
@@ -203,10 +196,10 @@ public class NoteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Note> updateNote(@PathVariable("id") Long id, @RequestBody Note updatedNote) {
-        if (!noteRepository.existsById(id)) {
+        Note existingNote = service.getNoteById(id);
+        if (existingNote == null) {
             return ResponseEntity.badRequest().build();
         }
-        Note existingNote = noteRepository.findById(id).get();
         boolean titleChanged = !existingNote.title.equals(updatedNote.title);
         if (titleChanged) {
             List<Note> renamedNotes = service.renameAllNoteReferences(
@@ -222,8 +215,7 @@ public class NoteController {
             }
         }
         updatedNote.copyTo(existingNote);
-
-        noteRepository.save(existingNote);
+        service.saveNote(existingNote);
         UpdateEvent updateEvent = new UpdateEvent(this, existingNote);
         eventPublisher.publishEvent(updateEvent);
         messaging.sendEvent(existingNote, "/topic/notes");
