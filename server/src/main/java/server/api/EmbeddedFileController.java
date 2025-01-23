@@ -11,7 +11,7 @@ import server.services.NoteService;
  * Provides endpoints to add, retrieve, delete, and rename files associated with specific notes.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/embeds")
 public class EmbeddedFileController {
     private final EmbeddedFileService embeddedFileService;
     private final NoteService noteService;
@@ -29,7 +29,7 @@ public class EmbeddedFileController {
         this.noteService = noteService;
     }
 
-    @PostMapping("/{noteId}/files")
+    @PostMapping("/{noteId}")
     public ResponseEntity<EmbeddedFile> addFile(@PathVariable long noteId,
                                                 @RequestBody EmbeddedFile embeddedFile) {
         Note note = noteService.getNoteById(noteId);
@@ -45,7 +45,7 @@ public class EmbeddedFileController {
         return ResponseEntity.ok(embeddedFile);
     }
 
-    @GetMapping("/{noteId}/files/{filename}/data")
+    @GetMapping("/{noteId}/{filename}")
     public ResponseEntity<byte[]> getData(@PathVariable long noteId, @PathVariable String filename) {
         EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
         if(file == null) {
@@ -56,7 +56,7 @@ public class EmbeddedFileController {
         return ResponseEntity.ok(data);
     }
 
-    @DeleteMapping("/{noteId}/files/{filename}")
+    @DeleteMapping("/{noteId}/{filename}")
     public ResponseEntity<Note> deleteFile(@PathVariable long noteId, @PathVariable String filename) {
         Note note = noteService.getNoteById(noteId);
         if (note==null) {
@@ -71,9 +71,10 @@ public class EmbeddedFileController {
         noteService.saveNote(note);
         return ResponseEntity.ok(note);
     }
-    @PutMapping("/{noteId}/files/{filename}/rename/{newFilename}")
+    @PutMapping("/{noteId}/{filename}/rename")
     public ResponseEntity<EmbeddedFile> renameFile(@PathVariable long noteId,
-                                                   @PathVariable String filename, @PathVariable String newFilename) {
+                                                   @PathVariable String filename,
+                                                   @RequestParam("name") String newFilename) {
         EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
         if (file == null) {
             return ResponseEntity.notFound().build();

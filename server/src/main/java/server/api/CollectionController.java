@@ -39,7 +39,7 @@ public class CollectionController {
         this.noteService = noteService;
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Collection> delete(@PathVariable("id") Long id) {
         if (!collectionService.doesCollectionExist(id)) {
             return ResponseEntity.notFound().build();
@@ -65,7 +65,7 @@ public class CollectionController {
      * @param id the id
      * @return the by id
      */
-    @GetMapping("id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Collection> getById(@PathVariable("id") long id) {
         Collection collection = collectionService.getCollectionById(id);
         if (id < 0 || collection == null)
