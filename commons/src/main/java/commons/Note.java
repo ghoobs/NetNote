@@ -1,5 +1,6 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -17,6 +18,10 @@ public class Note {
     //public static final String REGEX_NAMING_FORMAT = "[A-Za-z0-9\\s_\\.\\!\\?\\&\\=\\+\\-\\)\\(]+";
     public static final String REGEX_NAMING_FORMAT = "[^\\n\\r\\t]+";
     public static final String REGEX_MD_NOTE_REFERENCE = getMarkdownRegex(Note.REGEX_NAMING_FORMAT);
+
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Collection collection;
 
     /**
      * Constructs a markdown regex

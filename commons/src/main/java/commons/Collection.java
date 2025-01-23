@@ -21,7 +21,7 @@ public class Collection {
 
     //@JsonIgnoreProperties({"collection"})
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    public List<CollectionNote> notes;
+    public List<Note> notes;
 
     /**
      * Instantiates a new Collection
@@ -46,11 +46,11 @@ public class Collection {
      * @param name  the name
      * @param notes the Notes
      */
-    public Collection(String name, List<CollectionNote> notes) {
+    public Collection(String name, List<Note> notes) {
         this.name = name;
         this.notes = notes;
-        for (CollectionNote note : notes) {
-            note.setCollection(this);
+        for (Note note : notes) {
+            note.collection = this;
         }
     }
 
@@ -60,9 +60,9 @@ public class Collection {
      *
      * @param note the note
      */
-    public void addNote(CollectionNote note) {
+    public void addNote(Note note) {
         notes.add(note);
-        note.setCollection(this);
+        note.collection = this;
     }
 
     /**
@@ -117,11 +117,11 @@ public class Collection {
      *
      * @param newNotes the notes
      */
-    public void updateNotes(List<CollectionNote> newNotes) {
+    public void updateNotes(List<Note> newNotes) {
         this.notes.clear();
         // Add and associate new notes
-        for (CollectionNote note : newNotes) {
-            note.setCollection(this);
+        for (Note note : newNotes) {
+            note.collection = this;
             this.notes.add(note);
         }
     }
