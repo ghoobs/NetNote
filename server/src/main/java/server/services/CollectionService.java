@@ -6,6 +6,7 @@ import server.database.CollectionRepository;
 import commons.Collection;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CollectionService {
@@ -73,5 +74,15 @@ public class CollectionService {
      */
     public List<Collection> getAllCollections() {
         return collectionRepository.findAll();
+    }
+
+
+    /**
+     * More idiomatic way to find a collection by its id, works better with spring for some reason
+     * @param collectionId
+     * @return the collection if it is found
+     */
+    public Optional<Collection> collectionById(Long collectionId) {
+        return collectionRepository.findById(collectionId);
     }
 }
