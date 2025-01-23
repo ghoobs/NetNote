@@ -43,7 +43,7 @@ public class MainCtrl {
      */
 
     public void showOverview() {
-        primaryStage.setTitle("Notes: Overview");
+        primaryStage.setTitle("NetNote");
         primaryStage.setScene(overview);
         overview.setOnKeyPressed(e -> overviewCtrl.keyPressed(e));
     }
@@ -52,9 +52,9 @@ public class MainCtrl {
      * Sets the main scene to the editcollections scene and updates its title
      */
     public void showEditWindow(){
-        primaryStage.setTitle("Edit Collections");
         primaryStage.setScene(editCollections);
         editCollections.setOnKeyPressed(e -> editCollectionCtrl.keyPressed(e));
+        editCollectionCtrl.setLocale(editCollectionCtrl.loadSavedLocale());
     }
 
     /**

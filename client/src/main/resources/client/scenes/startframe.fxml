@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.web.WebView?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.NoteOverviewCtrl">
+<AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.NoteOverviewCtrl">
     <children>
         <HBox layoutY="-1.0" prefHeight="372.0" prefWidth="139.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="461.0" AnchorPane.topAnchor="-1.0">
             <children>
@@ -120,7 +120,7 @@
                                         </ImageView>
                                     </graphic>
                                 </MenuItem>
-                                <MenuItem onAction="#switchToDutch" text="Dutch">
+                                <MenuItem onAction="#switchToDutch" text="Nederland">
                                     <graphic>
                                         <ImageView fitHeight="15" fitWidth="20">
                                             <image>
@@ -129,11 +129,20 @@
                                         </ImageView>
                                     </graphic>
                                 </MenuItem>
-                                <MenuItem onAction="#switchToSpanish" text="Spanish">
+                                <MenuItem onAction="#switchToSpanish" text="Español">
                                     <graphic>
                                         <ImageView fitHeight="15" fitWidth="20">
                                             <image>
                                                 <Image url="@/images/spanishflag.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem onAction="#switchToPolish" text="Polski">
+                                    <graphic>
+                                        <ImageView fitHeight="15" fitWidth="20">
+                                            <image>
+                                                <Image url="@/images/polishflag.png" />
                                             </image>
                                         </ImageView>
                                     </graphic>

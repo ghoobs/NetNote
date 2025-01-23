@@ -71,6 +71,8 @@ public class NoteController {
         if (note == null) {
             return ResponseEntity.notFound().build();
         }
+        note.getEmbeddedFiles().clear();
+        service.updateNoteById(id);
         service.eraseNoteById(id);
         DeleteEvent deleteEvent = new DeleteEvent(this, note);
         eventPublisher.publishEvent(deleteEvent);
