@@ -115,13 +115,14 @@ public class Collection {
     /**
      * Update notes. Important to do it through this method to maintain the invariants
      *
-     * @param notes the notes
+     * @param newNotes the notes
      */
-    public void updateNotes(List<CollectionNote> notes) {
-
-        for (CollectionNote note : notes) {
-            this.addNote(note);
+    public void updateNotes(List<CollectionNote> newNotes) {
+        this.notes.clear();
+        // Add and associate new notes
+        for (CollectionNote note : newNotes) {
+            note.setCollection(this);
+            this.notes.add(note);
         }
-        this.notes = notes;
     }
 }

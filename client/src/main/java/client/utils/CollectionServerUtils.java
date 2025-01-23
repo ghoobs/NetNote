@@ -61,6 +61,7 @@ public class CollectionServerUtils {
      * @param args args
      */
     public static void main(String[] args) {
+        test1();
 
         CollectionServerUtils collectionServerUtils = new CollectionServerUtils("http://localhost:8080/");
         collectionServerUtils.addTestCollection();
