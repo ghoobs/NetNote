@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import server.services.NoteService;
 import server.websocket.WebSocketMessaging;
 
 @SpringJUnitConfig
@@ -22,6 +23,7 @@ class NoteControllerTest {
 
     //If you implement
     private TestNoteRepository testNoteRepository;
+    private NoteService testNoteService;
     private NoteController noteController;
     private ApplicationEventPublisher mockedEventPublisher;
     @MockBean
@@ -30,7 +32,8 @@ class NoteControllerTest {
     @BeforeEach
     void setUp() {
         testNoteRepository = new TestNoteRepository();
-        noteController = new NoteController(testNoteRepository);
+        testNoteService = new NoteService(testNoteRepository);
+        noteController = new NoteController(testNoteService);
         mockedEventPublisher = mock(ApplicationEventPublisher.class);
         noteController.setEventPublisher(mockedEventPublisher);
         noteController.setWebSocketMessaging(webSocketMessaging);

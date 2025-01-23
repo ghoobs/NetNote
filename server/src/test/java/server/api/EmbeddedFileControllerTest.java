@@ -7,6 +7,8 @@ import commons.Note;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import server.services.EmbeddedFileService;
+import server.services.NoteService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,8 @@ class EmbeddedFileControllerTest {
 
     private EmbeddedFileController embeddedFileController;
     private TestNoteRepository testNoteRepository;
-    private TestCollectionRepository testCollectionRepository;
+    private EmbeddedFileService testEmbeddedFileService;
+    private NoteService testNoteService;
     private Collection testCollection;
     private CollectionNote testNote;
     private EmbeddedFile testEmbeddedFile;
@@ -25,8 +28,12 @@ class EmbeddedFileControllerTest {
     @BeforeEach
     void setUp() {
         testNoteRepository = new TestNoteRepository();
-        testCollectionRepository = new TestCollectionRepository();
-        embeddedFileController = new EmbeddedFileController(testNoteRepository, testCollectionRepository);
+        testEmbeddedFileService = new EmbeddedFileService(testNoteRepository);
+        testNoteService = new NoteService(testNoteRepository);
+        embeddedFileController = new EmbeddedFileController(
+                testEmbeddedFileService,
+                testNoteService
+        );
         testCollection = new Collection("TestCollection");
         testNote = new CollectionNote("TestNote", "Some String");
         testEmbeddedFile = new EmbeddedFile("TestFile", "TestFiletype",
@@ -35,7 +42,6 @@ class EmbeddedFileControllerTest {
         testNoteList.add(testNote);
         testCollection.notes.add(testNote);
         testNote.addEmbeddedFile(testEmbeddedFile);
-        testCollection = testCollectionRepository.save(testCollection);
         testNote = testNoteRepository.save(testNote);
     }
 
@@ -58,8 +64,11 @@ class EmbeddedFileControllerTest {
 
     @Test
     void deleteFile() {
-        ResponseEntity<Note> response = embeddedFileController.deleteFile(testCollection.id,
-                testNote.getTitle(), testEmbeddedFile.getFilename());
+        ResponseEntity<Note> response =
+            embeddedFileController.deleteFile(
+                testNote.id,
+                testEmbeddedFile.getFilename()
+            );
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getEmbeddedFiles().isEmpty());
     }

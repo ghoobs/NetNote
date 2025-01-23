@@ -4,6 +4,8 @@ import commons.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import server.services.CollectionService;
+import server.services.NoteService;
 
 import java.util.List;
 
@@ -13,6 +15,8 @@ class CollectionControllerTest {
 
     private TestNoteRepository testNoteRepository;
     private TestCollectionRepository testCollectionRepository;
+    private NoteService testNoteService;
+    private CollectionService testCollectionService;
     private CollectionController collectionController;
     private Collection c1;
     private Collection c2;
@@ -21,7 +25,9 @@ class CollectionControllerTest {
     void setUp() {
         testNoteRepository = new TestNoteRepository();
         testCollectionRepository = new TestCollectionRepository();
-        collectionController = new CollectionController(testCollectionRepository, testNoteRepository);
+        testNoteService = new NoteService(testNoteRepository);
+        testCollectionService = new CollectionService(testCollectionRepository);
+        collectionController = new CollectionController(testCollectionService, testNoteService);
 
         c1 = new Collection("Test Collection");
         c2 = new Collection("Test Collection 2");
