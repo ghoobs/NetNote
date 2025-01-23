@@ -32,6 +32,7 @@ import java.awt.Desktop;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -873,12 +874,12 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void createNoteTextInputContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
 
-        Menu menuItemEmbedFile = new Menu("menu.embed");
-        MenuItem menuItemAddNoteReference = new MenuItem("menu.reference");
-        MenuItem menuItemAddTag = new MenuItem("menu.addTag");
+        Menu menuItemEmbedFile = new Menu(resourceBundle.getString("menu.embed"));
+        MenuItem menuItemAddNoteReference = new MenuItem(resourceBundle.getString("menu.reference"));
+        MenuItem menuItemAddTag = new MenuItem(resourceBundle.getString("menu.addTag"));
 
-        MenuItem menuSubUploadFile = new MenuItem("menu.embed.upload");
-        Menu menuSubSelectExistingFile = new Menu("menu.embed.existing");
+        MenuItem menuSubUploadFile = new MenuItem(resourceBundle.getString("menu.embed.upload"));
+        Menu menuSubSelectExistingFile = new Menu(resourceBundle.getString("menu.embed.existing"));
 
         menuItemEmbedFile.getItems().add(menuSubUploadFile);
         menuItemEmbedFile.getItems().add(menuSubSelectExistingFile);
@@ -945,7 +946,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setContentText("alert.file.exists1" + "\"" fileName + "\"" + "alert.file.exists2");
+            alert.setContentText(MessageFormat.format(
+                    resourceBundle.getString("alert.file.exists"), fileName));
             alert.showAndWait();
             return;
         }
@@ -955,7 +957,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setContentText("alert.file.readFail");
+            alert.setContentText(MessageFormat.format(
+                    resourceBundle.getString("alert.file.readFail"), fileName));
             alert.showAndWait();
             return;
         }
