@@ -32,6 +32,7 @@ import java.awt.Desktop;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -894,19 +895,42 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void createNoteTextInputContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem menuItemAddFile = new MenuItem(resourceBundle.getString("menu.upload"));
+        Menu menuItemEmbedFile = new Menu(resourceBundle.getString("menu.embed"));
         MenuItem menuItemAddNoteReference = new MenuItem(resourceBundle.getString("menu.reference"));
         MenuItem menuItemAddTag = new MenuItem(resourceBundle.getString("menu.addTag"));
 
-        contextMenu.getItems().add(menuItemAddFile);
+        MenuItem menuSubUploadFile = new MenuItem(resourceBundle.getString("menu.embed.upload"));
+        Menu menuSubSelectExistingFile = new Menu(resourceBundle.getString("menu.embed.existing"));
+
+        menuItemEmbedFile.getItems().add(menuSubUploadFile);
+        menuItemEmbedFile.getItems().add(menuSubSelectExistingFile);
+
+        contextMenu.getItems().add(menuItemEmbedFile);
         contextMenu.getItems().add(menuItemAddNoteReference);
         contextMenu.getItems().add(menuItemAddTag);
 
-        menuItemAddFile.setOnAction(this::onNoteTextInputCtxMenuUploadFile);
+
+        menuSubUploadFile.setOnAction(this::onNoteTextInputCtxMenuUploadFile);
         menuItemAddNoteReference.setOnAction(this::onNoteTextInputCtxMenuAddNoteRef);
         menuItemAddTag.setOnAction(this::onNoteTextInputCtxMenuAddNoteTag);
 
         noteWriting.setContextMenu(contextMenu);
+        contextMenu.setOnShown((_) -> {
+            menuSubSelectExistingFile.getItems().clear();
+            getSelectedNote()
+                    .getEmbeddedFiles()
+                    .forEach((file) -> {
+                        MenuItem item = new MenuItem(file.getFilename());
+                        item.setOnAction((_) -> {
+                            embedFileAtCaret(file.getFilename());
+                        });
+                        menuSubSelectExistingFile.getItems().add(item);
+                    }
+            );
+            menuSubSelectExistingFile.setDisable(
+                menuSubSelectExistingFile.getItems().isEmpty()
+            );
+        });
     }
 
     /**
@@ -918,7 +942,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         fileChooser.setTitle(resourceBundle.getString("fileChooser.select"));
 
         fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Image Files",
+                new FileChooser.ExtensionFilter(resourceBundle.getString("fileChooser.imageFiles"),
                         "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
         return fileChooser.showOpenDialog(null);
@@ -934,31 +958,55 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         if (file == null || !file.exists()) {
             return; // user cancelled the operation
         }
-
+        String fileName = file.getName();
+        if (getSelectedNote()
+                .getEmbeddedFiles()
+                .stream()
+                .map(EmbeddedFile::getFilename)
+                .anyMatch(name -> name.equals(fileName))
+        ) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText(MessageFormat.format(
+                    resourceBundle.getString("alert.file.exists"), fileName));
+            alert.showAndWait();
+            return;
+        }
         byte[] contents;
         try {
             contents = Files.toByteArray(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText(MessageFormat.format(
+                    resourceBundle.getString("alert.file.readFail"), fileName));
+            alert.showAndWait();
             return;
         }
 
         Note currentNote = listNotes.getSelectionModel().getSelectedItem();
-        String fileName = file.getName();
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
         EmbeddedFile embed = new EmbeddedFile(
             fileName,
             extension,
             contents
         );
-        Platform.runLater(()->{
-            server.addFile(currentNote.id, embed);
-        });
+        currentNote.addEmbeddedFile(
+            server.addFile(currentNote.id, embed)
+        );
+        embedFileAtCaret(fileName);
+    }
 
+    /**
+     * Adds an ![alt](url) embed at the current caret position
+     * @param fileName Embed file name
+     */
+    private void embedFileAtCaret(String fileName) {
         Platform.runLater(()->{
             int caretPosition = noteWriting.getCaretPosition();
             String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf("."));
             noteWriting.insertText(caretPosition, "!["+fileNameNoExt+"]("+fileName+")");
+            updateMarkdown();
         });
     }
 
