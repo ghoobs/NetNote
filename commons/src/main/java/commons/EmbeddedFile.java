@@ -19,8 +19,22 @@ import java.util.Objects;
 @Entity
 public class EmbeddedFile {
     // prevent illegal Windows file names + whitespaces excl. spaces
-    public static final String REGEX_NAMING_FORMAT = "^\\n\\r\\t\\:\\*\\/" +
-            "\\\"\\|\\?\\\"\\<\\>\\\\";
+    public static final String REGEX_ALT_NAMING_FORMAT = "[^\\n\\r\\t]+";
+    public static final String REGEX_URL_NAMING_FORMAT = "[^\\n\\r\\t\\:\\*\\/" +
+            "\\\"\\|\\?\\\"\\<\\>\\\\]+";
+    public static final String REGEX_MD_EMBED_REFERENCE =
+            getMarkdownRegex(REGEX_ALT_NAMING_FORMAT,REGEX_URL_NAMING_FORMAT);
+
+    /**
+     * Constructs a markdown regex
+     * @param altMatcher What to match (alt text)
+     * @param urlMatcher What to match (url)
+     * @return Regular expression
+     */
+    public static String getMarkdownRegex(String altMatcher, String urlMatcher) {
+        return "!\\[(" +altMatcher + ")\\]" +
+                "\\(("+ urlMatcher +")\\)";
+    }
 
     private String filename;
     private String filetype;
