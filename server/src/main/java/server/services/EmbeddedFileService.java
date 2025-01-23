@@ -2,7 +2,6 @@ package server.services;
 
 import commons.EmbeddedFile;
 import commons.Note;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import server.database.NoteRepository;
 
@@ -26,7 +25,7 @@ public class EmbeddedFileService {
      * @param noteId id of the note
      * @return List of embeds. Will be null if the note doesn't exist
      */
-    public @Nullable List<EmbeddedFile> getAllEmbeddedFilesFromNote(long noteId) {
+    public List<EmbeddedFile> getAllEmbeddedFilesFromNote(long noteId) {
         Optional<Note> optionalNote = noteRepository.findById(noteId);
         if (optionalNote.isEmpty()) {
             return null;
@@ -41,7 +40,7 @@ public class EmbeddedFileService {
      * @param filename name of the file
      * @return Embedded file. Will be null if the note doesn't exist, or if the file doesn't exist.
      */
-    public @Nullable EmbeddedFile getEmbeddedFileFromNote(long noteId, String filename) {
+    public EmbeddedFile getEmbeddedFileFromNote(long noteId, String filename) {
         List<EmbeddedFile> files = getAllEmbeddedFilesFromNote(noteId);
         if (files == null) {
             return null;

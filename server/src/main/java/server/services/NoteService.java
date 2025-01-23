@@ -3,8 +3,6 @@ package server.services;
 import commons.Collection;
 import commons.CollectionNote;
 import commons.Note;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import server.database.NoteRepository;
 
@@ -29,7 +27,7 @@ public class NoteService {
      * @param noteId Primary key of the note
      * @return A valid Note if it exists, null otherwise
      */
-    public @Nullable Note getNoteById(long noteId) {
+    public Note getNoteById(long noteId) {
         return noteRepository.findById(noteId).orElse(null);
     }
 
@@ -38,7 +36,7 @@ public class NoteService {
      * @param note A valid non-null Note
      * @return Updated note
      */
-    public @NotNull Note saveNote(@NotNull Note note) {
+    public Note saveNote(Note note) {
         return noteRepository.save(note);
     }
 
@@ -47,7 +45,7 @@ public class NoteService {
      * @param noteId Primary key of the note
      * @return Updated note if note exists, null otherwise
      */
-    public @Nullable Note updateNoteById(long noteId) {
+    public Note updateNoteById(long noteId) {
         Note note = getNoteById(noteId);
         if (note == null) {
             return null;
@@ -76,7 +74,7 @@ public class NoteService {
      * Gets all the notes in the repository
      * @return Valid list of notes
      */
-    public @NotNull List<Note> getAllNotes() {
+    public List<Note> getAllNotes() {
         return noteRepository.findAll();
     }
 
@@ -85,7 +83,7 @@ public class NoteService {
      * @param collection Collection to search in
      * @return List of notes contained in the collection
      */
-    public @NotNull List<Note> getNotesFromCollection(Collection collection) {
+    public List<Note> getNotesFromCollection(Collection collection) {
         if (collection == null) {
             //throw new IllegalArgumentException("Collection must not be null!");
             return noteRepository.findAll();
@@ -105,7 +103,7 @@ public class NoteService {
      * @param collection Collection in which the note is situated
      * @return List of notes that have been modified
      */
-    public @NotNull List<Note> renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
+    public List<Note> renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
         List<Note> allNotes = getNotesFromCollection(collection);
         List<Note> modifiedNotes = new ArrayList<>() ;
         allNotes.forEach(

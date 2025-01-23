@@ -1,7 +1,5 @@
 package server.services;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import server.database.CollectionRepository;
 
@@ -26,7 +24,7 @@ public class CollectionService {
      * @param collectionId Primary key of the collection
      * @return A valid collection if it exists, null otherwise
      */
-    public @Nullable Collection getCollectionById(long collectionId) {
+    public Collection getCollectionById(long collectionId) {
         return collectionRepository.findById(collectionId).orElse(null);
     }
 
@@ -35,7 +33,7 @@ public class CollectionService {
      * @param collection A valid non-null Collection
      * @return Updated collection
      */
-    public @NotNull Collection saveCollection(@NotNull Collection collection) {
+    public Collection saveCollection(Collection collection) {
         return collectionRepository.save(collection);
     }
 
@@ -44,7 +42,7 @@ public class CollectionService {
      * @param collectionId Primary key of the collection
      * @return Updated collection if note exists, null otherwise
      */
-    public @Nullable Collection updateCollectionById(long collectionId) {
+    public Collection updateCollectionById(long collectionId) {
         Collection collection = getCollectionById(collectionId);
         if (collection == null) {
             return null;
@@ -73,7 +71,7 @@ public class CollectionService {
      * Gets all the collections in the repository
      * @return Valid list of collections
      */
-    public @NotNull List<Collection> getAllCollections() {
+    public List<Collection> getAllCollections() {
         return collectionRepository.findAll();
     }
 }
