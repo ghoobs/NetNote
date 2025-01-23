@@ -77,6 +77,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @FXML
     private Button searchButton;
     @FXML
+    private Button refreshButton;
+    @FXML
     private Button editCollectionButton;
     @FXML
     private Label collectionLabel;
@@ -93,12 +95,15 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
     private List<ComboBox<String>> tagFilters = new ArrayList<>();
     private ObservableList<Note> filteredNotes;
+
     private final StringProperty propertyDeleteButton = new SimpleStringProperty();
     private final StringProperty propertyAddButton = new SimpleStringProperty();
     private final StringProperty propertySearchButton = new SimpleStringProperty();
     private final StringProperty propertySearchBarPrompt = new SimpleStringProperty();
     private final StringProperty propertyEditCollButton = new SimpleStringProperty();
     private final StringProperty propertyCollectionLabel = new SimpleStringProperty();
+    private final StringProperty propertyRefreshButton = new SimpleStringProperty();
+    private final StringProperty propertyClearButton = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
 
@@ -138,9 +143,13 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         searchBar.promptTextProperty().bind(propertySearchBarPrompt);
         editCollectionButton.textProperty().bind(propertyEditCollButton);
         collectionLabel.textProperty().bind(propertyCollectionLabel);
+        refreshButton.textProperty().bind(propertyRefreshButton);
+        clearTagsButton.textProperty().bind(propertyClearButton);
+
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
         setLocale(currentLocale);
+
         data = FXCollections.observableArrayList(server.getNotes());
         filteredNotes = FXCollections.observableArrayList(data);
         listNotes.setItems(filteredNotes);
@@ -240,7 +249,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         titleWriting.setText(newNote.getTitle());
         updateMarkdown();
         noteWriting.requestFocus();
-        showNotification("Note added successfully!");
+        showNotification(resourceBundle.getString("notif.adding"));
     }
 
 
@@ -275,14 +284,14 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                     makeEditable(titleWriting);
                 } else {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Title Already Exists");
-                    alert.setHeaderText("The title of your note has to be unique!");
+                    alert.setTitle(resourceBundle.getString("alert.saving1"));
+                    alert.setHeaderText(resourceBundle.getString("alert.saving2"));
                     alert.showAndWait();
                 }
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Empty Title");
-                alert.setHeaderText("The title of your note can't be empty!");
+                alert.setTitle(resourceBundle.getString("alert.saving3"));
+                alert.setHeaderText(resourceBundle.getString("alert.saving4"));
                 alert.showAndWait();
             }
         }
@@ -304,8 +313,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
         if (noteSelected != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Delete Note");
-            alert.setHeaderText("Are you sure you want to delete this note?");
+            alert.setTitle(resourceBundle.getString("alert.deleting3"));
+            alert.setHeaderText(resourceBundle.getString("alert.deleting4"));
             alert.setContentText(noteSelected.getTitle());
 
             alert.showAndWait().ifPresent(response -> {
@@ -316,11 +325,11 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                         filteredNotes.remove(noteSelected);
                         listNotes.refresh();
                         listNotes.getSelectionModel().clearSelection();
-                        showNotification("Note deleted successfully!");
+                        showNotification(resourceBundle.getString("notif.deleting"));
                     } catch (Exception e) {
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
-                        alert2.setTitle("Deletion Failed");
-                        alert2.setHeaderText("Error occurred during deletion");
+                        alert2.setTitle(resourceBundle.getString("alert.deleting1"));
+                        alert2.setHeaderText("alert.deleting2");
                         alert2.setContentText(e.getMessage());
                         alert2.showAndWait();
                     }
@@ -373,7 +382,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         listNotes.setItems(data);
         listNotes.getSelectionModel().select(0);
         onNoteClicked(null);
-        showNotification("Notes refreshed successfully!");
+        showNotification(resourceBundle.getString("notif.refreshing"));
     }
 
 
@@ -681,6 +690,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         propertySearchBarPrompt.set(rb.getString("searchBar.prompt"));
         propertyEditCollButton.set(rb.getString("button.editCollection"));
         propertyCollectionLabel.set(rb.getString("label.collections"));
+        propertyRefreshButton.set(rb.getString("button.refresh"));
+        propertyClearButton.set(rb.getString("button.clearFilters"));
         switch (locale.getLanguage()) {
             case "en":
                 currentLanguage.set("🇬🇧");
@@ -690,6 +701,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 break;
             case "es":
                 currentLanguage.set("🇪🇸");
+                break;
+            case "pl":
+                currentLanguage.set("\uD83C\uDDF5\uD83C\uDDF1");
                 break;
             default:
                 currentLanguage.set("🇬🇧");
@@ -723,6 +737,14 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     /**
+     * Switches the application's language to Polish.
+     */
+    public void switchToPolish() {
+        switchLanguage(new Locale("pl"));
+        currentLanguage.set("\uD83C\uDDF5\uD83C\uDDF1");
+    }
+
+    /**
      * Loads the saved locale from the configuration file.
      * If no locale is saved, defaults to English.
      *
@@ -749,6 +771,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         this.resourceBundle = ResourceBundle.getBundle("bundle", locale);
         saveLocale(locale);
         setLocale(locale);
+        createNoteTextInputContextMenu();
     }
 
     /**
@@ -781,86 +804,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     /**
-     * Sets the {@code Button} used for the delete functionality.
-     *
-     * @param deleteButton the delete {@code Button}.
-     */
-    public void setDeleteButton(Button deleteButton) {
-        this.deleteButton = deleteButton;
-    }
-
-    /**
-     * Sets the {@code Button} used for the add functionality.
-     *
-     * @param addButton the add {@code Button}.
-     */
-    public void setAddButton(Button addButton) {
-        this.addButton = addButton;
-    }
-
-    /**
-     * Sets the {@code Button} used for the search functionality.
-     *
-     * @param searchButton the search {@code Button}.
-     */
-    public void setSearchButton(Button searchButton) {
-        this.searchButton = searchButton;
-    }
-
-    /**
-     * Gets the current locale used by the application.
-     *
-     * @return the current {@code Locale}.
-     */
-    public Locale getCurrentLocale() {
-        return currentLocale;
-    }
-
-    /**
-     * Sets the {@code TextField} used for the search bar functionality.
-     *
-     * @param searchBar the search {@code TextField}.
-     */
-    public void setSearchBar(TextField searchBar) {
-        this.searchBar = searchBar;
-    }
-
-    /**
-     * Gets the {@code Button} used for the search functionality.
-     *
-     * @return the search {@code Button}.
-     */
-    public Button getSearchButton() {
-        return searchButton;
-    }
-
-    /**
-     * Gets the {@code Button} used for the add functionality.
-     *
-     * @return the add {@code Button}.
-     */
-    public Button getAddButton() {
-        return addButton;
-    }
-
-    /**
-     * Gets the {@code Button} used for the delete functionality.
-     *
-     * @return the delete {@code Button}.
-     */
-    public Button getDeleteButton() {
-        return deleteButton;
-    }
-
-    /**
-     * Gets the {@code TextField} used for the search bar functionality.
-     *
-     * @return the search {@code TextField}.
-     */
-    public TextField getSearchBar() {
-        return searchBar;
-    }
-    /**
      * Filters notes by a selected tag.
      */
     /**
@@ -873,7 +816,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         activeTagFilters.add(newTag);
         applyFilters(searchBar.getText());
         ComboBox<String> newComboBox = new ComboBox<>();
-        newComboBox.setPromptText("Select a tag");
+        newComboBox.setPromptText(resourceBundle.getString("label.tagSelect"));
         tagFilters.add(newComboBox);
         tagField.getChildren().add(newComboBox);
         displayTags(newComboBox);
@@ -898,7 +841,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         tagFilters.clear();
         tagField.getChildren().clear();
         ComboBox<String> initialComboBox = new ComboBox<>();
-        initialComboBox.setPromptText("Select a tag");
+        initialComboBox.setPromptText(resourceBundle.getString("label.tagSelect"));
         tagFilters.add(initialComboBox);
         tagField.getChildren().add(initialComboBox);
         displayTags(initialComboBox);
@@ -930,9 +873,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void createNoteTextInputContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem menuItemAddFile = new MenuItem("Upload file");
-        MenuItem menuItemAddNoteReference = new MenuItem("Reference Note");
-        MenuItem menuItemAddTag = new MenuItem("Add tag");
+        MenuItem menuItemAddFile = new MenuItem(resourceBundle.getString("menu.upload"));
+        MenuItem menuItemAddNoteReference = new MenuItem(resourceBundle.getString("menu.reference"));
+        MenuItem menuItemAddTag = new MenuItem(resourceBundle.getString("menu.addTag"));
 
         contextMenu.getItems().add(menuItemAddFile);
         contextMenu.getItems().add(menuItemAddNoteReference);
@@ -951,7 +894,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     private File askUserForEmbeddedFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select Image To Upload");
+        fileChooser.setTitle(resourceBundle.getString("fileChooser.select"));
 
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Image Files",
