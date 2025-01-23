@@ -2,7 +2,7 @@ package client.utils;
 
 
 import commons.Collection;
-import commons.CollectionNote;
+import commons.Note;
 import commons.Pair;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -92,8 +92,8 @@ public class CollectionServerUtils {
         var colId = collectionServerUtils.getAllCollectionNameIds().getFirst().getSecond();
         var collection = collectionServerUtils.getCollection(colId);
 
-        collection.addNote(new CollectionNote("Hello", "World"));
-        collection.addNote(new CollectionNote("Hello1", "World2"));
+        collection.addNote(new Note("Hello", "World"));
+        collection.addNote(new Note("Hello1", "World2"));
 
         collectionServerUtils.updateCollection(collection);
 
@@ -123,7 +123,7 @@ public class CollectionServerUtils {
      * @param collectionNote the collection note
      * @return the collection returned from the server
      */
-    public Collection addNoteToCollection(Collection collection,CollectionNote collectionNote) {
+    public Collection addNoteToCollection(Collection collection,Note collectionNote) {
         collection.addNote(collectionNote);
         return updateCollection(collection);
     }
@@ -188,7 +188,7 @@ public class CollectionServerUtils {
      * Add test collection.
      */
     public void addTestCollection() {
-        CollectionNote note = new CollectionNote("Hello", "World");
+        Note note = new Note("Hello", "World");
 
         Collection collection = new Collection("Collection");
         collection.addNote(note);
