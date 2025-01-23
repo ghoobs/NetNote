@@ -14,7 +14,7 @@ import server.services.EmbeddedFileService;
 @RequestMapping("/api")
 public class EmbeddedFileController {
 
-    private final NoteRepository noteRepo;
+    private final NoteRepository noteRepository;
     private final EmbeddedFileService service;
 
     /**
@@ -25,14 +25,14 @@ public class EmbeddedFileController {
      */
     public EmbeddedFileController(NoteRepository noteRepo,
                                   EmbeddedFileService service) {
-        this.noteRepo = noteRepo;
+        this.noteRepository = noteRepo;
         this.service = service;
     }
 
     @PostMapping("/{noteId}/files")
     public ResponseEntity<EmbeddedFile> addFile(@PathVariable long noteId,
                                                 @RequestBody EmbeddedFile embeddedFile) {
-        Note note = noteRepo.findById(noteId).orElse(null);
+        Note note = noteRepository.findById(noteId).orElse(null);
         if (note==null) {
             return ResponseEntity.notFound().build();
         }
@@ -41,7 +41,7 @@ public class EmbeddedFileController {
                 embeddedFile.getFiletype(), url, embeddedFile.getData(), note);
 
         note.addEmbeddedFile(toSave);
-        noteRepo.save(note);
+        noteRepository.save(note);
         return ResponseEntity.ok(embeddedFile);
     }
 
@@ -58,7 +58,7 @@ public class EmbeddedFileController {
 
     @DeleteMapping("/{noteId}/files/{filename}")
     public ResponseEntity<Note> deleteFile(@PathVariable long noteId, @PathVariable String filename) {
-        Note note = noteRepo.findById(noteId).orElse(null);
+        Note note = noteRepository.findById(noteId).orElse(null);
         if (note==null) {
             return ResponseEntity.notFound().build();
         }
@@ -68,7 +68,7 @@ public class EmbeddedFileController {
         }
 
         note.removeEmbeddedFile(file);
-        noteRepo.save(note);
+        noteRepository.save(note);
         return ResponseEntity.ok(note);
     }
     @PutMapping("/{noteId}/files/{filename}/rename/{newFilename}")
@@ -80,7 +80,7 @@ public class EmbeddedFileController {
         }
 
         file.setFilename(newFilename);
-        noteRepo.save(noteRepo.findById(noteId).get());
+        noteRepository.save(noteRepository.findById(noteId).get());
         return ResponseEntity.ok(file);
     }
 

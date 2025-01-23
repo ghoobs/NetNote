@@ -1,14 +1,11 @@
 package server.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-import commons.Collection;
 import commons.Note;
-import commons.CollectionNote;
 import commons.Pair;
 import commons.Tag;
 import events.AddEvent;
@@ -17,13 +14,9 @@ import events.UpdateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.stream.Stream;
-
+import server.services.NoteService;
 import server.websocket.WebSocketMessaging;
 import server.database.NoteRepository;
 
@@ -46,16 +39,22 @@ import server.database.NoteRepository;
 @RequestMapping("/api/notes")
 public class NoteController {
 
-    private final NoteRepository notes;
+    private final NoteRepository noteRepository;
+    private final NoteService service;
     private ApplicationEventPublisher eventPublisher;
     private WebSocketMessaging messaging;
+
     /**
      * Instantiates a new Note controller.
      *
-     * @param repo the repo
+     * @param noteRepository Note repository
+     * @param service Note service
      */
-    public NoteController(NoteRepository repo) {
-        this.notes = repo;
+    public NoteController(NoteRepository noteRepository,
+                          NoteService service
+    ) {
+        this.noteRepository = noteRepository;
+        this.service = service;
     }
 
     /**
@@ -76,11 +75,11 @@ public class NoteController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Note> delete(@PathVariable("id") Long id){
 
-        if (!notes.existsById(id)) {
+        if (!noteRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        Note toDelete = notes.findById(id).get();
-        notes.deleteById(id);
+        Note toDelete = noteRepository.findById(id).get();
+        noteRepository.deleteById(id);
         DeleteEvent deleteEvent = new DeleteEvent(this, toDelete);
         eventPublisher.publishEvent(deleteEvent);
         messaging.sendEvent(id, "/topic/notes");
@@ -99,7 +98,7 @@ public class NoteController {
      */
     @GetMapping(path = {"", "/"})
     public List<Note> getAll() {
-        return notes.findAll();
+        return noteRepository.findAll();
     }
 
 
@@ -111,10 +110,10 @@ public class NoteController {
      */
     @GetMapping("id/{id}")
     public ResponseEntity<Note> getById(@PathVariable("id") long id) {
-        if (id < 0 || !notes.existsById(id))
+        if (id < 0 || !noteRepository.existsById(id))
             return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok(notes.findById(id).get());
+        return ResponseEntity.ok(noteRepository.findById(id).get());
     }
 
     /**
@@ -170,7 +169,7 @@ public class NoteController {
      */
     @GetMapping("/search")
     public List<Note> searchNotes(@RequestParam String keyword){
-            List<Note> allNotes = notes.findAll();
+            List<Note> allNotes = noteRepository.findAll();
             return allNotes.stream()
                     .filter(note -> note.hasKeyword(keyword))
                     .collect(Collectors.toList());
@@ -187,7 +186,7 @@ public class NoteController {
         if (noteAdding.text == null || noteAdding.title == null)
             return ResponseEntity.badRequest().build();
 
-        Note savedNote = notes.save(noteAdding);
+        Note savedNote = noteRepository.save(noteAdding);
         AddEvent addEvent = new AddEvent(this, savedNote);
         eventPublisher.publishEvent(addEvent);
         messaging.sendEvent(savedNote, "/topic/notes");
@@ -204,13 +203,15 @@ public class NoteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Note> updateNote(@PathVariable("id") Long id, @RequestBody Note updatedNote) {
-        if (!notes.existsById(id)) {
+        if (!noteRepository.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
-        Note existingNote = notes.findById(id).get();
+        Note existingNote = noteRepository.findById(id).get();
         boolean titleChanged = !existingNote.title.equals(updatedNote.title);
         if (titleChanged) {
-            List<Note> renamedNotes = renameAllNoteReferences(existingNote.title, updatedNote.title,
+            List<Note> renamedNotes = service.renameAllNoteReferences(
+                    existingNote.title,
+                    updatedNote.title,
                     null /* TODO: add note collection here in the future*/);
             if (messaging != null) {
                 renamedNotes.forEach(
@@ -222,54 +223,10 @@ public class NoteController {
         }
         updatedNote.copyTo(existingNote);
 
-        notes.save(existingNote);
+        noteRepository.save(existingNote);
         UpdateEvent updateEvent = new UpdateEvent(this, existingNote);
         eventPublisher.publishEvent(updateEvent);
         messaging.sendEvent(existingNote, "/topic/notes");
         return ResponseEntity.ok(existingNote);
     }
-
-    /**
-     * Gets all notes pertaining to a specific collection
-     * @param collection Collection to search in
-     * @return List of notes contained in the collection
-     */
-    private List<Note> getNotesFromCollection(Collection collection) {
-        if (collection == null) {
-            //throw new IllegalArgumentException("Collection must not be null!");
-            return notes.findAll();
-        }
-        return notes.findAll()
-                .stream()
-                .map(note -> (CollectionNote)note)
-                .filter(note -> note.collection.id==collection.id)
-                .map(note -> (Note)note)
-                .toList();
-    }
-
-    /**
-     * Renames all references [[...]] inside of notes that match the old title to the new title
-     * @param oldTitle Old title of the note reference to rename
-     * @param newTitle New title of the note reference to set
-     * @param collection Collection in which the note is situated
-     * @return List of notes that have been modified
-     */
-    private List<Note> renameAllNoteReferences(String oldTitle, String newTitle, Collection collection) {
-        List<Note> allNotes = getNotesFromCollection(collection);
-        List<Note> modifiedNotes = new ArrayList<Note>() ;
-        allNotes.forEach(
-            (note) -> {
-                String oldText = note.text;
-                note.text = note.text.replace(
-                    "[[" + oldTitle + "]]",
-                    "[[" + newTitle + "]]"
-                );
-                if (!oldText.equals(note.text)) {
-                    modifiedNotes.add(note);
-                }
-            }
-        );
-        return modifiedNotes;
-    }
-
 }
