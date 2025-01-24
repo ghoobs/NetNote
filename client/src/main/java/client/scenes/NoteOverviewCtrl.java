@@ -501,6 +501,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void applyFilters(String searchWord) {
         if ((searchWord == null || searchWord.isEmpty()) && activeTagFilters.isEmpty()) {
             filteredNotes.setAll(data);
+            refresh();
         } else {
             filteredNotes.setAll(data.stream()
                     .filter(note -> {
