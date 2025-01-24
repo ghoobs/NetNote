@@ -22,6 +22,9 @@ to run the client. Please note that the server needs to be running, before you c
 
 Once this is working, you can try importing the project into your favorite IDE.
 
+# User Guide:
+### [Open user guide](./docs/userguide/GUIDE.md)
+
 ### Useful Shortcuts:
 - CTRL + S - to save a Note
 - CTRL + N - to create a new Note
