@@ -5,7 +5,7 @@ import client.markdown.MarkdownHandler;
 import client.utils.CollectionServerUtils;
 import client.utils.*;
 import client.markdown.*;
-import client.utils.ServerUtils2;
+
 import client.websocket.WebSocketClient2;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
@@ -47,7 +47,7 @@ import javafx.util.Duration;
  */
 public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
-    private final ServerUtils2 server;
+    private final ServerConnection server;
     private final MainCtrl mainCtrl;
     private final MarkdownHandler mdHandler;
     private WebSocketClient2 webSocketClient;
@@ -124,7 +124,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      * @param mainCtrl  the main controller of the application
      */
     @Inject
-    public NoteOverviewCtrl(ServerUtils2 server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerConnection server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
         this.server = server;
         this.mdHandler = mdHandler;
         this.mainCtrl = mainCtrl;
@@ -1091,7 +1091,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public String getServerUrl() {
-        return "http://localhost:8080";
+        return ServerConnection.SERVER;
     }
 
     @FXML

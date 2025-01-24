@@ -109,8 +109,8 @@ public class MarkdownHandlerTest {
         String resourceName = "my complex-image_name! [1].png";
         String altName = "test/thing";
         String srcHtml = "<p>!["+altName+"]("+resourceName+")</p>";
-        String expectedHtml = "<p><img alt=\""+altName+"\" src=\""+serverUrl+"/api/" +
-                noteId+ "/files/"+resourceName+"/data\"></p>";
+        String expectedHtml = "<p><img alt=\""+altName+"\" src=\""+serverUrl+"/api/embeds/" +
+                noteId+ "/"+resourceName+"\"></p>";
         String result = MarkdownHandler.regexReplaceAllEmbeds(srcHtml, serverUrl, noteId);
         assertEquals(
                 result ,
