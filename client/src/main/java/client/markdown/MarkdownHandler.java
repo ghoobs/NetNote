@@ -365,6 +365,6 @@ public class MarkdownHandler {
     public static String regexReplaceAllEmbeds(String htmlData, String serverUrl, long noteId) {
         return htmlData.replaceAll(
                  EmbeddedFile.REGEX_MD_EMBED_REFERENCE,
-                "<img alt=\"$1\" src=\""+serverUrl+"/api/" + noteId+ "/files/$2/data\">");
+                "<img alt=\"$1\" src=\""+serverUrl+"/api/embeds/" + noteId+ "/$2\">");
     }
 }
