@@ -407,6 +407,15 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         showNotification(resourceBundle.getString("notif.refreshing"));
     }
 
+    public void refreshNoPopup() {
+        var notes = server.getNotes();
+        data = FXCollections.observableList(notes);
+        refreshCollectionList();
+        listNotes.setItems(data);
+        listNotes.getSelectionModel().select(0);
+        onNoteClicked(null);
+    }
+
 
     private void playFadeAnimation() {
         FadeTransition fadeOut = new FadeTransition(Duration.millis(500), listNotes);
@@ -501,7 +510,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void applyFilters(String searchWord) {
         if ((searchWord == null || searchWord.isEmpty()) && activeTagFilters.isEmpty()) {
             filteredNotes.setAll(data);
-            refresh();
+            refreshNoPopup();
         } else {
             filteredNotes.setAll(data.stream()
                     .filter(note -> {
