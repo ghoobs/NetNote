@@ -1072,6 +1072,45 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     @Override
+    public void onMdEmbeddedFileClick(String fileName) {
+        EmbeddedFile file = getSelectedNote()
+                .getEmbeddedFiles()
+                .stream()
+                .filter(f -> f.getFilename().equals(fileName))
+                .findFirst()
+                .orElse(null);
+        if (file == null) {
+            return;
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setContentText(MessageFormat.format(
+                resourceBundle.getString("alert.file.askDownload"), fileName));
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.YES) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(resourceBundle.getString("fileChooser.save"));
+        fileChooser.setInitialFileName(file.getFilename());
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("*", "*." + file.getFiletype()));
+        File output = fileChooser.showSaveDialog(null);
+        if (output != null && output.exists()) {
+            try {
+                FileOutputStream fileWriter = new FileOutputStream(output);
+                fileWriter.write(file.getData());
+            } catch (Exception ex) {
+                Alert alertError = new Alert(Alert.AlertType.ERROR);
+                alertError.initModality(Modality.APPLICATION_MODAL);
+                alertError.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.writeFail"), fileName));
+                alert.showAndWait();
+            }
+        }
+    }
+
+    @Override
     public boolean doesNoteExistWithinSameCollection(String note) {
         return listNotes.getItems()
                 .stream()

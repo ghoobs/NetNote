@@ -20,6 +20,12 @@ public interface IMarkdownEvents {
     void onUrlMdAnchorClick(String url);
 
     /**
+     * Called when an embedded file is clicked
+     * @param fileName Name of the file
+     */
+    void onMdEmbeddedFileClick(String fileName);
+
+    /**
      * Called to ask if a note with this name exists, within the same collection.
      * This is used to determine the style of the button.
      * @param note Name of the note, excluding the [[...]]
