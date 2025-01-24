@@ -38,6 +38,11 @@ public class CollectionController {
             NoteService noteService) {
         this.collectionService = collectionService;
         this.noteService = noteService;
+
+        if (collectionService.getAllCollections().isEmpty()){
+            Collection collection = new Collection("Standard Collection");
+            collectionService.saveCollection(collection);
+        }
     }
 
     @DeleteMapping("/delete/{id}")
