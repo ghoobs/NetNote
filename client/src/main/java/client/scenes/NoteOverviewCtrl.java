@@ -37,6 +37,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import javafx.animation.FadeTransition;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -160,9 +162,20 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         System.out.println(colServer.getCollections().stream().flatMap(x -> x.notes.stream()).map(x -> x.collection.toString()).toList());
         filteredNotes = FXCollections.observableArrayList(data);
         listNotes.setItems(filteredNotes);
-        tagFilters.add(tagComboBox);
-        displayTags(tagComboBox);
-        clearTagsButton.setOnAction(event -> clearTags());
+        tagComboBox.setOnAction(event -> {
+            String selectedTag = tagComboBox.getValue();
+            if (selectedTag != null && !selectedTag.isEmpty()) {
+                try {
+                    applyTagFilter(selectedTag);
+                } catch (IndexOutOfBoundsException e) {
+                    System.err.println("Handled IndexOutOfBoundsException in tagComboBox.setOnAction.");
+                }
+            }
+        });
+        clearTagsButton.setOnAction(event -> resetFilters());
+        searchBar.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        populateTagComboBox();
+
         makeEditable(noteWriting);
         titleWriting.setEditable(true);
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
@@ -186,10 +199,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             }
         });
         //setupWebSocketClient();
-        searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
-            applyFilters(newValue);
-            highlightSelectedNote(newValue);
-        });
         listNotes.setOnMouseClicked(this::onNoteClicked);
         createNoteTextInputContextMenu();
 
@@ -410,6 +419,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         listNotes.getSelectionModel().select(0);
         onNoteClicked(null);
         showNotification(resourceBundle.getString("notif.refreshing"));
+        resetFilters();
     }
 
 
@@ -500,28 +510,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         }
     }
 
-    /**
-     * Filters the notes based on both search and active tag filters.
-     */
-    private void applyFilters(String searchWord) {
-        if ((searchWord == null || searchWord.isEmpty()) && activeTagFilters.isEmpty()) {
-            filteredNotes.setAll(data);
-        } else {
-            filteredNotes.setAll(data.stream()
-                    .filter(note -> {
-                        List<String> noteTags = extractTags(note.getText());
-                        boolean matchesSearch = (searchWord == null || searchWord.isEmpty()) ||
-                                note.getTitle().toLowerCase().contains(searchWord.toLowerCase()) ||
-                                note.getText().toLowerCase().contains(searchWord.toLowerCase());
-                        boolean matchesTags = activeTagFilters.isEmpty() ||
-                                activeTagFilters.stream().allMatch(noteTags::contains);
-
-                        return matchesSearch && matchesTags; // Must satisfy both
-                    })
-                    .toList());
-        }
-        listNotes.setItems(filteredNotes); // Update ListView
-    }
     /**
      * Highlights the title and content of the currently selected note based on the search keyword.
      *
@@ -831,68 +819,186 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     /**
-     * Filters notes by a selected tag.
+     * Filters the notes based on both search and active tag filters.
      */
-    /**
-     * Filters notes by a selected tag and applies the combined filters.
-     */
-    private void filterByTag(String newTag) {
-        if (newTag == null || newTag.isEmpty()) {
-            return;
+    private void applyFilters() {
+        String searchKeyword = searchBar.getText().toLowerCase();
+        filteredNotes.setAll(data.stream()
+                .filter(note -> note.getTitle().toLowerCase().contains(searchKeyword)
+                        || note.getText().toLowerCase().contains(searchKeyword))
+                .filter(note -> activeTagFilters.stream()
+                        .allMatch(filter -> extractTags(note.getText()).contains(filter)))
+                .toList());
+
+        try {
+            if (filteredNotes.isEmpty()) {
+                listNotes.getSelectionModel().clearSelection();
+            } else {
+                listNotes.getSelectionModel().select(0);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Handled IndexOutOfBoundsException during applyFilters.");
         }
-        activeTagFilters.add(newTag);
-        applyFilters(searchBar.getText());
-        ComboBox<String> newComboBox = new ComboBox<>();
-        newComboBox.setPromptText(resourceBundle.getString("label.tagSelect"));
-        tagFilters.add(newComboBox);
-        tagField.getChildren().add(newComboBox);
-        displayTags(newComboBox);
     }
 
     /**
-     * Displays available tags in a given ComboBox.
+     * Updates the selection in the ListView based on the filtered notes.
+     * If the filtered list is empty, it clears the selection and resets the note editor.
+     * Otherwise, it selects the first note in the list and updates the note editor fields.
+     * Handles IndexOutOfBoundsException to prevent application crashes.
      */
-    private void displayTags(ComboBox<String> tagBox) {
-        List<String> allTags = filteredNotes.stream()
-                .map(Note::getText)
-                .flatMap(content -> extractTags(content).stream()) // Flatten the tags
+    private void updateListViewSelection() {
+        try {
+            if (filteredNotes.isEmpty()) {
+                listNotes.getSelectionModel().clearSelection();
+                noteWriting.clear();
+                titleWriting.clear();
+            } else {
+                listNotes.getSelectionModel().select(0); // Safely select the first item
+                Note selectedNote = listNotes.getSelectionModel().getSelectedItem();
+                if (selectedNote != null) {
+                    noteWriting.setText(selectedNote.getText());
+                    titleWriting.setText(selectedNote.getTitle());
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Ignored IndexOutOfBoundsException: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Applies a tag filter to the notes based on the selected tag.
+     * Updates the filtered notes list and the available tags in the dropdown.
+     * Ensures proper handling of IndexOutOfBoundsException to prevent crashes.
+     *
+     * @param tag the tag to filter notes by.
+     */
+    private void applyTagFilter(String tag) {
+        if (tag == null || tag.isEmpty()) return;
+
+        Platform.runLater(() -> {
+            try {
+                activeTagFilters.add(tag);
+                filteredNotes.setAll(data.stream()
+                        .filter(note -> activeTagFilters.stream()
+                                .allMatch(filter -> extractTags(note.getText()).contains(filter)))
+                        .toList());
+                if (!filteredNotes.isEmpty()) {
+                    listNotes.getSelectionModel().select(0);
+                } else {
+                    listNotes.getSelectionModel().clearSelection();
+                }
+                tagComboBox.setValue(null);
+                tagComboBox.setPromptText("Select Tag");
+                updateAvailableTags();
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("Handled IndexOutOfBoundsException in applyTagFilter.");
+            }
+        });
+    }
+
+    /**
+     * Resets all filters, including search and tag filters.
+     * Clears the active tag filters and updates the filtered notes to include all notes.
+     * Repopulates the tag dropdown menu and resets the ListView selection.
+     * Ensures the dropdown displays "Select Tag".
+     */
+
+    private void resetFilters() {
+        activeTagFilters.clear(); // Clear active tag filters
+        searchBar.clear(); // Clear the search bar
+        filteredNotes.setAll(data); // Reset filtered notes to include all notes
+        listNotes.setItems(filteredNotes); // Update ListView with all notes
+        updateListViewSelection(); // Update the ListView selection
+
+        // Repopulate the tag dropdown menu and set placeholder
+        populateTagComboBox();
+        tagComboBox.setValue(null); // Clear the current value
+        tagComboBox.setPromptText("Select Tag"); // Set the placeholder text to "Select Tag"
+    }
+
+
+    /**
+     * Populates the tag dropdown menu with all available tags from the notes.
+     * Excludes any tags that are already in use as active filters.
+     * Sets the dropdown value to null if no tags are available.
+     */
+    private void populateTagComboBox() {
+        List<String> allTags = data.stream()
+                .flatMap(note -> extractTags(note.getText()).stream())
                 .distinct()
-                .toList();
-        List<String> availableTags = new ArrayList<>(allTags);
-        availableTags.removeAll(activeTagFilters);
-        tagBox.getItems().setAll(availableTags);
-        tagBox.valueProperty().addListener((observable, oldValue, newValue) -> filterByTag(newValue));
+                .collect(Collectors.toList());
+        allTags.removeAll(activeTagFilters);
+        tagComboBox.getItems().setAll(allTags);
+        tagComboBox.setPromptText("Select Tag");
+        tagComboBox.setValue(null);
     }
-    public void clearTags() {
-        activeTagFilters.clear();
-        tagFilters.clear();
-        tagField.getChildren().clear();
-        ComboBox<String> initialComboBox = new ComboBox<>();
-        initialComboBox.setPromptText(resourceBundle.getString("label.tagSelect"));
-        tagFilters.add(initialComboBox);
-        tagField.getChildren().add(initialComboBox);
-        displayTags(initialComboBox);
-        filteredNotes.setAll(data);
-        listNotes.setItems(filteredNotes);
-    }
+
+
     /**
-     * Filters notes based on the provided predicate.
+     * Updates the available tags in the dropdown based on the filtered notes.
+     * Retains the currently selected tag if it is still valid after updating.
+     * Handles IndexOutOfBoundsException to ensure smooth execution.
      */
-    private void filterNotes(Predicate<Note> predicate) {
-        filteredNotes.setAll(data.stream().filter(predicate).toList());
-        listNotes.setItems(filteredNotes);
+    private void updateAvailableTags() {
+        Platform.runLater(() -> {
+            try {
+                String currentSelection = tagComboBox.getValue();
+                List<String> remainingTags = filteredNotes.stream()
+                        .flatMap(note -> extractTags(note.getText()).stream())
+                        .distinct()
+                        .collect(
+                                Collectors.toList());
+                remainingTags.removeAll(activeTagFilters);
+                tagComboBox.getItems().setAll(remainingTags);
+                if (currentSelection != null && remainingTags.contains(currentSelection)) {
+                    tagComboBox.setValue(currentSelection);
+                }
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("Handled IndexOutOfBoundsException in updateAvailableTags.");
+            }
+        });
     }
+
     /**
-     * Extracts tags directly from the content of a note using regex.
+     * Extracts all tags from the given content using a regular expression.
+     * Tags are identified as words prefixed with a '#' character.
+     *
+     * @param content the content from which to extract tags.
+     * @return a list of tags without the '#' prefix.
      */
     private List<String> extractTags(String content) {
+        if (content == null || content.isEmpty()) return Collections.emptyList();
         List<String> tags = new ArrayList<>();
-        Matcher matcher = Pattern.compile("(?<=\\s|^)#\\w+\\b").matcher(content);
+        Matcher matcher = Pattern.compile("(?<=\\s|^)#\\w+").matcher(content);
         while (matcher.find()) {
-            tags.add(matcher.group());
+            tags.add(matcher.group().substring(1)); // Remove the '#' symbol
         }
         return tags;
     }
+
+    /**
+     * Handles clicking on a note title in Markdown.
+     * Selects the note with the given title in the ListView and updates the note editor.
+     *
+     * @param noteTitle the title of the clicked note.
+     */
+    @Override
+    public void onNoteMdButtonClick(String noteTitle) {
+        Optional<Note> matchingNote = data.stream()
+                .filter(note -> note.getTitle().equals(noteTitle))
+                .findFirst();
+
+        matchingNote.ifPresent(note -> {
+            listNotes.getSelectionModel().select(note);
+            noteWriting.setText(note.getText());
+        });
+    }
+    @Override
+    public void onTagMdButtonClick(String tag) {
+        applyTagFilter(tag);
+    }
+
 
     /**
      * Creates a right-click context popup for the note text input.
@@ -1035,21 +1141,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         int caretPosition = noteWriting.getCaretPosition();
         noteWriting.insertText(caretPosition, "#");
     }
-
-    @Override
-    public void onTagMdButtonClick(String tag) {
-        filterByTag(tag);
-    }
-
-    @Override
-    public void onNoteMdButtonClick(String note) {
-        Optional<Note> maybeNote = listNotes.getItems().stream()
-                .filter(tnote -> tnote.getTitle().equals(note))
-                .findFirst();
-        // Note exists, navigate
-        maybeNote.ifPresent(this::changeSelectedNote);
-    }
-
     @Override
     public void onUrlMdAnchorClick(String url) {
         if (Desktop.isDesktopSupported()) {
