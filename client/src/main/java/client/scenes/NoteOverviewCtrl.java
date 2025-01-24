@@ -985,7 +985,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 alert.showAndWait();
             } finally {
                 if (fileWriter != null) {
-                    fileWriter.close();
+                    try {
+                        fileWriter.close();
+                    } catch (Exception ex) { } //please shut up java compiler
                 }
             }
         }
