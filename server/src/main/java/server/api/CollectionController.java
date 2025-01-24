@@ -8,6 +8,7 @@ import server.services.CollectionService;
 import server.services.NoteService;
 
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -37,6 +38,11 @@ public class CollectionController {
             NoteService noteService) {
         this.collectionService = collectionService;
         this.noteService = noteService;
+
+        if (collectionService.getAllCollections().isEmpty()){
+            Collection collection = new Collection("Standard Collection");
+            collectionService.saveCollection(collection);
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -114,17 +120,19 @@ public class CollectionController {
             @PathVariable("id") long id,
             @RequestBody Collection updatedCollection
     ) {
-        Collection existingCollection = collectionService.getCollectionById(id);
-        if (existingCollection == null) {
-            return ResponseEntity.badRequest().build();
+        Optional<Collection> existingCollectionOpt = collectionService.collectionById(id);
+        if (existingCollectionOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
 
+        var existingCollection = existingCollectionOpt.get();
+
         existingCollection.name = updatedCollection.name;
+
 
         if (updatedCollection.notes != null) {
             existingCollection.updateNotes(updatedCollection.notes);
         }
-
 
         return ResponseEntity.ok(collectionService.saveCollection(existingCollection));
     }

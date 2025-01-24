@@ -153,16 +153,7 @@
                 </MenuBar>
 
                 <Label fx:id="collectionLabel" alignment="CENTER" prefHeight="26.0" prefWidth="83.0" text="Collection:" />
-                <MenuBar prefHeight="26.0" prefWidth="91.0">
-                    <menus>
-                        <Menu fx:id="collectionMenu" mnemonicParsing="false" text="Select">
-                            <items>
-                                <MenuItem mnemonicParsing="false" text="All" />
-                                <MenuItem mnemonicParsing="false" text="Default" />
-                            </items>
-                        </Menu>
-                    </menus>
-                </MenuBar>
+            <ComboBox fx:id="collectionMenu" prefHeight="26.0" prefWidth="82.0" promptText="Select Collection" />
                 <Button fx:id="editCollectionButton" mnemonicParsing="false" onAction="#editCollections" text="Edit Collections" />
             </items>
         </ToolBar>
