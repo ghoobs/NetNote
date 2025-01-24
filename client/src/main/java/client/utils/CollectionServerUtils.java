@@ -61,7 +61,7 @@ public class CollectionServerUtils {
      * @param args args
      */
     public static void main(String[] args) {
-        test1();
+        //test1();
 
         CollectionServerUtils collectionServerUtils = new CollectionServerUtils("http://localhost:8080/");
         collectionServerUtils.addTestCollection();
@@ -75,7 +75,7 @@ public class CollectionServerUtils {
 
        var oneDeleting = ids.getLast();
         System.out.println(oneDeleting);
-        collectionServerUtils.deleteCollection(oneDeleting.getSecond());
+        //collectionServerUtils.deleteCollection(oneDeleting.getSecond());
         ids = collectionServerUtils.getAllCollectionNameIds();
         System.out.println(ids);
     }
@@ -203,10 +203,16 @@ public class CollectionServerUtils {
      * @return a list of {@link Collection} objects fetched from the server
      */
     public List<Collection> getCollections() {
-        return ClientBuilder.newClient(new ClientConfig()) //
+        var collectionsNotCorrect = ClientBuilder.newClient(new ClientConfig()) //
                 .target(server).path("api/collections") //
                 .request(APPLICATION_JSON) //
                 .get(new GenericType<List<Collection>>() {
                 });
+        for (Collection c : collectionsNotCorrect) {
+            for (Note note : c.notes) {
+                note.collection = c;
+            }
+        }
+        return collectionsNotCorrect;
     }
 }
