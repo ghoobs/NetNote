@@ -961,7 +961,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
         alert.initModality(Modality.APPLICATION_MODAL);
         alert.setContentText(MessageFormat.format(
-                resourceBundle.getString("alert.file.askDownload"), fileName));
+                resourceBundle.getString("alert.file.askDownload"), file.getFilename()));
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isEmpty() || result.get() != ButtonType.YES) {
             return;
@@ -981,7 +981,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 Alert alertError = new Alert(Alert.AlertType.ERROR);
                 alertError.initModality(Modality.APPLICATION_MODAL);
                 alertError.setContentText(MessageFormat.format(
-                        resourceBundle.getString("alert.file.writeFail"), fileName));
+                        resourceBundle.getString("alert.file.writeFail"), file.getFilename()));
                 alert.showAndWait();
             } finally {
                 if (fileWriter != null) {
