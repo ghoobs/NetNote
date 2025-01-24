@@ -3,6 +3,8 @@ package client.scenes;
 import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
 import client.utils.CollectionServerUtils;
+import client.utils.*;
+import client.markdown.*;
 import client.utils.ServerUtils2;
 import client.websocket.WebSocketClient2;
 import com.google.common.io.Files;
@@ -94,7 +96,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private ToggleButton themeToggleButton;
 
     @FXML
-    private Menu collectionMenu;
+    private ComboBox<Collection> collectionMenu;
 
     private boolean isDarkMode = false;
 
@@ -157,7 +159,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
         setLocale(currentLocale);
 
-        data = FXCollections.observableArrayList(server.getNotes());
+        data = FXCollections.observableArrayList(colServer.getCollections().stream().flatMap(x -> x.notes.stream()).toList());
+        System.out.println(colServer.getCollections().stream().flatMap(x -> x.notes.stream()).map(x -> x.collection.toString()).toList());
         filteredNotes = FXCollections.observableArrayList(data);
         listNotes.setItems(filteredNotes);
         tagFilters.add(tagComboBox);
@@ -193,6 +196,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         listNotes.setOnMouseClicked(this::onNoteClicked);
         createNoteTextInputContextMenu();
 
+        collectionMenu.valueProperty().addListener((observable, oldValue, newValue) -> {currentCollection = newValue;
+            refresh();});
+
         //when the root node is deleted from the scene, the destructor is called
         Platform.runLater(() -> {
             Stage stage = (Stage) root.getScene().getWindow();
@@ -208,7 +214,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     private void refreshCollectionList() {
-        collectionMenu.getItems().addAll(colServer.getAllCollectionNameIds().stream().map(x -> new MenuItem(x.getFirst())).toList());
+        collectionMenu.getItems().clear();
+        collectionMenu.getItems().addAll(colServer.getCollections());
 //        searchButton.setOnAction(event -> searchNotes());
     }
 
