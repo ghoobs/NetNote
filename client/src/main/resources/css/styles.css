@@ -1,0 +1,44 @@
+/* Light Mode */
+.root.light-mode {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+}
+
+.text-area.light-mode, .text-field.light-mode {
+    -fx-control-inner-background: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: #cccccc;
+}
+
+.list-view.light-mode {
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-text-fill: #000000;
+}
+
+.web-view.light-mode {
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-text-fill: #000000;
+}
+
+/* Blue Mode */
+.root.blue-mode {
+    -fx-background-color: #7899da;
+}
+
+.text-area.blue-mode, .text-field.blue-mode {
+    -fx-control-inner-background: #7899da;
+    -fx-border-color: #839dcc;
+}
+
+.list-view.blue-mode {
+    -fx-background-color: #7899da;
+    -fx-control-inner-background: #7798d1;
+}
+
+.web-view.blue-mode {
+    -fx-control-inner-background: #7899da;
+    -fx-background-color: #839dcc;
+    -fx-text-fill: #000000;
+}
