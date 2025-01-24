@@ -954,6 +954,44 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     /**
+     * Shows a file browser dialogue, and requests the user to save a file.
+     * @param file Embed to save
+     */
+    private void askUserToSaveEmbeddedFile(EmbeddedFile file) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setContentText(MessageFormat.format(
+                resourceBundle.getString("alert.file.askDownload"), fileName));
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.YES) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(resourceBundle.getString("fileChooser.save"));
+        fileChooser.setInitialFileName(file.getFilename());
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("fileChooser.imageFiles", "*." + file.getFiletype()));
+        File output = fileChooser.showSaveDialog(null);
+        if (output != null) {
+            FileOutputStream fileWriter;
+            try {
+                fileWriter = new FileOutputStream(output);
+                fileWriter.write(file.getData());
+            } catch (Exception ex) {
+                Alert alertError = new Alert(Alert.AlertType.ERROR);
+                alertError.initModality(Modality.APPLICATION_MODAL);
+                alertError.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.writeFail"), fileName));
+                alert.showAndWait();
+            } finally {
+                if (fileWriter != null) {
+                    fileWriter.close();
+                }
+            }
+        }
+    }
+
+    /**
      * Called when ContextMenu->Upload file is clicked.
      * This will open a file browser dialogue, and will embed it into the current note.
      * @param event event
@@ -1082,32 +1120,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         if (file == null) {
             return;
         }
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
-        alert.initModality(Modality.APPLICATION_MODAL);
-        alert.setContentText(MessageFormat.format(
-                resourceBundle.getString("alert.file.askDownload"), fileName));
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isEmpty() || result.get() != ButtonType.YES) {
-            return;
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(resourceBundle.getString("fileChooser.save"));
-        fileChooser.setInitialFileName(file.getFilename());
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("*", "*." + file.getFiletype()));
-        File output = fileChooser.showSaveDialog(null);
-        if (output != null && output.exists()) {
-            try {
-                FileOutputStream fileWriter = new FileOutputStream(output);
-                fileWriter.write(file.getData());
-            } catch (Exception ex) {
-                Alert alertError = new Alert(Alert.AlertType.ERROR);
-                alertError.initModality(Modality.APPLICATION_MODAL);
-                alertError.setContentText(MessageFormat.format(
-                        resourceBundle.getString("alert.file.writeFail"), fileName));
-                alert.showAndWait();
-            }
-        }
+        askUserToSaveEmbeddedFile(file);
     }
 
     @Override
