@@ -973,7 +973,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 new FileChooser.ExtensionFilter("fileChooser.imageFiles", "*." + file.getFiletype()));
         File output = fileChooser.showSaveDialog(null);
         if (output != null) {
-            FileOutputStream fileWriter;
+            FileOutputStream fileWriter = null;
             try {
                 fileWriter = new FileOutputStream(output);
                 fileWriter.write(file.getData());
