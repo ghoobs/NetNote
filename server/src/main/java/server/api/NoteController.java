@@ -65,7 +65,7 @@ public class NoteController {
         this.messaging = messaging;
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Note> delete(@PathVariable("id") Long id){
         Note note = service.getNoteById(id);
         if (note == null) {
@@ -102,7 +102,7 @@ public class NoteController {
      * @param id the id
      * @return the by id
      */
-    @GetMapping("id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Note> getById(@PathVariable("id") long id) {
         Note note = service.getNoteById(id);
         if (id < 0 || note == null)
@@ -128,7 +128,7 @@ public class NoteController {
      *
      * @return the list
      */
-    @GetMapping("/names")
+    @GetMapping("/list/names")
     public List<String> getAllNames() {
         return getAll().stream().map(note -> note.title).toList();
     }
@@ -139,7 +139,7 @@ public class NoteController {
      *
      * @return the list
      */
-    @GetMapping("/ids")
+    @GetMapping("/list/ids")
     public List<Long> getAllIds() {
         return getAll().stream().map(note -> note.id).toList();
     }
@@ -149,7 +149,7 @@ public class NoteController {
      *
      * @return the tags
      */
-    @GetMapping("/tags")
+    @GetMapping("/list/tags")
     public List<Tag> getAllTags() {
         Set<Tag> tags = new HashSet<>();
         getAll().forEach(note -> tags.addAll(note.tags));
@@ -159,14 +159,14 @@ public class NoteController {
     /**
      * Search through notes using a keyword/string
      * Is case-insensitive to allow for more keywords
-     * @param keyword the keyword used to search through the notes
+     * @param keywords the keywords used to search through the notes
      * @return the notes that have the keyword in title or contents
      */
     @GetMapping("/search")
-    public List<Note> searchNotes(@RequestParam String keyword){
+    public List<Note> searchNotes(@RequestParam("keywords") String keywords){
             List<Note> allNotes = service.getAllNotes();
             return allNotes.stream()
-                    .filter(note -> note.hasKeyword(keyword))
+                    .filter(note -> note.hasKeyword(keywords))
                     .collect(Collectors.toList());
     }
 
