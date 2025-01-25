@@ -967,6 +967,46 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     /**
+     * Shows a file browser dialogue, and requests the user to save a file.
+     * @param file Embed to save
+     */
+    private void askUserToSaveEmbeddedFile(EmbeddedFile file) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setContentText(MessageFormat.format(
+                resourceBundle.getString("alert.file.askDownload"), file.getFilename()));
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.YES) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(resourceBundle.getString("fileChooser.save"));
+        fileChooser.setInitialFileName(file.getFilename());
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("fileChooser.imageFiles", "*." + file.getFiletype()));
+        File output = fileChooser.showSaveDialog(null);
+        if (output != null) {
+            FileOutputStream fileWriter = null;
+            try {
+                fileWriter = new FileOutputStream(output);
+                fileWriter.write(file.getData());
+            } catch (Exception ex) {
+                Alert alertError = new Alert(Alert.AlertType.ERROR);
+                alertError.initModality(Modality.APPLICATION_MODAL);
+                alertError.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.writeFail"), file.getFilename()));
+                alert.showAndWait();
+            } finally {
+                if (fileWriter != null) {
+                    try {
+                        fileWriter.close();
+                    } catch (Exception ex) { } //please shut up java compiler
+                }
+            }
+        }
+    }
+
+    /**
      * Called when ContextMenu->Upload file is clicked.
      * This will open a file browser dialogue, and will embed it into the current note.
      * @param event event
@@ -1082,6 +1122,20 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 System.out.println(ex.getMessage());
             }
         }
+    }
+
+    @Override
+    public void onMdEmbeddedFileClick(String fileName) {
+        EmbeddedFile file = getSelectedNote()
+                .getEmbeddedFiles()
+                .stream()
+                .filter(f -> f.getFilename().equals(fileName))
+                .findFirst()
+                .orElse(null);
+        if (file == null) {
+            return;
+        }
+        askUserToSaveEmbeddedFile(file);
     }
 
     @Override
