@@ -19,6 +19,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.Styleable;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -73,6 +74,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @FXML
     private ListView<Note> listNotes;
     @FXML
+    private ListView<EmbeddedFile> listEmbeddedFiles;
+    @FXML
     private TextField titleWriting;
     @FXML
     private WebView markDownView;
@@ -96,7 +99,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private Button clearTagsButton;
     @FXML
     private ToggleButton themeToggleButton;
-
     @FXML
     private ComboBox<Collection> collectionMenu;
 
@@ -209,6 +211,61 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
+        listEmbeddedFiles.setCellFactory(lv -> {
+            ListCell<EmbeddedFile> cell = new ListCell<>() {
+                @Override
+                protected void updateItem(EmbeddedFile file, boolean empty) {
+                    super.updateItem(file, empty);
+                    setText(file == null ? null : file.getFilename());
+                }
+            };
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItemRename = new MenuItem(resourceBundle.getString("menu.listembeds.rename"));
+            MenuItem menuItemDelete = new MenuItem(resourceBundle.getString("menu.listembeds.delete"));
+
+            contextMenu.getItems().add(menuItemRename);
+            contextMenu.getItems().add(menuItemDelete);
+
+            menuItemRename.setOnAction((_) -> {
+                if (getSelectedNote() == null) return;
+                EmbeddedFile file = cell.itemProperty().getValue();
+                mainCtrl.showRenameEmbeddedFileWindow(getSelectedNote(), file);
+            });
+            menuItemDelete.setOnAction((_) -> {
+                EmbeddedFile file = cell.itemProperty().getValue();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.askDelete"), file.getFilename()));
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isEmpty() || result.get() != ButtonType.YES) {
+                    return;
+                }
+                if (getSelectedNote() != null) {
+                    try {
+                        server.deleteFile(getSelectedNote().id, file.getFilename());
+                    } catch (WebApplicationException e) {
+                        Alert alert2 = new Alert(Alert.AlertType.ERROR);
+                        alert2.initModality(Modality.APPLICATION_MODAL);
+                        alert2.setContentText(e.getMessage());
+                        alert2.showAndWait();
+                        return;
+                    }
+                    refresh();
+                }
+            });
+
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell ;
+        });
+
         //setupWebSocketClient();
         listNotes.setOnMouseClicked(this::onNoteClicked);
         createNoteTextInputContextMenu();
@@ -416,6 +473,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         makeEditable(titleWriting);
         noteWriting.setText(note.getText());
         titleWriting.setText(note.getTitle());
+        var files = FXCollections.observableList(note.getEmbeddedFiles());
+        listEmbeddedFiles.setItems(files);
         updateMarkdown();
         listNotes.getSelectionModel().select(note);
     }
@@ -1190,7 +1249,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 .getEmbeddedFiles()
                 .stream()
                 .map(EmbeddedFile::getFilename)
-                .anyMatch(name -> name.equals(fileName))
+                .anyMatch(name -> name.toLowerCase().equals(fileName.toLowerCase()))
         ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -1333,6 +1392,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void applyBlueMode() {
         listNotes.getStyleClass().remove("light-mode");
         listNotes.getStyleClass().add("blue-mode");
+        listEmbeddedFiles.getStyleClass().add("blue-mode");
+        listEmbeddedFiles.getStyleClass().remove("light-mode");
 
         noteWriting.getStyleClass().remove("light-mode");
         titleWriting.getStyleClass().remove("light-mode");
@@ -1347,6 +1408,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void applyLightMode() {
         listNotes.getStyleClass().remove("blue-mode");
         listNotes.getStyleClass().add("light-mode");
+        listEmbeddedFiles.getStyleClass().remove("blue-mode");
+        listEmbeddedFiles.getStyleClass().add("light-mode");
 
         noteWriting.getStyleClass().remove("blue-mode");
         titleWriting.getStyleClass().remove("blue-mode");

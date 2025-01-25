@@ -5,6 +5,8 @@ import commons.Note;
 import org.springframework.stereotype.Service;
 import server.database.NoteRepository;
 
+import java.util.regex.Pattern;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,5 +47,32 @@ public class EmbeddedFileService {
                 .filter(that -> that.getFilename().equals(filename))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Renames all references ![foo](...) inside of notes that match the old file name to the new file name
+     * @param note Note that the embedded file belongs to
+     * @param oldFileName old filename to rename
+     * @param newFileName new filename to set
+     * @return if the note's text has been modified
+     */
+    public boolean renameAllEmbeddedFileReferences(Note note, String oldFileName, String newFileName) {
+        boolean modified = false;
+        String pattern = Pattern.quote(oldFileName);//I want to know the right format
+        String regExpression = 
+            EmbeddedFile.getMarkdownRegex(
+                EmbeddedFile.REGEX_ALT_NAMING_FORMAT,
+                pattern
+            );
+        String oldText = note.text;
+        note.text = note.text.replaceAll(
+                regExpression,
+                "![$1]("+newFileName+")"
+        );
+        if (!oldText.equals(note.text)) {
+            modified = true;
+            noteRepository.save(note);
+        }
+        return modified;
     }
 }

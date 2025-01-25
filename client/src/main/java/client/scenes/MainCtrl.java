@@ -1,5 +1,7 @@
 package client.scenes;
 
+import commons.Note;
+import commons.EmbeddedFile;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -7,10 +9,15 @@ import javafx.util.Pair;
 
 public class MainCtrl {
     private Stage primaryStage;
-    private NoteOverviewCtrl overviewCtrl;
+
     private Scene overview;
+    private NoteOverviewCtrl overviewCtrl;
+
     private Scene editCollections;
     private EditCollectionCtrl editCollectionCtrl;
+
+    private Scene renameEmbeddedFile;
+    private RenameCtrl renameEmbeddedFileCtrl;
 
     /**
      * Sets up and displays the primary stage with the note overview scene.
@@ -22,18 +29,23 @@ public class MainCtrl {
      * @param editCollections a Pair containing:
      *                        - the controller for the edit collection window (EditCollectionCtrl)
      *                        - the root layout (Parent) for the edit collection scene
+     * @param renameEmbeddedFile a Pair containing:
+     *                        - the controller for the rename file window (RenameCtrl)
+     *                        - the root layout (Parent) for the rename file scene
      */
 
     public void initialize(Stage primaryStage,
                            Pair<NoteOverviewCtrl, Parent> overview,
-                           Pair<EditCollectionCtrl, Parent> editCollections) {
+                           Pair<EditCollectionCtrl, Parent> editCollections,
+                           Pair<RenameCtrl, Parent> renameEmbeddedFile) {
         this.primaryStage = primaryStage;
 
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
         this.editCollections = new Scene(editCollections.getValue());
         this.editCollectionCtrl = editCollections.getKey();
-
+        this.renameEmbeddedFile = new Scene(renameEmbeddedFile.getValue());
+        this.renameEmbeddedFileCtrl = renameEmbeddedFile.getKey();
         showOverview();
         primaryStage.show();
     }
@@ -55,6 +67,17 @@ public class MainCtrl {
         primaryStage.setScene(editCollections);
         editCollections.setOnKeyPressed(e -> editCollectionCtrl.keyPressed(e));
         editCollectionCtrl.setLocale(editCollectionCtrl.loadSavedLocale());
+    }
+    
+    /**
+     * Sets the main scene to the renameEmbeddedFile scene and updates its title
+     * @param currentNote currentNote
+     * @param currentFile the current file
+     */
+    public void showRenameEmbeddedFileWindow(Note currentNote, EmbeddedFile currentFile){
+        primaryStage.setScene(renameEmbeddedFile);
+        renameEmbeddedFileCtrl.setLocale(renameEmbeddedFileCtrl.loadSavedLocale());
+        renameEmbeddedFileCtrl.setCurrentNote(currentNote, currentFile);
     }
 
     /**
