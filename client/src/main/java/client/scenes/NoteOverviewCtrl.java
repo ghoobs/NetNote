@@ -207,7 +207,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             contextMenu.getItems().add(menuItemDelete);
 
             menuItemRename.setOnAction((_) -> {
+                if (getSelectedNote() == null) return;
                 EmbeddedFile file = cell.itemProperty().getValue();
+                mainCtrl.showRenameEmbeddedFileWindow(getSelectedNote(), file);
             });
             menuItemDelete.setOnAction((_) -> {
                 EmbeddedFile file = cell.itemProperty().getValue();
@@ -1078,7 +1080,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 .getEmbeddedFiles()
                 .stream()
                 .map(EmbeddedFile::getFilename)
-                .anyMatch(name -> name.equals(fileName))
+                .anyMatch(name -> name.toLowerCase().equals(fileName.toLowerCase()))
         ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);

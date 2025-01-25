@@ -59,9 +59,10 @@ public class Main extends Application {
 
         var overview = FXML.load(NoteOverviewCtrl.class, "client", "scenes", "startframe.fxml");
         var editCollections = FXML.load(EditCollectionCtrl.class, "client", "scenes", "editcollections.fxml");
+        var renameEmbeddedFile = FXML.load(RenameCtrl.class, "client", "scenes", "renamefile.fxml");
 
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview, editCollections);
+        mainCtrl.initialize(primaryStage, overview, editCollections, renameEmbeddedFile);
     }
 
     /**

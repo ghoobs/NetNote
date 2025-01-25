@@ -113,7 +113,7 @@ public class ServerConnection {
                 .delete(Note.class);
     }
 
-    public EmbeddedFile renameFile(long noteId, String noteTitle, String fileName, String newFileName) {
+    public EmbeddedFile renameFile(long noteId, String fileName, String newFileName) {
         return ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/embeds/" + noteId + "/" + fileName + "/rename")
                 .queryParam("name", newFileName)
