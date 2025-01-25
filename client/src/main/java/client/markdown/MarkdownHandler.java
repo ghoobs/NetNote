@@ -340,7 +340,7 @@ public class MarkdownHandler {
                         EventListener listenerImg = this::onClickHtmlImage;
                         // Add event handler to <a> hyperlinks.
                         var imgNodeList = doc.getElementsByTagName("img");
-                        for (int i = 0; i < btnNodeList.getLength(); i++) {
+                        for (int i = 0; i < imgNodeList.getLength(); i++) {
                             EventTarget hyperlink = (EventTarget)imgNodeList.item(i);
                             hyperlink.addEventListener("click", listenerImg, true);
                         }
