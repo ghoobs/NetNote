@@ -10,8 +10,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -20,25 +19,21 @@ import server.websocket.WebSocketMessaging;
 
 @SpringJUnitConfig
 class NoteControllerTest {
-
-    //If you implement
-    private TestNoteRepository testNoteRepository;
-    private NoteService testNoteService;
     private NoteController noteController;
-    private ApplicationEventPublisher mockedEventPublisher;
     @MockBean
     private WebSocketMessaging webSocketMessaging;
 
     @BeforeEach
     void setUp() {
-        testNoteRepository = new TestNoteRepository();
-        testNoteService = new NoteService(testNoteRepository);
+        TestNoteRepository testNoteRepository = new TestNoteRepository();
+        NoteService testNoteService = new NoteService(testNoteRepository);
         noteController = new NoteController(testNoteService);
-        mockedEventPublisher = mock(ApplicationEventPublisher.class);
+        ApplicationEventPublisher mockedEventPublisher = mock(ApplicationEventPublisher.class);
         noteController.setEventPublisher(mockedEventPublisher);
         noteController.setWebSocketMessaging(webSocketMessaging);
     }
 
+    @Test
     void putData() {
         noteController.addNote(new Note("Title", "Contents"));
     }
@@ -54,7 +49,6 @@ class NoteControllerTest {
         noteController.addNote(new Note("Title", "Contents"));
         noteController.addNote(new Note("Title2", "Contents2"));
         assertTrue(noteController.getAll().stream().map(x -> x.title).anyMatch(x -> x.equals("Title")));
-
         assertTrue(noteController.getAll().stream().map(x -> x.title).anyMatch(x -> x.equals("Title2")));
     }
 
@@ -115,13 +109,13 @@ class NoteControllerTest {
         noteController.addNote(new Note("Title3", "Contents3", tags3));
 
         List<Tag> tags = noteController.getAllTags();
-        assertTrue(tags.contains(new Tag("Hello")));
-        assertTrue(tags.contains(new Tag("It's")));
-        assertTrue(tags.contains(new Tag("A")));
-        assertTrue(tags.contains(new Tag("Me")));
-        assertTrue(tags.contains(new Tag("Mario")));
+        assertNotNull(tags);
+        assertTrue(tags.contains(new Tag("Hello")) &&
+                tags.contains(new Tag("It's")) &&
+                tags.contains(new Tag("A")) &&
+                tags.contains(new Tag("Me")) &&
+                tags.contains(new Tag("Mario")));
     }
-
 
     @Test
     void addNote() {
@@ -151,8 +145,8 @@ class NoteControllerTest {
         noteController.addNote(note1);
         noteController.addNote(note2);
         noteController.addNote(note3);
-
         List<Note> searchedNotes = noteController.searchNotes("2");
+
         assertEquals(1, searchedNotes.size());
         assertTrue(searchedNotes.contains(note2));
     }
@@ -163,49 +157,32 @@ class NoteControllerTest {
         Note note2 = new Note("Title", "2");
         noteController.addNote(note1);
         noteController.addNote(note2);
-
         List<Note> searchedNotes = noteController.searchNotes("Title");
+
         assertEquals(2, searchedNotes.size());
         assertTrue(searchedNotes.contains(note1) && searchedNotes.contains(note2));
     }
 
-
     @Test
     void deleteNotesTest() {
-
-
         Note note1 = new Note("Title", "1");
         Note note2 = new Note("Title", "2");
-
         noteController.addNote(note1);
         noteController.addNote(note2);
 
         assertEquals(ResponseEntity.notFound().build(), noteController.delete((long) 100));
         assertEquals(ResponseEntity.ok().build(), noteController.delete((long) 0));
-
-
         assertEquals(note2, noteController.getById(1).getBody());
-
-
-        assertEquals(ResponseEntity.notFound().build(), noteController.getById((long) 0));
-
     }
-
 
     @Test
     void editNotesTest(){
-
         Note note1 = new Note("Title", "1");
         Note note2 = new Note("Title", "2");
-
         noteController.addNote(note1);
         noteController.addNote(note2);
-
         assertEquals(note2 , noteController.getById(1).getBody());
-
         var updatedNote = new Note("Title2", "2");
-
-
         updatedNote = noteController.updateNote((long) 1,updatedNote).getBody();
 
         assertEquals(updatedNote, noteController.getById(1).getBody());

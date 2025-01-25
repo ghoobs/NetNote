@@ -22,9 +22,7 @@ public class EmbeddedFileController {
      * @param embeddedFileService   the embedded file service
      * @param noteService           the note services
      */
-    public EmbeddedFileController(
-            EmbeddedFileService embeddedFileService,
-            NoteService noteService) {
+    public EmbeddedFileController(EmbeddedFileService embeddedFileService, NoteService noteService) {
         this.embeddedFileService = embeddedFileService;
         this.noteService = noteService;
     }
@@ -33,7 +31,7 @@ public class EmbeddedFileController {
     public ResponseEntity<EmbeddedFile> addFile(@PathVariable long noteId,
                                                 @RequestBody EmbeddedFile embeddedFile) {
         Note note = noteService.getNoteById(noteId);
-        if (note==null) {
+        if (note == null) {
             return ResponseEntity.notFound().build();
         }
         String url = "files/" + embeddedFile.getFilename();
@@ -48,41 +46,39 @@ public class EmbeddedFileController {
     @GetMapping("/{noteId}/{filename}")
     public ResponseEntity<byte[]> getData(@PathVariable long noteId, @PathVariable String filename) {
         EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
-        if(file == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        byte[] data = file.getData();
-        return ResponseEntity.ok(data);
+        return file == null
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(file.getData());
     }
 
     @DeleteMapping("/{noteId}/{filename}")
     public ResponseEntity<Note> deleteFile(@PathVariable long noteId, @PathVariable String filename) {
         Note note = noteService.getNoteById(noteId);
-        if (note==null) {
+        if (note == null) {
             return ResponseEntity.notFound().build();
         }
         EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
         if(file == null) {
             return ResponseEntity.notFound().build();
         }
-
         note.removeEmbeddedFile(file);
         noteService.saveNote(note);
         return ResponseEntity.ok(note);
     }
+
     @PutMapping("/{noteId}/{filename}/rename")
     public ResponseEntity<EmbeddedFile> renameFile(@PathVariable long noteId,
                                                    @PathVariable String filename,
                                                    @RequestParam("name") String newFilename) {
         EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
-        if (file == null) {
-            return ResponseEntity.notFound().build();
-        }
+        return file == null
+                ? ResponseEntity.notFound().build()
+                : updateFilenameAndSave(file, noteId, newFilename);
+    }
 
+    private ResponseEntity<EmbeddedFile> updateFilenameAndSave(EmbeddedFile file, long noteId, String newFilename) {
         file.setFilename(newFilename);
         noteService.updateNoteById(noteId);
         return ResponseEntity.ok(file);
     }
-
 }

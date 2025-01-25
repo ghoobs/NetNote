@@ -17,9 +17,7 @@ public class TestCollectionRepository implements CollectionRepository {
     private int counter = 0;
 
     @Override
-    public void flush() {
-
-    }
+    public void flush() {}
 
     @Override
     public <S extends Collection> S saveAndFlush(S entity) {

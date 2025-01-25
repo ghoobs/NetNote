@@ -17,8 +17,7 @@ public class NoteService {
      * Instantiates this service
      * @param noteRepository Note repository
      */
-    public NoteService(
-            NoteRepository noteRepository) {
+    public NoteService(NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
     }
 

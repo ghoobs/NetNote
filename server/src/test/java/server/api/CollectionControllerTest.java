@@ -13,20 +13,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CollectionControllerTest {
 
-    private TestNoteRepository testNoteRepository;
-    private TestCollectionRepository testCollectionRepository;
-    private NoteService testNoteService;
-    private CollectionService testCollectionService;
     private CollectionController collectionController;
     private Collection c1;
     private Collection c2;
 
     @BeforeEach
     void setUp() {
-        testNoteRepository = new TestNoteRepository();
-        testCollectionRepository = new TestCollectionRepository();
-        testNoteService = new NoteService(testNoteRepository);
-        testCollectionService = new CollectionService(testCollectionRepository);
+        TestNoteRepository testNoteRepository = new TestNoteRepository();
+        TestCollectionRepository testCollectionRepository = new TestCollectionRepository();
+        NoteService testNoteService = new NoteService(testNoteRepository);
+        CollectionService testCollectionService = new CollectionService(testCollectionRepository);
         collectionController = new CollectionController(testCollectionService, testNoteService);
 
         c1 = new Collection("Test Collection");
@@ -37,7 +33,8 @@ class CollectionControllerTest {
 
     @Test
     void getAll() {
-        //assertEquals(List.of("Test Collection", "Test Collection 2"), collectionController.getAll().stream().map(x -> x.name).toList());
+        assertEquals(List.of("Standard Collection", "Test Collection", "Test Collection 2"),
+                collectionController.getAll().stream().map(x -> x.name).toList());
     }
 
     @Test
@@ -50,14 +47,12 @@ class CollectionControllerTest {
     void addCollection(){
         Collection c3 = new Collection("Test Collection 3");
         collectionController.addCollection(c3);
-
         assertTrue(collectionController.getAll().contains(c3));
     }
 
     @Test
     void deleteCollection(){
         collectionController.delete(c1.id);
-
         assertFalse(collectionController.getAll().contains(c1));
     }
 
@@ -65,7 +60,6 @@ class CollectionControllerTest {
     void updateCollection() {
         Collection collection = new Collection("test");
         collectionController.addCollection(collection);
-
         Collection updatedCollection = new Collection("test but updated");
         ResponseEntity<Collection> responseEntity = collectionController.updateCollection(collection.id, updatedCollection);
 

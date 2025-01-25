@@ -45,10 +45,7 @@ public class CollectionService {
      */
     public Collection updateCollectionById(long collectionId) {
         Collection collection = getCollectionById(collectionId);
-        if (collection == null) {
-            return null;
-        }
-        return collectionRepository.save(collection);
+        return collection == null ? null : collectionRepository.save(collection);
     }
 
     /**
@@ -76,10 +73,9 @@ public class CollectionService {
         return collectionRepository.findAll();
     }
 
-
     /**
      * More idiomatic way to find a collection by its id, works better with spring for some reason
-     * @param collectionId
+     * @param collectionId the id for the collection, used as the primary identifier
      * @return the collection if it is found
      */
     public Optional<Collection> collectionById(Long collectionId) {
