@@ -19,6 +19,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.Styleable;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -70,6 +71,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private ObservableList<Note> data;
     @FXML
     private ListView<Note> listNotes;
+    @FXML
+    private ListView<EmbeddedFile> listEmbeddedFiles;
     @FXML
     private TextField titleWriting;
     @FXML
@@ -1217,6 +1220,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void applyBlueMode() {
         listNotes.getStyleClass().remove("light-mode");
         listNotes.getStyleClass().add("blue-mode");
+        listEmbeddedFiles.getStyleClass().add("blue-mode");
+        listEmbeddedFiles.getStyleClass().remove("light-mode");
 
         noteWriting.getStyleClass().remove("light-mode");
         titleWriting.getStyleClass().remove("light-mode");
@@ -1231,6 +1236,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void applyLightMode() {
         listNotes.getStyleClass().remove("blue-mode");
         listNotes.getStyleClass().add("light-mode");
+        listEmbeddedFiles.getStyleClass().remove("blue-mode");
+        listEmbeddedFiles.getStyleClass().add("light-mode");
 
         noteWriting.getStyleClass().remove("blue-mode");
         titleWriting.getStyleClass().remove("blue-mode");
