@@ -12,7 +12,13 @@ import javafx.scene.layout.*;
 import javafx.scene.text.*;
 import javafx.stage.Modality;
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Properties;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+
 
 public class RenameCtrl {
     @FXML
@@ -42,7 +48,15 @@ public class RenameCtrl {
      * called when clicked on ok button
      */
     public void ok() {
-        String fullFileName = fileNameInput.getText() + currentFile.getFiletype();
+        String fullFileName = fileNameInput.getText() + "." + currentFile.getFiletype();
+        if (!fullFileName.matches(EmbeddedFile.REGEX_URL_NAMING_FORMAT)) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText(MessageFormat.format(
+                    resourceBundle.getString("alert.file.renameInvalid"), fullFileName));
+            alert.showAndWait();
+            return;
+        }
         if (currentNote
                 .getEmbeddedFiles()
                 .stream()
@@ -65,6 +79,7 @@ public class RenameCtrl {
             alert2.setContentText(e.getMessage());
             alert2.showAndWait();
         } finally {
+            mainCtrl.getOverviewCtrl().refresh();
             mainCtrl.showOverview();
         }
     }
@@ -77,10 +92,39 @@ public class RenameCtrl {
 
     public void setCurrentNote(Note currentNote, EmbeddedFile currentFile) {
         this.currentNote = currentNote;
+        this.currentFile = currentFile;
         String fileName = currentFile.getFilename();
         String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf("."));
         fileNameInput.setText(fileNameNoExt);
     }
+
+    
+    /**
+     * Sets the locale for the application and updates all UI properties with localized strings.
+     *
+     * @param locale the {@code Locale} to set for the application.
+     */
+    public void setLocale(Locale locale) {
+        this.resourceBundle = ResourceBundle.getBundle("bundle", locale);
+    }
+
+    /**
+     * Loads the saved locale from the configuration file.
+     * If no locale is saved, defaults to English.
+     *
+     * @return the {@code Locale} loaded from the configuration file or the default {@code Locale.ENGLISH}.
+     */
+    protected Locale loadSavedLocale() {
+        try {
+            Properties props = new Properties();
+            props.load(new FileInputStream("config.properties"));
+            return new Locale(props.getProperty("language", "en"));
+        } catch (IOException e) {
+            return Locale.ENGLISH;
+        }
+    }
+
+
     // titleInput is fx:id of text field where you can enter the new filename
 
     // scene is called rename.fxml

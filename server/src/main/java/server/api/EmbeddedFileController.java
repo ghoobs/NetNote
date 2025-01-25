@@ -1,10 +1,15 @@
 package server.api;
 import commons.EmbeddedFile;
 import commons.Note;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.services.EmbeddedFileService;
 import server.services.NoteService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import server.websocket.WebSocketMessaging;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * REST controller for managing embedded files within notes of a collection.
@@ -15,6 +20,7 @@ import server.services.NoteService;
 public class EmbeddedFileController {
     private final EmbeddedFileService embeddedFileService;
     private final NoteService noteService;
+    private WebSocketMessaging messaging;
 
     /**
      * Constructs an EmbeddedFileController
@@ -27,6 +33,11 @@ public class EmbeddedFileController {
             NoteService noteService) {
         this.embeddedFileService = embeddedFileService;
         this.noteService = noteService;
+    }
+    
+    @Autowired
+    public void setWebSocketMessaging(WebSocketMessaging messaging) {
+        this.messaging = messaging;
     }
 
     @PostMapping("/{noteId}")
@@ -81,6 +92,16 @@ public class EmbeddedFileController {
         }
 
         file.setFilename(newFilename);
+        Note note = noteService.getNoteById(noteId);
+        boolean renamedNote = 
+            embeddedFileService.renameAllEmbeddedFileReferences(
+                note,
+                filename, 
+                newFilename
+            );
+        if (messaging != null && renamedNote) {
+            messaging.sendEvent(note, "/topic/notes");
+        }
         noteService.updateNoteById(noteId);
         return ResponseEntity.ok(file);
     }

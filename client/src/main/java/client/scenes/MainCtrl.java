@@ -76,7 +76,6 @@ public class MainCtrl {
      */
     public void showRenameEmbeddedFileWindow(Note currentNote, EmbeddedFile currentFile){
         primaryStage.setScene(renameEmbeddedFile);
-        renameEmbeddedFile.setOnKeyPressed(e -> renameEmbeddedFileCtrl.keyPressed(e));
         renameEmbeddedFileCtrl.setLocale(renameEmbeddedFileCtrl.loadSavedLocale());
         renameEmbeddedFileCtrl.setCurrentNote(currentNote, currentFile);
     }
