@@ -868,6 +868,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     private void applyFilters() {
         String searchKeyword = searchBar.getText().toLowerCase();
+        if(searchKeyword.isEmpty()) {
+            refreshNoPopup();
+        }
         filteredNotes.setAll(data.stream()
                 .filter(note -> note.getTitle().toLowerCase().contains(searchKeyword)
                         || note.getText().toLowerCase().contains(searchKeyword))
@@ -920,7 +923,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     private void applyTagFilter(String tag) {
         if (tag == null || tag.isEmpty()) return;
-
         Platform.runLater(() -> {
             try {
                 activeTagFilters.add(tag);
