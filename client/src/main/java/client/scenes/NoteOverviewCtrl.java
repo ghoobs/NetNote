@@ -526,6 +526,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 case D:
                     deleteNote();
                     break;
+                case M:
+                    editCollections();
+                    break;
             }
             keyEvent.consume();
         }
