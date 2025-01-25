@@ -71,6 +71,8 @@ public class MainCtrl {
     
     /**
      * Sets the main scene to the renameEmbeddedFile scene and updates its title
+     * @param currentNote currentNote
+     * @param currentFile the current file
      */
     public void showRenameEmbeddedFileWindow(Note currentNote, EmbeddedFile currentFile){
         primaryStage.setScene(renameEmbeddedFile);

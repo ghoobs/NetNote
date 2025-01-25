@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.*;
 import javafx.stage.Modality;
 import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 public class RenameCtrl {
     @FXML
@@ -22,6 +23,7 @@ public class RenameCtrl {
 
     private MainCtrl mainCtrl;
     private ServerConnection server;
+    private ResourceBundle resourceBundle;
 
     /**
      * Constructs a new NoteOverviewCtrl with the specified server and main controller.
