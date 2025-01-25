@@ -97,10 +97,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private Button clearTagsButton; // Button to reset filters
     @FXML
     private ToggleButton themeToggleButton;
-
-    @FXML
-    private ListView<EmbeddedFile> listEmbeddedFiles;
-
     @FXML
     private ComboBox<Collection> collectionMenu;
 
@@ -211,10 +207,30 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             contextMenu.getItems().add(menuItemDelete);
 
             menuItemRename.setOnAction((_) -> {
-                System.out.println(cell.itemProperty().getValue().toString());
+                EmbeddedFile file = cell.itemProperty().getValue();
             });
             menuItemDelete.setOnAction((_) -> {
-                System.out.println(cell.itemProperty().getValue().toString());
+                EmbeddedFile file = cell.itemProperty().getValue();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.askDelete"), file.getFilename()));
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isEmpty() || result.get() != ButtonType.YES) {
+                    return;
+                }
+                if (getSelectedNote() != null) {
+                    try {
+                        server.deleteFile(getSelectedNote().id, file.getFilename());
+                    } catch (WebApplicationException e) {
+                        Alert alert2 = new Alert(Alert.AlertType.ERROR);
+                        alert2.initModality(Modality.APPLICATION_MODAL);
+                        alert2.setContentText(e.getMessage());
+                        alert2.showAndWait();
+                        return;
+                    }
+                    refresh();
+                }
             });
 
             cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {

@@ -7,18 +7,27 @@ import javafx.scene.layout.*;
 import javafx.scene.text.*;
 
 public class RenameCtrl {
-
     @FXML
     private TextField fileNameInput;
+
+    /** 
+     * called when clicked on ok button
+     */
     public void ok() {
-        // called when clicked on ok button
+        
         // ok button fx:id is renameFileOkButton
     }
-
+    /**
+     *  called when clicked on cancel button
+    */
     public void cancel() {
-        // called when clicked on cancel button
         // cancel button fx:id is renameFileCancelButton
     }
+
+    String getText() {
+        return "";
+    }
+
 
     // titleInput is fx:id of text field where you can enter the new filename
 
