@@ -84,10 +84,13 @@ public class EmbeddedFileController {
         EmbeddedFile file = embeddedFileService.getEmbeddedFileFromNote(noteId, filename);
         return file == null
                 ? ResponseEntity.notFound().build()
-                : updateFilenameAndSave(file, noteId, newFilename);
+                : updateFilenameAndSave(file, noteId, filename, newFilename);
     }
 
-    private ResponseEntity<EmbeddedFile> updateFilenameAndSave(EmbeddedFile file, long noteId, String newFilename) {
+    private ResponseEntity<EmbeddedFile> updateFilenameAndSave( EmbeddedFile file,
+                                                                long noteId, 
+                                                                String filename,
+                                                                String newFilename) {
         file.setFilename(newFilename);
         Note note = noteService.getNoteById(noteId);
         boolean renamedNote = 
