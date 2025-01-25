@@ -484,16 +484,21 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     public void refresh() {
         playFadeAnimation();
-        Note currentNote = listNotes.getSelectionModel().getSelectedItem();
+        int currentNote = listNotes.getSelectionModel().getSelectedIndex();
 
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
+        System.out.println(currentNote);
         refreshCollectionList();
         listNotes.setItems(data);
         listNotes.getSelectionModel().select(currentNote);
         onNoteClicked(null);
         showNotification(resourceBundle.getString("notif.refreshing"));
         resetFilters();
+        if(currentNote >=0 && currentNote < listNotes.getItems().size()){
+            var files = FXCollections.observableList(getSelectedNote().getEmbeddedFiles());
+            listEmbeddedFiles.setItems(files);
+        }
     }
 
     public void refreshNoPopup() {

@@ -40,7 +40,7 @@
                           <items>
                                     <TextArea fx:id="noteWriting" onKeyReleased="#editedTheNote" prefHeight="185.0" prefWidth="226.0" />
                               <Label fx:id="labelEF" prefHeight="17.0" prefWidth="228.0" text="Embedded Files:" />
-                              <ListView fx:id="listEmbeddedFiles" prefHeight="85.0" prefWidth="224.0" />
+                              <ListView fx:id="listEmbeddedFiles" maxHeight="400.0" prefHeight="85.0" prefWidth="224.0" />
                           </items>
                         </SplitPane>
                     </items>
