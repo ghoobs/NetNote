@@ -1,13 +1,21 @@
 package client.scenes;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.*;
+
 public class RenameCtrl {
 
-    public void ok(){
+    @FXML
+    private TextField fileNameInput;
+    public void ok() {
         // called when clicked on ok button
         // ok button fx:id is renameFileOkButton
     }
 
-    public void cancel(){
+    public void cancel() {
         // called when clicked on cancel button
         // cancel button fx:id is renameFileCancelButton
     }

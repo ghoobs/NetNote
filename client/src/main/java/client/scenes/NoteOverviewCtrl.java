@@ -96,6 +96,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private ToggleButton themeToggleButton;
 
     @FXML
+    private ListView<EmbeddedFile> listEmbeddedFiles;
+
+    @FXML
     private ComboBox<Collection> collectionMenu;
 
     private boolean isDarkMode = false;
@@ -188,6 +191,39 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
+        listEmbeddedFiles.setCellFactory(lv -> {
+            ListCell<EmbeddedFile> cell = new ListCell<>() {
+                @Override
+                protected void updateItem(EmbeddedFile file, boolean empty) {
+                    super.updateItem(file, empty);
+                    setText(file == null ? null : file.getFilename());
+                }
+            };
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItemRename = new MenuItem(resourceBundle.getString("menu.listembeds.rename"));
+            MenuItem menuItemDelete = new MenuItem(resourceBundle.getString("menu.listembeds.delete"));
+
+            contextMenu.getItems().add(menuItemRename);
+            contextMenu.getItems().add(menuItemDelete);
+
+            menuItemRename.setOnAction((_) -> {
+                System.out.println(cell.itemProperty().getValue().toString());
+            });
+            menuItemDelete.setOnAction((_) -> {
+                System.out.println(cell.itemProperty().getValue().toString());
+            });
+
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell ;
+        });
+
         //setupWebSocketClient();
         searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilters(newValue);
@@ -396,6 +432,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         makeEditable(titleWriting);
         noteWriting.setText(note.getText());
         titleWriting.setText(note.getTitle());
+        var files = FXCollections.observableList(note.getEmbeddedFiles());
+        listEmbeddedFiles.setItems(files);
         updateMarkdown();
         listNotes.getSelectionModel().select(note);
     }
