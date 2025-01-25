@@ -15,9 +15,8 @@ import java.util.List;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
-public class ServerUtils2 {
-    private static final String SERVER = "http://localhost:8080/";
-
+public class ServerConnection {
+    public static final String SERVER = "http://localhost:8080";
 
     /**
      * Retrieves all notes from the server.
@@ -88,35 +87,36 @@ public class ServerUtils2 {
      */
     public void deleteNote(Note note) {
         ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/notes/delete/" + note.getId()) //Endpoint for deleting a note
+                .target(SERVER).path("api/notes/" + note.getId()) //Endpoint for deleting a note
                 .request(APPLICATION_JSON)
                 .delete();
     }
 
     public EmbeddedFile addFile(long noteId, EmbeddedFile embeddedFile) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + noteId + "/files")
+                .target(SERVER).path("api/embeds/" + noteId)
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(embeddedFile, APPLICATION_JSON), EmbeddedFile.class);
     }
 
     public byte[] getData(long noteId, String fileName) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + noteId + "/files/" + fileName + "/data")
+                .target(SERVER).path("api/embeds/" + noteId + "/" + fileName)
                 .request(APPLICATION_OCTET_STREAM)
                 .get(byte[].class);
     }
 
     public Note deleteFile(long noteId, String fileName) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + noteId + "/files/" + fileName)
+                .target(SERVER).path("api/embeds/" + noteId + "/" + fileName)
                 .request(APPLICATION_JSON)
                 .delete(Note.class);
     }
 
     public EmbeddedFile renameFile(long noteId, String noteTitle, String fileName, String newFileName) {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/" + noteId + "/files/" + fileName + "/rename/" + newFileName)
+                .target(SERVER).path("api/embeds/" + noteId + "/" + fileName + "/rename")
+                .queryParam("name", newFileName)
                 .request(APPLICATION_JSON)
                 .put(Entity.entity(newFileName, APPLICATION_JSON), EmbeddedFile.class);
     }

@@ -2,9 +2,10 @@ package client.scenes;
 
 import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
+import client.utils.CollectionServerUtils;
 import client.utils.*;
 import client.markdown.*;
-import client.utils.ServerUtils2;
+
 import client.websocket.WebSocketClient2;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
@@ -42,14 +43,13 @@ import java.util.stream.Collectors;
 import javafx.animation.FadeTransition;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.checkerframework.checker.units.qual.C;
 
 /**
  * The type Note overview ctrl.
  */
 public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
-    private final ServerUtils2 server;
+    private final ServerConnection server;
     private final MainCtrl mainCtrl;
     private final MarkdownHandler mdHandler;
     private WebSocketClient2 webSocketClient;
@@ -89,16 +89,18 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @FXML
     private Button editCollectionButton;
     @FXML
-    private Label collectionLabel;
-    @FXML
     private HBox tagField; // HBox to hold the tag ComboBoxes
     @FXML
     private ComboBox<String> tagComboBox; // Initial ComboBox for tags
     @FXML
     private Button clearTagsButton; // Button to reset filters
+    @FXML
+    private ToggleButton themeToggleButton;
 
     @FXML
     private ComboBox<Collection> collectionMenu;
+
+    private boolean isDarkMode = false;
 
     private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
     private List<ComboBox<String>> tagFilters = new ArrayList<>();
@@ -124,7 +126,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      * @param mainCtrl  the main controller of the application
      */
     @Inject
-    public NoteOverviewCtrl(ServerUtils2 server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerConnection server, MarkdownHandler mdHandler, MainCtrl mainCtrl) {
         this.server = server;
         this.mdHandler = mdHandler;
         this.mainCtrl = mainCtrl;
@@ -150,9 +152,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         searchButton.textProperty().bind(propertySearchButton);
         searchBar.promptTextProperty().bind(propertySearchBarPrompt);
         editCollectionButton.textProperty().bind(propertyEditCollButton);
-        collectionLabel.textProperty().bind(propertyCollectionLabel);
         refreshButton.textProperty().bind(propertyRefreshButton);
         clearTagsButton.textProperty().bind(propertyClearButton);
+        root.getStyleClass().add("light-mode");
+        root.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
@@ -422,6 +425,15 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         resetFilters();
     }
 
+    public void refreshNoPopup() {
+        var notes = server.getNotes();
+        data = FXCollections.observableList(notes);
+        refreshCollectionList();
+        listNotes.setItems(data);
+        listNotes.getSelectionModel().select(0);
+        onNoteClicked(null);
+    }
+
 
     private void playFadeAnimation() {
         FadeTransition fadeOut = new FadeTransition(Duration.millis(500), listNotes);
@@ -510,6 +522,29 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         }
     }
 
+    /**
+     * Filters the notes based on both search and active tag filters.
+     */
+    private void applyFilters(String searchWord) {
+        if ((searchWord == null || searchWord.isEmpty()) && activeTagFilters.isEmpty()) {
+            filteredNotes.setAll(data);
+            refreshNoPopup();
+        } else {
+            filteredNotes.setAll(data.stream()
+                    .filter(note -> {
+                        List<String> noteTags = extractTags(note.getText());
+                        boolean matchesSearch = (searchWord == null || searchWord.isEmpty()) ||
+                                note.getTitle().toLowerCase().contains(searchWord.toLowerCase()) ||
+                                note.getText().toLowerCase().contains(searchWord.toLowerCase());
+                        boolean matchesTags = activeTagFilters.isEmpty() ||
+                                activeTagFilters.stream().allMatch(noteTags::contains);
+
+                        return matchesSearch && matchesTags; // Must satisfy both
+                    })
+                    .toList());
+        }
+        listNotes.setItems(filteredNotes); // Update ListView
+    }
     /**
      * Highlights the title and content of the currently selected note based on the search keyword.
      *
@@ -1060,6 +1095,46 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     /**
+     * Shows a file browser dialogue, and requests the user to save a file.
+     * @param file Embed to save
+     */
+    private void askUserToSaveEmbeddedFile(EmbeddedFile file) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setContentText(MessageFormat.format(
+                resourceBundle.getString("alert.file.askDownload"), file.getFilename()));
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.YES) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(resourceBundle.getString("fileChooser.save"));
+        fileChooser.setInitialFileName(file.getFilename());
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("fileChooser.imageFiles", "*." + file.getFiletype()));
+        File output = fileChooser.showSaveDialog(null);
+        if (output != null) {
+            FileOutputStream fileWriter = null;
+            try {
+                fileWriter = new FileOutputStream(output);
+                fileWriter.write(file.getData());
+            } catch (Exception ex) {
+                Alert alertError = new Alert(Alert.AlertType.ERROR);
+                alertError.initModality(Modality.APPLICATION_MODAL);
+                alertError.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.writeFail"), file.getFilename()));
+                alert.showAndWait();
+            } finally {
+                if (fileWriter != null) {
+                    try {
+                        fileWriter.close();
+                    } catch (Exception ex) { } //please shut up java compiler
+                }
+            }
+        }
+    }
+
+    /**
      * Called when ContextMenu->Upload file is clicked.
      * This will open a file browser dialogue, and will embed it into the current note.
      * @param event event
@@ -1163,6 +1238,20 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
     @Override
+    public void onMdEmbeddedFileClick(String fileName) {
+        EmbeddedFile file = getSelectedNote()
+                .getEmbeddedFiles()
+                .stream()
+                .filter(f -> f.getFilename().equals(fileName))
+                .findFirst()
+                .orElse(null);
+        if (file == null) {
+            return;
+        }
+        askUserToSaveEmbeddedFile(file);
+    }
+
+    @Override
     public boolean doesNoteExistWithinSameCollection(String note) {
         return listNotes.getItems()
                 .stream()
@@ -1179,6 +1268,52 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public String getServerUrl() {
-        return "http://localhost:8080";
+        return ServerConnection.SERVER;
+    }
+
+    @FXML
+    private void toggleTheme() {
+        if (root.getStyleClass().contains("light-mode")) {
+            root.getStyleClass().remove("light-mode");
+            root.getStyleClass().remove("light-mode");
+            root.getStyleClass().add("blue-mode");
+
+            applyBlueMode();
+            System.out.println("Switched to Blue Mode");
+        } else {
+            root.getStyleClass().remove("blue-mode");
+            root.getStyleClass().add("light-mode");
+
+            applyLightMode();
+            System.out.println("Switched to Light Mode");
+        }
+    }
+
+    private void applyBlueMode() {
+        listNotes.getStyleClass().remove("light-mode");
+        listNotes.getStyleClass().add("blue-mode");
+
+        noteWriting.getStyleClass().remove("light-mode");
+        titleWriting.getStyleClass().remove("light-mode");
+        noteWriting.getStyleClass().add("blue-mode");
+        titleWriting.getStyleClass().add("blue-mode");
+        markDownView.getStyleClass().remove("light-mode");
+        markDownView.getStyleClass().add("blue-mode");
+
+        tagComboBox.getStyleClass().add("blue-mode");
+    }
+
+    private void applyLightMode() {
+        listNotes.getStyleClass().remove("blue-mode");
+        listNotes.getStyleClass().add("light-mode");
+
+        noteWriting.getStyleClass().remove("blue-mode");
+        titleWriting.getStyleClass().remove("blue-mode");
+        noteWriting.getStyleClass().add("light-mode");
+        titleWriting.getStyleClass().add("light-mode");
+        markDownView.getStyleClass().remove("blue-mode");
+        markDownView.getStyleClass().add("light-mode");
+
+        tagComboBox.getStyleClass().add("light-mode");
     }
 }

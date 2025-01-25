@@ -11,7 +11,7 @@ import java.util.ResourceBundle;
 
 import client.scenes.*;
 import com.google.inject.Injector;
-import client.utils.ServerUtils2;
+import client.utils.ServerConnection;
 import javafx.application.Application;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
@@ -46,7 +46,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("bundle", loadSavedLocale());
 
-        var serverUtils = INJECTOR.getInstance(ServerUtils2.class);
+        var serverUtils = INJECTOR.getInstance(ServerConnection.class);
         if (!serverUtils.isServerAvailable()) {
             var msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
             System.err.println(msg);

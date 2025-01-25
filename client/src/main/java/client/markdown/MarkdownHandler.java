@@ -207,9 +207,11 @@ public class MarkdownHandler {
      */
     private void dispatchWebViewUpdate(String mdContents) {
         if (markdownEvents != null) {
+            Note note = markdownEvents.getSelectedNote();
+            if (note == null) return;
             mdContents = regexReplaceAllEmbeds(mdContents,
                     markdownEvents.getServerUrl(),
-                    markdownEvents.getSelectedNote().id);
+                    note.id);
         }
         // parse the markdown contents
         Node document = mdParser.parse(mdContents);
@@ -249,6 +251,7 @@ public class MarkdownHandler {
         event.preventDefault();
         event.stopPropagation();
 
+        if (markdownEvents == null) return;
         var node = (org.w3c.dom.Node)event.getTarget();
         var hrefAttr = node.getAttributes().getNamedItem("href");
 
@@ -256,7 +259,6 @@ public class MarkdownHandler {
             return; // no link
         }
 
-        if (markdownEvents == null) return;
         markdownEvents.onUrlMdAnchorClick(hrefAttr.getNodeValue());
     }
     /**
@@ -267,9 +269,9 @@ public class MarkdownHandler {
         event.preventDefault();
         event.stopPropagation();
 
+        if (markdownEvents == null) return;
         var node = (org.w3c.dom.Node)event.getTarget();
 
-        if (markdownEvents == null) return;
         var noteRefValue = node.getAttributes().getNamedItem("notetype");
         var tagRefValue = node.getAttributes().getNamedItem("tagtype");
 
@@ -277,6 +279,23 @@ public class MarkdownHandler {
             markdownEvents.onNoteMdButtonClick(noteRefValue.getNodeValue());
         } else if (noteRefValue == null && tagRefValue != null) {
             markdownEvents.onTagMdButtonClick(tagRefValue.getNodeValue());
+        }
+    }
+
+    /**
+     * The action when clicking on an image
+     * @param event Propagated event
+     */
+    private void onClickHtmlImage(Event event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (markdownEvents == null) return;
+        var node = (org.w3c.dom.Node)event.getTarget();
+
+        var srcImage = node.getAttributes().getNamedItem("myAttrFile");
+        if (srcImage != null) {
+            markdownEvents.onMdEmbeddedFileClick(srcImage.getNodeValue());
         }
     }
 
@@ -315,6 +334,15 @@ public class MarkdownHandler {
                         for (int i = 0; i < btnNodeList.getLength(); i++) {
                             EventTarget hyperlink = (EventTarget)btnNodeList.item(i);
                             hyperlink.addEventListener("click", listenerBtn, true);
+                        }
+
+                        // Create the event listener for anchors
+                        EventListener listenerImg = this::onClickHtmlImage;
+                        // Add event handler to <a> hyperlinks.
+                        var imgNodeList = doc.getElementsByTagName("img");
+                        for (int i = 0; i < btnNodeList.getLength(); i++) {
+                            EventTarget hyperlink = (EventTarget)imgNodeList.item(i);
+                            hyperlink.addEventListener("click", listenerImg, true);
                         }
                     }
                 }
@@ -365,6 +393,7 @@ public class MarkdownHandler {
     public static String regexReplaceAllEmbeds(String htmlData, String serverUrl, long noteId) {
         return htmlData.replaceAll(
                  EmbeddedFile.REGEX_MD_EMBED_REFERENCE,
-                "<img alt=\"$1\" src=\""+serverUrl+"/api/" + noteId+ "/files/$2/data\">");
+                "<img myAttrFile=\"$2\" alt=\"$1\" src=\""+serverUrl+"/api/embeds/" +
+                        noteId+ "/$2\">");
     }
 }

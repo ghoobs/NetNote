@@ -27,21 +27,10 @@ public class MarkdownHandlerTest {
             public void onTagMdButtonClick(String tag) {}
             public void onNoteMdButtonClick(String note) {}
             public void onUrlMdAnchorClick(String url) {}
-
-            @Override
-            public boolean doesNoteExistWithinSameCollection(String note) {
-                return false;
-            }
-
-            @Override
-            public Note getSelectedNote() {
-                return null;
-            }
-
-            @Override
-            public String getServerUrl() {
-                return "";
-            }
+            public void onMdEmbeddedFileClick(String fileName) {}
+            public boolean doesNoteExistWithinSameCollection(String note) { return false; }
+            public Note getSelectedNote() { return null;}
+            public String getServerUrl() {return ""; }
         }));
     }
 
@@ -109,8 +98,8 @@ public class MarkdownHandlerTest {
         String resourceName = "my complex-image_name! [1].png";
         String altName = "test/thing";
         String srcHtml = "<p>!["+altName+"]("+resourceName+")</p>";
-        String expectedHtml = "<p><img alt=\""+altName+"\" src=\""+serverUrl+"/api/" +
-                noteId+ "/files/"+resourceName+"/data\"></p>";
+        String expectedHtml = "<p><img myAttrFile=\""+resourceName+"\" alt=\""+altName+"\" src=\""+serverUrl+"/api/embeds/" +
+                noteId+ "/"+resourceName+"\"></p>";
         String result = MarkdownHandler.regexReplaceAllEmbeds(srcHtml, serverUrl, noteId);
         assertEquals(
                 result ,

@@ -1,7 +1,7 @@
 package client.scenes;
 
 import client.utils.CollectionServerUtils;
-import client.utils.ServerUtils2;
+import client.utils.ServerConnection;
 import com.google.inject.Inject;
 import commons.Collection;
 import jakarta.ws.rs.WebApplicationException;
@@ -27,7 +27,7 @@ import java.io.IOException;
 
 public class EditCollectionCtrl implements Initializable {
     private final MainCtrl mainCtrl;
-    private final ServerUtils2 server;
+    private final ServerConnection server;
     private final CollectionServerUtils collectionUtils;
 
     @FXML
@@ -80,7 +80,7 @@ public class EditCollectionCtrl implements Initializable {
      * @param collectionUtils more utils for interacting with the Collection part of the server
      */
     @Inject
-    public EditCollectionCtrl(ServerUtils2 server, MainCtrl mainCtrl, CollectionServerUtils collectionUtils) {
+    public EditCollectionCtrl(ServerConnection server, MainCtrl mainCtrl, CollectionServerUtils collectionUtils) {
         this.mainCtrl = mainCtrl;
         this.server = server;
         this.collectionUtils = collectionUtils;
