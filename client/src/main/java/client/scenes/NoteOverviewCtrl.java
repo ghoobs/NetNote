@@ -983,7 +983,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         fileChooser.setTitle(resourceBundle.getString("fileChooser.save"));
         fileChooser.setInitialFileName(file.getFilename());
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("fileChooser.imageFiles", "*." + file.getFiletype()));
+                new FileChooser.ExtensionFilter(resourceBundle.getString("fileChooser.imageFiles"),
+                        "*." + file.getFiletype()));
         File output = fileChooser.showSaveDialog(null);
         if (output != null) {
             FileOutputStream fileWriter = null;
