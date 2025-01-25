@@ -112,6 +112,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private final StringProperty propertyCollectionLabel = new SimpleStringProperty();
     private final StringProperty propertyRefreshButton = new SimpleStringProperty();
     private final StringProperty propertyClearButton = new SimpleStringProperty();
+    private final StringProperty propertyThemeButton = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
 
@@ -152,6 +153,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         editCollectionButton.textProperty().bind(propertyEditCollButton);
         refreshButton.textProperty().bind(propertyRefreshButton);
         clearTagsButton.textProperty().bind(propertyClearButton);
+        themeToggleButton.textProperty().bind(propertyThemeButton);
         root.getStyleClass().add("light-mode");
         root.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
@@ -159,8 +161,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
         setLocale(currentLocale);
 
+        //TODO when Collections are implemented, use the second line, otherwise the first one
+        //data = FXCollections.observableArrayList(server.getNotes());
         data = FXCollections.observableArrayList(colServer.getCollections().stream().flatMap(x -> x.notes.stream()).toList());
-        System.out.println(colServer.getCollections().stream().flatMap(x -> x.notes.stream()).map(x -> x.collection.toString()).toList());
+        //System.out.println(colServer.getCollections().stream().flatMap(x -> x.notes.stream()).map(x -> x.collection.toString()).toList());
         filteredNotes = FXCollections.observableArrayList(data);
         listNotes.setItems(filteredNotes);
         tagFilters.add(tagComboBox);
@@ -171,7 +175,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         mdHandler.createMdParser(MarkdownHandler.getDefaultExtensions());
         mdHandler.setWebEngine(markDownView.getEngine());
         mdHandler.setEventInterface(this);
-        mdHandler.launchAsyncWorker(); // TODO: make sure to dispose when ctrl is closed or something
+        mdHandler.launchAsyncWorker();
 
 
         refreshCollectionList();
@@ -355,6 +359,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                         filteredNotes.remove(noteSelected);
                         listNotes.refresh();
                         listNotes.getSelectionModel().clearSelection();
+                        titleWriting.setText("");
+                        noteWriting.setText("");
                         showNotification(resourceBundle.getString("notif.deleting"));
                     } catch (Exception e) {
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
@@ -405,12 +411,15 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     public void refresh() {
         playFadeAnimation();
+        Note currentNote = listNotes.getSelectionModel().getSelectedItem();
 
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
         refreshCollectionList();
         listNotes.setItems(data);
-        listNotes.getSelectionModel().select(0);
+        if(currentNote != null){
+            listNotes.getSelectionModel().select(currentNote);
+        }
         onNoteClicked(null);
         showNotification(resourceBundle.getString("notif.refreshing"));
     }
@@ -732,6 +741,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         propertyCollectionLabel.set(rb.getString("label.collections"));
         propertyRefreshButton.set(rb.getString("button.refresh"));
         propertyClearButton.set(rb.getString("button.clearFilters"));
+        propertyThemeButton.set(rb.getString("button.theme"));
         switch (locale.getLanguage()) {
             case "en":
                 currentLanguage.set("🇬🇧");
@@ -935,16 +945,18 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         noteWriting.setContextMenu(contextMenu);
         contextMenu.setOnShown((_) -> {
             menuSubSelectExistingFile.getItems().clear();
-            getSelectedNote()
-                    .getEmbeddedFiles()
-                    .forEach((file) -> {
-                        MenuItem item = new MenuItem(file.getFilename());
-                        item.setOnAction((_) -> {
-                            embedFileAtCaret(file.getFilename());
-                        });
-                        menuSubSelectExistingFile.getItems().add(item);
-                    }
-            );
+            if(getSelectedNote() != null){
+                getSelectedNote()
+                        .getEmbeddedFiles()
+                        .forEach((file) -> {
+                                    MenuItem item = new MenuItem(file.getFilename());
+                                    item.setOnAction((_) -> {
+                                        embedFileAtCaret(file.getFilename());
+                                    });
+                                    menuSubSelectExistingFile.getItems().add(item);
+                                }
+                        );
+            }
             menuSubSelectExistingFile.setDisable(
                 menuSubSelectExistingFile.getItems().isEmpty()
             );
@@ -1017,6 +1029,13 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             return; // user cancelled the operation
         }
         String fileName = file.getName();
+        if(getSelectedNote() == null){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText(resourceBundle.getString("alert.no.note"));
+            alert.showAndWait();
+            return;
+        }
         if (getSelectedNote()
                 .getEmbeddedFiles()
                 .stream()

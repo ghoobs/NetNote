@@ -37,6 +37,8 @@ public class Note {
     public long id;
 
     public String title;
+
+    @Lob
     public String text;
 
     @ManyToMany
