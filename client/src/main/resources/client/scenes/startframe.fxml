@@ -93,7 +93,7 @@
                      <HBox.margin>
                         <Insets />
                      </HBox.margin></Button>
-                         <ComboBox fx:id="tagComboBox" prefHeight="21.0" prefWidth="110.0" promptText="Select a tag">
+                         <ComboBox fx:id="tagComboBox" prefHeight="21.0" prefWidth="110.0" promptText="selectTagPrompt">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
@@ -161,6 +161,15 @@
                                               </ImageView>
                                           </graphic>
                                       </MenuItem>
+                                      <MenuItem onAction="#switchToRomanian" text="Română">
+                                          <graphic>
+                                              <ImageView fitHeight="15" fitWidth="20">
+                                                  <image>
+                                                      <Image url="@/images/romanianflag.png" />
+                                                  </image>
+                                              </ImageView>
+                                          </graphic>
+                                      </MenuItem>
                                   </items>
                               </Menu>
                           </menus>
@@ -168,7 +177,7 @@
                         <Insets left="5.0" />
                      </HBox.margin>
                       </MenuBar>
-                  <ComboBox fx:id="collectionMenu" prefWidth="150.0" promptText="Select Collection" />
+                  <ComboBox fx:id="collectionMenu" prefWidth="150.0" promptText="selectCollection" />
                       <Button fx:id="editCollectionButton" mnemonicParsing="false" onAction="#editCollections" text="Edit Collections">
                      <HBox.margin>
                         <Insets left="5.0" />
