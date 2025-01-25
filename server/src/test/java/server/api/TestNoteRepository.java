@@ -17,11 +17,8 @@ public class TestNoteRepository implements NoteRepository {
     private final HashMap<Long, Note> notes = new HashMap<>();
     private int counter = 0;
 
-
     @Override
-    public void flush() {
-
-    }
+    public void flush() {}
 
     @Override
     public <S extends Note> S saveAndFlush(S entity) {
