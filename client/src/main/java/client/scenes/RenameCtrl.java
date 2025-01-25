@@ -1,13 +1,17 @@
 package client.scenes;
 
 import client.utils.ServerConnection;
+import com.google.inject.Inject;
 import commons.Note;
 import commons.EmbeddedFile;
+import jakarta.ws.rs.WebApplicationException;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
+import javafx.stage.Modality;
+import java.text.MessageFormat;
 
 public class RenameCtrl {
     @FXML
@@ -36,7 +40,7 @@ public class RenameCtrl {
      * called when clicked on ok button
      */
     public void ok() {
-        String fullFileName = newFilenameNoExt + file.getFiletype();
+        String fullFileName = fileNameInput.getText() + currentFile.getFiletype();
         if (currentNote
                 .getEmbeddedFiles()
                 .stream()
@@ -47,11 +51,12 @@ public class RenameCtrl {
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.renameError"), fullFileName));
+            alert.showAndWait();
             return;
         }
         String oldFilename = currentFile.getFilename();
         try {
-            server.rename(getSelectedNote().id, file.getFilename(), fullFileName);
+            server.renameFile(currentNote.id, currentFile.getFilename(), fullFileName);
         } catch (WebApplicationException e) {
             Alert alert2 = new Alert(Alert.AlertType.ERROR);
             alert2.initModality(Modality.APPLICATION_MODAL);
