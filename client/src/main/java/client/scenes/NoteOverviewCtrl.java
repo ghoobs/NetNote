@@ -368,8 +368,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                         filteredNotes.remove(noteSelected);
                         listNotes.refresh();
                         listNotes.getSelectionModel().clearSelection();
-                        titleWriting.setText("");
-                        noteWriting.setText("");
+                        refreshNoPopup();
                         showNotification(resourceBundle.getString("notif.deleting"));
                     } catch (Exception e) {
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
