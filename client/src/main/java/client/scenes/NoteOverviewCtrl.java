@@ -526,6 +526,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 case D:
                     deleteNote();
                     break;
+                case M:
+                    editCollections();
+                    break;
             }
             keyEvent.consume();
         }
@@ -1037,6 +1040,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         matchingNote.ifPresent(note -> {
             listNotes.getSelectionModel().select(note);
             noteWriting.setText(note.getText());
+            titleWriting.setText(note.getTitle());
+            updateMarkdown();
         });
     }
     @Override

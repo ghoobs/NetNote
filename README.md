@@ -24,9 +24,10 @@ Once this is working, you can try importing the project into your favorite IDE.
 
 ### Useful Shortcuts:
 - CTRL + S - to save a Note
-- CTRL + N - to create a new Note
+- CTRL + N - to create a new Note (in the Notes Overview window) or a new Collection (in the Edit Collections window)
 - CTRL + D - to delete a Note
 - CTRL + R - to refresh the client view
+- CTRL + M - to navigate to the Edit Collections window
 
 ### Keyboard Navigation:
 - Pressing the escape key sets the input focus to the search bar.

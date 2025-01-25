@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
@@ -292,10 +293,15 @@ public class EditCollectionCtrl implements Initializable {
      * @param keyEvent the key event triggered by the user
      */
     public void keyPressed(KeyEvent keyEvent) {
-        switch(keyEvent.getCode()) {
-            case ESCAPE:
-                back();
-                break;
+        if(keyEvent.getCode() == KeyCode.ESCAPE){
+            back();
+            keyEvent.consume();
+        }
+        if (keyEvent.isShortcutDown()) {
+            if (keyEvent.getCode() == KeyCode.N) {
+                addCollection();
+                keyEvent.consume();
+            }
         }
     }
 
