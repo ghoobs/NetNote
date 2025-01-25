@@ -1,0 +1,3 @@
+2025-01-25 23:14:23.117380+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "TEXT CHARACTER VARYING(255)": "U&'[[this note does not exist]]\\000a[[New Note! is?]]\\000a\\000athis is a foreign... (256)"; SQL statement:
+update note set collection_id=?,text=?,title=? where id=? [22001-224]
