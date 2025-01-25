@@ -89,11 +89,11 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @FXML
     private Button editCollectionButton;
     @FXML
-    private HBox tagField; // HBox to hold the tag ComboBoxes
+    private HBox tagField;
     @FXML
-    private ComboBox<String> tagComboBox; // Initial ComboBox for tags
+    private ComboBox<String> tagComboBox;
     @FXML
-    private Button clearTagsButton; // Button to reset filters
+    private Button clearTagsButton;
     @FXML
     private ToggleButton themeToggleButton;
 
@@ -115,6 +115,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private final StringProperty propertyRefreshButton = new SimpleStringProperty();
     private final StringProperty propertyClearButton = new SimpleStringProperty();
     private final StringProperty propertyThemeButton = new SimpleStringProperty();
+    private final StringProperty propertyCollectionMenuPrompt = new SimpleStringProperty();
+    private final StringProperty propertyTagComboBoxPrompt = new SimpleStringProperty();
     private Locale currentLocale;
     private ResourceBundle resourceBundle;
 
@@ -147,6 +149,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        tagComboBox.promptTextProperty().bind(propertyTagComboBoxPrompt);
+        collectionMenu.promptTextProperty().bind(propertyCollectionMenuPrompt);
         languageMenu.textProperty().bind(currentLanguage);
         deleteButton.textProperty().bind(propertyDeleteButton);
         addButton.textProperty().bind(propertyAddButton);
@@ -346,7 +350,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      * @return a List of titles
      */
     private List<String> allTitles() {
-        return listNotes.getItems().stream()
+        return data.stream()
                 .map(n -> n.getTitle())
                 .toList();
     }
@@ -355,13 +359,14 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         Note noteSelected = listNotes.getSelectionModel().getSelectedItem();
 
         if (noteSelected != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            ButtonType okButton = new ButtonType(resourceBundle.getString("button.ok"), ButtonBar.ButtonData.OK_DONE);
+            ButtonType cancelButton = new ButtonType(resourceBundle.getString("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", okButton, cancelButton);
             alert.setTitle(resourceBundle.getString("alert.deleting3"));
             alert.setHeaderText(resourceBundle.getString("alert.deleting4"));
             alert.setContentText(noteSelected.getTitle());
-
             alert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
+                if (response == okButton) {
                     try {
                         server.deleteNote(noteSelected);
                         data.remove(noteSelected);
@@ -374,7 +379,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                     } catch (Exception e) {
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
                         alert2.setTitle(resourceBundle.getString("alert.deleting1"));
-                        alert2.setHeaderText("alert.deleting2");
+                        alert2.setHeaderText(resourceBundle.getString("alert.deleting2"));
                         alert2.setContentText(e.getMessage());
                         alert2.showAndWait();
                     }
@@ -382,6 +387,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             });
         }
     }
+
     /**
      * Updates markdown when input is typed into note contents
      */
@@ -752,6 +758,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         propertyRefreshButton.set(rb.getString("button.refresh"));
         propertyClearButton.set(rb.getString("button.clearFilters"));
         propertyThemeButton.set(rb.getString("button.theme"));
+        propertyCollectionMenuPrompt.set(rb.getString("selectCollection"));
+        propertyTagComboBoxPrompt.set(rb.getString("selectTagPrompt"));
         switch (locale.getLanguage()) {
             case "en":
                 currentLanguage.set("🇬🇧");
@@ -764,6 +772,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 break;
             case "pl":
                 currentLanguage.set("\uD83C\uDDF5\uD83C\uDDF1");
+                break;
+            case "ro":
+                currentLanguage.set("\uD83C\uDDF7\uD83C\uDDF4");
                 break;
             default:
                 currentLanguage.set("🇬🇧");
@@ -786,6 +797,13 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     public void switchToDutch() {
         switchLanguage(new Locale("nl"));
         currentLanguage.set("🇳🇱");
+    }
+    /**
+     * Switches the application's language to Romanian.
+     */
+    public void switchToRomanian() {
+        switchLanguage(new Locale("ro"));
+        currentLanguage.set("\uD83C\uDDF7\uD83C\uDDF4");
     }
 
     /**
@@ -934,7 +952,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                     listNotes.getSelectionModel().clearSelection();
                 }
                 tagComboBox.setValue(null);
-                tagComboBox.setPromptText("Select Tag");
+             //   tagComboBox.setPromptText("Select Tag");
                 updateAvailableTags();
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("Handled IndexOutOfBoundsException in applyTagFilter.");
@@ -959,7 +977,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         // Repopulate the tag dropdown menu and set placeholder
         populateTagComboBox();
         tagComboBox.setValue(null); // Clear the current value
-        tagComboBox.setPromptText("Select Tag"); // Set the placeholder text to "Select Tag"
+        // tagComboBox.setPromptText("Select Tag"); // Set the placeholder text to "Select Tag"
     }
 
 
@@ -975,7 +993,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 .collect(Collectors.toList());
         allTags.removeAll(activeTagFilters);
         tagComboBox.getItems().setAll(allTags);
-        tagComboBox.setPromptText("Select Tag");
+        //tagComboBox.setPromptText("Select Tag");
         tagComboBox.setValue(null);
     }
 
