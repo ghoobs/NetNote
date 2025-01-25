@@ -17,6 +17,7 @@ Your image is now embedded
 
 ## Managing embedded images
 It's possible to view the list of embedded files, rename and delete them.
-
+You can alter embedded files by right clicking on them in the list.
 ![alt text](image-3.png)
+
 Renaming a file will rename all of its references in the current note.
