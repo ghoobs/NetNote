@@ -1037,6 +1037,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         matchingNote.ifPresent(note -> {
             listNotes.getSelectionModel().select(note);
             noteWriting.setText(note.getText());
+            titleWriting.setText(note.getTitle());
+            updateMarkdown();
         });
     }
     @Override
