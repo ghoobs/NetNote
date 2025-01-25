@@ -373,8 +373,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                         filteredNotes.remove(noteSelected);
                         listNotes.refresh();
                         listNotes.getSelectionModel().clearSelection();
-                        titleWriting.setText("");
-                        noteWriting.setText("");
+                        refreshNoPopup();
                         showNotification(resourceBundle.getString("notif.deleting"));
                     } catch (Exception e) {
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
@@ -432,9 +431,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         data = FXCollections.observableList(notes);
         refreshCollectionList();
         listNotes.setItems(data);
-        if(currentNote != null){
-            listNotes.getSelectionModel().select(currentNote);
-        }
+        listNotes.getSelectionModel().select(currentNote);
         onNoteClicked(null);
         showNotification(resourceBundle.getString("notif.refreshing"));
         resetFilters();
@@ -445,7 +442,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         data = FXCollections.observableList(notes);
         refreshCollectionList();
         listNotes.setItems(data);
-        listNotes.getSelectionModel().select(0);
+        listNotes.getSelectionModel().select(notes.size() - 1);
         onNoteClicked(null);
     }
 
@@ -889,6 +886,9 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     private void applyFilters() {
         String searchKeyword = searchBar.getText().toLowerCase();
+        if(searchKeyword.isEmpty()) {
+            refreshNoPopup();
+        }
         filteredNotes.setAll(data.stream()
                 .filter(note -> note.getTitle().toLowerCase().contains(searchKeyword)
                         || note.getText().toLowerCase().contains(searchKeyword))
@@ -941,7 +941,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
      */
     private void applyTagFilter(String tag) {
         if (tag == null || tag.isEmpty()) return;
-
         Platform.runLater(() -> {
             try {
                 activeTagFilters.add(tag);
@@ -975,7 +974,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         searchBar.clear(); // Clear the search bar
         filteredNotes.setAll(data); // Reset filtered notes to include all notes
         listNotes.setItems(filteredNotes); // Update ListView with all notes
-        updateListViewSelection(); // Update the ListView selection
 
         // Repopulate the tag dropdown menu and set placeholder
         populateTagComboBox();
