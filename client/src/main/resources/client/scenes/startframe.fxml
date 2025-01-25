@@ -21,7 +21,7 @@
     <children>
         <HBox layoutY="33.0" prefHeight="340.0" prefWidth="139.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="461.0" AnchorPane.topAnchor="-1.0">
             <children>
-                <ListView fx:id="listNotes" prefHeight="335.0" prefWidth="139.0">
+                <ListView fx:id="listNotes" prefHeight="257.0" prefWidth="139.0">
                     <HBox.margin>
                         <Insets top="40.0" />
                     </HBox.margin>
@@ -32,8 +32,9 @@
             <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="329.0" prefWidth="227.0">
                     <children>
-                        <TextArea fx:id="noteWriting" layoutY="30.0" onKeyReleased="#editedTheNote" prefHeight="302.0" prefWidth="226.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                        <TextArea fx:id="noteWriting" layoutY="30.0" onKeyReleased="#editedTheNote" prefHeight="226.0" prefWidth="226.0" AnchorPane.bottomAnchor="76.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
                         <TextField fx:id="titleWriting" layoutY="1.0" onKeyReleased="#editedTheNote" prefHeight="25.0" prefWidth="227.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
+                  <ListView fx:id="listEmbeddedFiles" layoutY="256.0" prefHeight="76.0" prefWidth="226.0" />
                     </children>
                 </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="325.0" prefWidth="226.0">
