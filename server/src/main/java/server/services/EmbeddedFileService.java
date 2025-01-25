@@ -27,11 +27,7 @@ public class EmbeddedFileService {
      */
     public List<EmbeddedFile> getAllEmbeddedFilesFromNote(long noteId) {
         Optional<Note> optionalNote = noteRepository.findById(noteId);
-        if (optionalNote.isEmpty()) {
-            return null;
-        }
-        Note note = optionalNote.get();
-        return note.getEmbeddedFiles();
+        return optionalNote.map(Note::getEmbeddedFiles).orElse(null);
     }
 
     /**
@@ -45,7 +41,6 @@ public class EmbeddedFileService {
         if (files == null) {
             return null;
         }
-
         return files.stream()
                 .filter(that -> that.getFilename().equals(filename))
                 .findFirst()

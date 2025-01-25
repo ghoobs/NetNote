@@ -33,13 +33,14 @@ public class CollectionController {
      * @param collectionService the collection service
      * @param noteService       the note service
      */
-    public CollectionController(
-            CollectionService collectionService,
-            NoteService noteService) {
+    public CollectionController(CollectionService collectionService, NoteService noteService) {
         this.collectionService = collectionService;
         this.noteService = noteService;
+        initializeStandardCollection();
+    }
 
-        if (collectionService.getAllCollections().isEmpty()){
+    private void initializeStandardCollection() {
+        if (collectionService.getAllCollections().isEmpty()) {
             Collection collection = new Collection("Standard Collection");
             collectionService.saveCollection(collection);
         }
@@ -103,8 +104,7 @@ public class CollectionController {
         if (collectionAdding == null || collectionAdding.name == null) {
             return ResponseEntity.badRequest().build();
         }
-        Collection savedCollection = collectionService.saveCollection(collectionAdding);
-        return ResponseEntity.ok(savedCollection);
+        return ResponseEntity.ok(collectionService.saveCollection(collectionAdding));
     }
 
     /**
@@ -118,22 +118,18 @@ public class CollectionController {
     @PutMapping("/{id}")
     public ResponseEntity<Collection> updateCollection(
             @PathVariable("id") long id,
-            @RequestBody Collection updatedCollection
-    ) {
+            @RequestBody Collection updatedCollection) {
+
         Optional<Collection> existingCollectionOpt = collectionService.collectionById(id);
         if (existingCollectionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
         var existingCollection = existingCollectionOpt.get();
-
         existingCollection.name = updatedCollection.name;
-
 
         if (updatedCollection.notes != null) {
             existingCollection.updateNotes(updatedCollection.notes);
         }
-
         return ResponseEntity.ok(collectionService.saveCollection(existingCollection));
     }
 }

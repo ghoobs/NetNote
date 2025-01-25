@@ -20,21 +20,16 @@ import server.websocket.WebSocketMessaging;
 
 @SpringJUnitConfig
 class NoteControllerTest {
-
-    //If you implement
-    private TestNoteRepository testNoteRepository;
-    private NoteService testNoteService;
     private NoteController noteController;
-    private ApplicationEventPublisher mockedEventPublisher;
     @MockBean
     private WebSocketMessaging webSocketMessaging;
 
     @BeforeEach
     void setUp() {
-        testNoteRepository = new TestNoteRepository();
-        testNoteService = new NoteService(testNoteRepository);
+        TestNoteRepository testNoteRepository = new TestNoteRepository();
+        NoteService testNoteService = new NoteService(testNoteRepository);
         noteController = new NoteController(testNoteService);
-        mockedEventPublisher = mock(ApplicationEventPublisher.class);
+        ApplicationEventPublisher mockedEventPublisher = mock(ApplicationEventPublisher.class);
         noteController.setEventPublisher(mockedEventPublisher);
         noteController.setWebSocketMessaging(webSocketMessaging);
     }

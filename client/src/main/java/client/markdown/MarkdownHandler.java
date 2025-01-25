@@ -342,7 +342,10 @@ public class MarkdownHandler {
                         var imgNodeList = doc.getElementsByTagName("img");
                         for (int i = 0; i < btnNodeList.getLength(); i++) {
                             EventTarget hyperlink = (EventTarget)imgNodeList.item(i);
-                            hyperlink.addEventListener("click", listenerImg, true);
+                            // Null-check to avoid constant errors thrown in console.
+                            if(hyperlink != null) {
+                                hyperlink.addEventListener("click", listenerImg, true);
+                            }
                         }
                     }
                 }

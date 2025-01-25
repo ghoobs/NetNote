@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-
 import commons.Note;
 import commons.Pair;
 import commons.Tag;

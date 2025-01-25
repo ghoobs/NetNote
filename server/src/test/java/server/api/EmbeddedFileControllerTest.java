@@ -16,25 +16,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EmbeddedFileControllerTest {
-
     private EmbeddedFileController embeddedFileController;
-    private TestNoteRepository testNoteRepository;
-    private EmbeddedFileService testEmbeddedFileService;
-    private NoteService testNoteService;
-    private Collection testCollection;
     private CollectionNote testNote;
     private EmbeddedFile testEmbeddedFile;
 
     @BeforeEach
     void setUp() {
-        testNoteRepository = new TestNoteRepository();
-        testEmbeddedFileService = new EmbeddedFileService(testNoteRepository);
-        testNoteService = new NoteService(testNoteRepository);
+        TestNoteRepository testNoteRepository = new TestNoteRepository();
+        EmbeddedFileService testEmbeddedFileService = new EmbeddedFileService(testNoteRepository);
+        NoteService testNoteService = new NoteService(testNoteRepository);
         embeddedFileController = new EmbeddedFileController(
                 testEmbeddedFileService,
                 testNoteService
         );
-        testCollection = new Collection("TestCollection");
+        Collection testCollection = new Collection("TestCollection");
         testNote = new CollectionNote("TestNote", "Some String");
         testEmbeddedFile = new EmbeddedFile("TestFile", "TestFiletype",
                 "TestURL", "data".getBytes(), testNote);
