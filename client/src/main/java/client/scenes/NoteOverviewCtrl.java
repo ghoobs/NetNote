@@ -2,7 +2,7 @@ package client.scenes;
 
 import client.markdown.IMarkdownEvents;
 import client.markdown.MarkdownHandler;
-
+import client.utils.CollectionServerUtils;
 import client.utils.*;
 import client.markdown.*;
 
@@ -87,16 +87,18 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @FXML
     private Button editCollectionButton;
     @FXML
-    private Label collectionLabel;
-    @FXML
     private HBox tagField; // HBox to hold the tag ComboBoxes
     @FXML
     private ComboBox<String> tagComboBox; // Initial ComboBox for tags
     @FXML
     private Button clearTagsButton; // Button to reset filters
+    @FXML
+    private ToggleButton themeToggleButton;
 
     @FXML
     private ComboBox<Collection> collectionMenu;
+
+    private boolean isDarkMode = false;
 
     private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
     private List<ComboBox<String>> tagFilters = new ArrayList<>();
@@ -148,9 +150,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         searchButton.textProperty().bind(propertySearchButton);
         searchBar.promptTextProperty().bind(propertySearchBarPrompt);
         editCollectionButton.textProperty().bind(propertyEditCollButton);
-        collectionLabel.textProperty().bind(propertyCollectionLabel);
         refreshButton.textProperty().bind(propertyRefreshButton);
         clearTagsButton.textProperty().bind(propertyClearButton);
+        root.getStyleClass().add("light-mode");
+        root.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
         this.currentLocale = loadSavedLocale();
         this.resourceBundle = ResourceBundle.getBundle("bundle", currentLocale);
@@ -1099,5 +1102,51 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @Override
     public String getServerUrl() {
         return ServerConnection.SERVER;
+    }
+
+    @FXML
+    private void toggleTheme() {
+        if (root.getStyleClass().contains("light-mode")) {
+            root.getStyleClass().remove("light-mode");
+            root.getStyleClass().remove("light-mode");
+            root.getStyleClass().add("blue-mode");
+
+            applyBlueMode();
+            System.out.println("Switched to Blue Mode");
+        } else {
+            root.getStyleClass().remove("blue-mode");
+            root.getStyleClass().add("light-mode");
+
+            applyLightMode();
+            System.out.println("Switched to Light Mode");
+        }
+    }
+
+    private void applyBlueMode() {
+        listNotes.getStyleClass().remove("light-mode");
+        listNotes.getStyleClass().add("blue-mode");
+
+        noteWriting.getStyleClass().remove("light-mode");
+        titleWriting.getStyleClass().remove("light-mode");
+        noteWriting.getStyleClass().add("blue-mode");
+        titleWriting.getStyleClass().add("blue-mode");
+        markDownView.getStyleClass().remove("light-mode");
+        markDownView.getStyleClass().add("blue-mode");
+
+        tagComboBox.getStyleClass().add("blue-mode");
+    }
+
+    private void applyLightMode() {
+        listNotes.getStyleClass().remove("blue-mode");
+        listNotes.getStyleClass().add("light-mode");
+
+        noteWriting.getStyleClass().remove("blue-mode");
+        titleWriting.getStyleClass().remove("blue-mode");
+        noteWriting.getStyleClass().add("light-mode");
+        titleWriting.getStyleClass().add("light-mode");
+        markDownView.getStyleClass().remove("blue-mode");
+        markDownView.getStyleClass().add("light-mode");
+
+        tagComboBox.getStyleClass().add("light-mode");
     }
 }
