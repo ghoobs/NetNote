@@ -21,3 +21,7 @@ You can alter embedded files by right clicking on them in the list.
 ![alt text](image-3.png)
 
 Renaming a file will rename all of its references in the current note.
+
+## Downloading embedded images
+Downloading images is very straight forward, you may click on an image in the markdown preview to save it to your computer.
+
