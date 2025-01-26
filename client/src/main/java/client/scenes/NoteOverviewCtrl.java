@@ -1434,6 +1434,12 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         markDownView.getStyleClass().add("blue-mode");
 
         tagComboBox.getStyleClass().add("blue-mode");
+        
+        try {
+            markDownView.getEngine().setUserStyleSheetLocation(getClass().getResource("/css/blue-mode-webview.css").toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void applyLightMode() {
@@ -1450,5 +1456,11 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         markDownView.getStyleClass().add("light-mode");
 
         tagComboBox.getStyleClass().add("light-mode");
+
+        try {
+            markDownView.getEngine().setUserStyleSheetLocation(getClass().getResource("/css/light-mode-webview.css").toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }
