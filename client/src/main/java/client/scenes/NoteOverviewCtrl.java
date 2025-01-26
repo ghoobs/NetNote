@@ -198,7 +198,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         mdHandler.launchAsyncWorker();
         markDownView.setContextMenuEnabled(false);
 
-        refreshCollectionList();
+        //refreshCollectionList();
         listNotes.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(Note note, boolean empty) {
@@ -434,8 +434,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
-        System.out.println(currentNote);
-        refreshCollectionList();
+        //System.out.println(currentNote);
+        //refreshCollectionList();
         listNotes.setItems(data);
         listNotes.getSelectionModel().select(currentNote);
         onNoteClicked(null);
@@ -450,7 +450,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     public void refreshNoPopup() {
         var notes = server.getNotes();
         data = FXCollections.observableList(notes);
-        refreshCollectionList();
+        //refreshCollectionList();
         listNotes.setItems(data);
         listNotes.getSelectionModel().select(notes.size() - 1);
         onNoteClicked(null);
