@@ -22,15 +22,14 @@ to run the client. Please note that the server needs to be running, before you c
 
 Once this is working, you can try importing the project into your favorite IDE.
 
-# User Guide:
+# User Guide (All features):
 ## [Open user guide](./docs/userguide/README.md)
 
 ### Useful Shortcuts:
 - CTRL + S - to save a Note
-- CTRL + N - to create a new Note (in the Notes Overview window) or a new Collection (in the Edit Collections window)
+- CTRL + N - to create a new Note
 - CTRL + D - to delete a Note
 - CTRL + R - to refresh the client view
-- CTRL + M - to navigate to the Edit Collections window
 
 ### Keyboard Navigation:
 - Pressing the escape key sets the input focus to the search bar.
