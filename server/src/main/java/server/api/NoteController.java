@@ -34,7 +34,7 @@ import server.websocket.WebSocketMessaging;
  * /api/notes/search
  */
 @RestController
-@RequestMapping("/api/notes")
+@RequestMapping("/api/notes/default")
 public class NoteController {
     private final NoteService service;
     private ApplicationEventPublisher eventPublisher;

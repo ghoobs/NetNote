@@ -22,6 +22,9 @@ public class Config {
     @JsonProperty
     Map<String, List<Long>> serversToIds;
 
+    @JsonProperty
+    String defaultCollection = "default";
+
 
     /**
      * Instantiates a new Config.

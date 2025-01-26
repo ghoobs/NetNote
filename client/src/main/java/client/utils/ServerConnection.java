@@ -18,6 +18,22 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 public class ServerConnection {
     public static final String SERVER = "http://localhost:8080";
 
+    private String path;
+
+    public final String currentCollection;
+
+    public ServerConnection() {
+        try {
+            this.path = "/api/notes/" + Config.loadConfig().defaultCollection + "/";
+
+        }
+        catch (Exception e) {
+            this.path = "/api/notes/default/";
+        }
+        var splitPath = path.split("/");
+        currentCollection = splitPath[splitPath.length - 2];
+    }
+
     /**
      * Retrieves all notes from the server.
      *
@@ -26,7 +42,7 @@ public class ServerConnection {
 
     public List<Note> getNotes() {
         return ClientBuilder.newClient(new ClientConfig()) //
-                .target(SERVER).path("api/notes") //
+                .target(SERVER).path(path) //
                 .request(APPLICATION_JSON) //
                 .get(new GenericType<List<Note>>() {
                 });
@@ -41,7 +57,7 @@ public class ServerConnection {
 
     public Note addNote(Note note) {
         return ClientBuilder.newClient(new ClientConfig()) //
-                .target(SERVER).path("api/notes") //
+                .target(SERVER).path(path) //
                 .request(APPLICATION_JSON) //
                 .post(Entity.entity(note, APPLICATION_JSON), Note.class);
     }
@@ -75,7 +91,7 @@ public class ServerConnection {
 
     public Note updateNote(Note note) {
         return ClientBuilder.newClient() //
-                .target(SERVER).path("api/notes/" + note.getId()) // Endpoint for updating a note
+                .target(SERVER).path(path + note.getId()) // Endpoint for updating a note
                 .request(MediaType.APPLICATION_JSON) //
                 .put(Entity.entity(note, MediaType.APPLICATION_JSON), Note.class);
     }
@@ -87,7 +103,7 @@ public class ServerConnection {
      */
     public void deleteNote(Note note) {
         ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/notes/" + note.getId()) //Endpoint for deleting a note
+                .target(SERVER).path(path + note.getId()) //Endpoint for deleting a note
                 .request(APPLICATION_JSON)
                 .delete();
     }
