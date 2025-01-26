@@ -196,7 +196,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         mdHandler.setWebEngine(markDownView.getEngine());
         mdHandler.setEventInterface(this);
         mdHandler.launchAsyncWorker();
-
+        markDownView.setContextMenuEnabled(false);
 
         refreshCollectionList();
         listNotes.setCellFactory(listView -> new ListCell<>() {
@@ -212,72 +212,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
-        listEmbeddedFiles.setCellFactory(lv -> {
-            ListCell<EmbeddedFile> cell = new ListCell<>() {
-                @Override
-                protected void updateItem(EmbeddedFile file, boolean empty) {
-                    super.updateItem(file, empty);
-                    setText(file == null ? null : file.getFilename());
-                }
-            };
-
-            ContextMenu contextMenu = new ContextMenu();
-            MenuItem menuItemRename = new MenuItem(resourceBundle.getString("menu.listembeds.rename"));
-            MenuItem menuItemDelete = new MenuItem(resourceBundle.getString("menu.listembeds.delete"));
-
-            contextMenu.getItems().add(menuItemRename);
-            contextMenu.getItems().add(menuItemDelete);
-
-            menuItemRename.setOnAction((_) -> {
-                if (getSelectedNote() == null) return;
-                EmbeddedFile file = cell.itemProperty().getValue();
-                mainCtrl.showRenameEmbeddedFileWindow(getSelectedNote(), file);
-            });
-            menuItemDelete.setOnAction((_) -> {
-                EmbeddedFile file = cell.itemProperty().getValue();
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
-                alert.setTitle(resourceBundle.getString("confirmation.title"));
-                alert.setHeaderText(resourceBundle.getString("confirmation.header"));
-                alert.initModality(Modality.APPLICATION_MODAL);
-                alert.setContentText(MessageFormat.format(
-                        resourceBundle.getString("alert.file.askDelete"), file.getFilename()));
-                ((Button) alert.getDialogPane().lookupButton(ButtonType.YES))
-                        .setText(resourceBundle.getString("button.yes"));
-                ((Button) alert.getDialogPane().lookupButton(ButtonType.NO))
-                        .setText(resourceBundle.getString("button.no"));
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.isEmpty() || result.get() != ButtonType.YES) {
-                    return;
-                }
-                if (getSelectedNote() != null) {
-                    try {
-                        server.deleteFile(getSelectedNote().id, file.getFilename());
-                    } catch (WebApplicationException e) {
-                        Alert alert2 = new Alert(Alert.AlertType.ERROR);
-                        alert2.initModality(Modality.APPLICATION_MODAL);
-                        alert2.setContentText(e.getMessage());
-                        alert2.showAndWait();
-                        return;
-                    }
-                    refresh();
-                }
-            });
-        //    renameFileMenuItem.setText(resourceBundle.getString("menu.listembeds.rename"));
-         //   deleteFileMenuItem.setText(resourceBundle.getString("menu.listembeds.delete"));
-            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-                if (isNowEmpty) {
-                    cell.setContextMenu(null);
-                } else {
-                    cell.setContextMenu(contextMenu);
-                }
-            });
-            return cell ;
-        });
-
         //setupWebSocketClient();
         listNotes.setOnMouseClicked(this::onNoteClicked);
         createNoteTextInputContextMenu();
-
+        createEmbeddedFileCellFactory();
         collectionMenu.valueProperty().addListener((observable, oldValue, newValue) -> {currentCollection = newValue;
             refresh();});
 
@@ -923,6 +861,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         saveLocale(locale);
         setLocale(locale);
         createNoteTextInputContextMenu();
+        createEmbeddedFileCellFactory();
     }
 
     /**
@@ -1139,6 +1078,71 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     }
 
 
+    /**
+     * Creates cell factory for the embedded files listview
+     */
+    private void createEmbeddedFileCellFactory() {
+        listEmbeddedFiles.setCellFactory(lv -> {
+            ListCell<EmbeddedFile> cell = new ListCell<>() {
+                @Override
+                protected void updateItem(EmbeddedFile file, boolean empty) {
+                    super.updateItem(file, empty);
+                    setText(file == null ? null : file.getFilename());
+                }
+            };
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItemRename = new MenuItem(resourceBundle.getString("menu.listembeds.rename"));
+            MenuItem menuItemDelete = new MenuItem(resourceBundle.getString("menu.listembeds.delete"));
+
+            contextMenu.getItems().add(menuItemRename);
+            contextMenu.getItems().add(menuItemDelete);
+
+            menuItemRename.setOnAction((_) -> {
+                if (getSelectedNote() == null) return;
+                EmbeddedFile file = cell.itemProperty().getValue();
+                mainCtrl.showRenameEmbeddedFileWindow(getSelectedNote(), file);
+            });
+            menuItemDelete.setOnAction((_) -> {
+                EmbeddedFile file = cell.itemProperty().getValue();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+                alert.setTitle(resourceBundle.getString("confirmation.title"));
+                alert.setHeaderText(resourceBundle.getString("confirmation.header"));
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.askDelete"), file.getFilename()));
+                ((Button) alert.getDialogPane().lookupButton(ButtonType.YES))
+                        .setText(resourceBundle.getString("button.yes"));
+                ((Button) alert.getDialogPane().lookupButton(ButtonType.NO))
+                        .setText(resourceBundle.getString("button.no"));
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isEmpty() || result.get() != ButtonType.YES) {
+                    return;
+                }
+                if (getSelectedNote() != null) {
+                    try {
+                        server.deleteFile(getSelectedNote().id, file.getFilename());
+                    } catch (WebApplicationException e) {
+                        Alert alert2 = new Alert(Alert.AlertType.ERROR);
+                        alert2.initModality(Modality.APPLICATION_MODAL);
+                        alert2.setContentText(e.getMessage());
+                        alert2.showAndWait();
+                        return;
+                    }
+                    refresh();
+                }
+            });
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell ;
+        });
+
+    }
     /**
      * Creates a right-click context popup for the note text input.
      */
