@@ -191,7 +191,7 @@
                      </HBox.margin>
                       </MenuBar>
                   <ComboBox fx:id="collectionMenu" prefWidth="150.0" promptText="selectCollection" />
-                      <Button fx:id="editCollectionButton" mnemonicParsing="false" onAction="#editCollections" text="Edit Collections">
+                      <Button fx:id="editCollectionButton" mnemonicParsing="false" text="Edit Collections">
                      <HBox.margin>
                         <Insets left="5.0" />
                      </HBox.margin>
