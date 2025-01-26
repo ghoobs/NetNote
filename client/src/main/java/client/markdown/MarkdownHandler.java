@@ -317,32 +317,33 @@ public class MarkdownHandler {
                            webEngine.loadContent(htmlCache); // restore the html page
                         }
                         Document doc = webEngine.getDocument();
+                        if(doc != null) {
+                            // Create the event listener for anchors
+                            EventListener listenerA = this::onClickHtmlAnchor;
+                            // Add event handler to <a> hyperlinks.
+                            var aNodeList = doc.getElementsByTagName("a");
+                            for (int i = 0; i < aNodeList.getLength(); i++) {
+                                EventTarget hyperlink = (EventTarget)aNodeList.item(i);
+                                hyperlink.addEventListener("click", listenerA, true);
+                            }
 
-                        // Create the event listener for anchors
-                        EventListener listenerA = this::onClickHtmlAnchor;
-                        // Add event handler to <a> hyperlinks.
-                        var aNodeList = doc.getElementsByTagName("a");
-                        for (int i = 0; i < aNodeList.getLength(); i++) {
-                            EventTarget hyperlink = (EventTarget)aNodeList.item(i);
-                            hyperlink.addEventListener("click", listenerA, true);
-                        }
+                            // Create the event listener for anchors
+                            EventListener listenerBtn = this::onClickHtmlButton;
+                            // Add event handler to <a> hyperlinks.
+                            var btnNodeList = doc.getElementsByTagName("button");
+                            for (int i = 0; i < btnNodeList.getLength(); i++) {
+                                EventTarget hyperlink = (EventTarget)btnNodeList.item(i);
+                                hyperlink.addEventListener("click", listenerBtn, true);
+                            }
 
-                        // Create the event listener for anchors
-                        EventListener listenerBtn = this::onClickHtmlButton;
-                        // Add event handler to <a> hyperlinks.
-                        var btnNodeList = doc.getElementsByTagName("button");
-                        for (int i = 0; i < btnNodeList.getLength(); i++) {
-                            EventTarget hyperlink = (EventTarget)btnNodeList.item(i);
-                            hyperlink.addEventListener("click", listenerBtn, true);
-                        }
-
-                        // Create the event listener for anchors
-                        EventListener listenerImg = this::onClickHtmlImage;
-                        // Add event handler to <a> hyperlinks.
-                        var imgNodeList = doc.getElementsByTagName("img");
-                        for (int i = 0; i < imgNodeList.getLength(); i++) {
-                            EventTarget hyperlink = (EventTarget)imgNodeList.item(i);
+                            // Create the event listener for anchors
+                            EventListener listenerImg = this::onClickHtmlImage;
+                            // Add event handler to <a> hyperlinks.
+                            var imgNodeList = doc.getElementsByTagName("img");
+                            for (int i = 0; i < imgNodeList.getLength(); i++) {
+                                EventTarget hyperlink = (EventTarget)imgNodeList.item(i);
                                 hyperlink.addEventListener("click", listenerImg, true);
+                            }
                         }
                     }
                 }
