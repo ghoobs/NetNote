@@ -90,6 +90,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @FXML
     private Button refreshButton;
     @FXML
+    private Label labelEF;
+    @FXML
     private Button editCollectionButton;
     @FXML
     private HBox tagField;
@@ -101,7 +103,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private ToggleButton themeToggleButton;
     @FXML
     private ComboBox<Collection> collectionMenu;
-
     private boolean isDarkMode = false;
 
     private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
@@ -195,7 +196,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         mdHandler.setWebEngine(markDownView.getEngine());
         mdHandler.setEventInterface(this);
         mdHandler.launchAsyncWorker();
-
+        markDownView.setContextMenuEnabled(false);
 
         refreshCollectionList();
         listNotes.setCellFactory(listView -> new ListCell<>() {
@@ -211,65 +212,10 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 }
             }
         });
-        listEmbeddedFiles.setCellFactory(lv -> {
-            ListCell<EmbeddedFile> cell = new ListCell<>() {
-                @Override
-                protected void updateItem(EmbeddedFile file, boolean empty) {
-                    super.updateItem(file, empty);
-                    setText(file == null ? null : file.getFilename());
-                }
-            };
-
-            ContextMenu contextMenu = new ContextMenu();
-            MenuItem menuItemRename = new MenuItem(resourceBundle.getString("menu.listembeds.rename"));
-            MenuItem menuItemDelete = new MenuItem(resourceBundle.getString("menu.listembeds.delete"));
-
-            contextMenu.getItems().add(menuItemRename);
-            contextMenu.getItems().add(menuItemDelete);
-
-            menuItemRename.setOnAction((_) -> {
-                if (getSelectedNote() == null) return;
-                EmbeddedFile file = cell.itemProperty().getValue();
-                mainCtrl.showRenameEmbeddedFileWindow(getSelectedNote(), file);
-            });
-            menuItemDelete.setOnAction((_) -> {
-                EmbeddedFile file = cell.itemProperty().getValue();
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
-                alert.initModality(Modality.APPLICATION_MODAL);
-                alert.setContentText(MessageFormat.format(
-                        resourceBundle.getString("alert.file.askDelete"), file.getFilename()));
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.isEmpty() || result.get() != ButtonType.YES) {
-                    return;
-                }
-                if (getSelectedNote() != null) {
-                    try {
-                        server.deleteFile(getSelectedNote().id, file.getFilename());
-                    } catch (WebApplicationException e) {
-                        Alert alert2 = new Alert(Alert.AlertType.ERROR);
-                        alert2.initModality(Modality.APPLICATION_MODAL);
-                        alert2.setContentText(e.getMessage());
-                        alert2.showAndWait();
-                        return;
-                    }
-                    refresh();
-                }
-            });
-
-            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-                if (isNowEmpty) {
-                    cell.setContextMenu(null);
-                } else {
-                    cell.setContextMenu(contextMenu);
-                }
-            });
-            return cell ;
-        });
-
         //setupWebSocketClient();
         listNotes.setOnMouseClicked(this::onNoteClicked);
         createNoteTextInputContextMenu();
-
+        createEmbeddedFileCellFactory();
         collectionMenu.valueProperty().addListener((observable, oldValue, newValue) -> {currentCollection = newValue;
             refresh();});
 
@@ -593,9 +539,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 case D:
                     deleteNote();
                     break;
-                case M:
-                    editCollections();
-                    break;
             }
             keyEvent.consume();
         }
@@ -824,6 +767,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         propertyThemeButton.set(rb.getString("button.theme"));
         propertyCollectionMenuPrompt.set(rb.getString("selectCollection"));
         propertyTagComboBoxPrompt.set(rb.getString("selectTagPrompt"));
+        labelEF.setText(resourceBundle.getString("label.embeddedFiles"));
         switch (locale.getLanguage()) {
             case "en":
                 currentLanguage.set("🇬🇧");
@@ -914,6 +858,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         saveLocale(locale);
         setLocale(locale);
         createNoteTextInputContextMenu();
+        createEmbeddedFileCellFactory();
     }
 
     /**
@@ -1131,6 +1076,73 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
 
 
     /**
+     * Creates cell factory for the embedded files listview
+     */
+    private void createEmbeddedFileCellFactory() {
+        listEmbeddedFiles.setCellFactory(lv -> {
+            ListCell<EmbeddedFile> cell = new ListCell<>() {
+                @Override
+                protected void updateItem(EmbeddedFile file, boolean empty) {
+                    super.updateItem(file, empty);
+                    setText(file == null ? null : file.getFilename());
+                }
+            };
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItemRename = new MenuItem(resourceBundle.getString("menu.listembeds.rename"));
+            MenuItem menuItemDelete = new MenuItem(resourceBundle.getString("menu.listembeds.delete"));
+
+            contextMenu.getItems().add(menuItemRename);
+            contextMenu.getItems().add(menuItemDelete);
+
+            menuItemRename.setOnAction((_) -> {
+                if (getSelectedNote() == null) return;
+                EmbeddedFile file = cell.itemProperty().getValue();
+                mainCtrl.showRenameEmbeddedFileWindow(getSelectedNote(), file);
+            });
+            menuItemDelete.setOnAction((_) -> {
+                EmbeddedFile file = cell.itemProperty().getValue();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+                alert.setTitle(resourceBundle.getString("confirmation.title"));
+                alert.setHeaderText(resourceBundle.getString("confirmation.header"));
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.setContentText(MessageFormat.format(
+                        resourceBundle.getString("alert.file.askDelete"), file.getFilename()));
+                ((Button) alert.getDialogPane().lookupButton(ButtonType.YES))
+                        .setText(resourceBundle.getString("button.yes"));
+                ((Button) alert.getDialogPane().lookupButton(ButtonType.NO))
+                        .setText(resourceBundle.getString("button.no"));
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isEmpty() || result.get() != ButtonType.YES) {
+                    return;
+                }
+                if (getSelectedNote() != null) {
+                    try {
+                        server.deleteFile(getSelectedNote().id, file.getFilename());
+                    } catch (WebApplicationException e) {
+                        Alert alert2 = new Alert(Alert.AlertType.ERROR);
+                        alert2.initModality(Modality.APPLICATION_MODAL);
+                        alert.setTitle(resourceBundle.getString("error.title"));
+                        alert.setHeaderText(resourceBundle.getString("error.header"));
+                        alert2.setContentText(e.getMessage());
+                        alert2.showAndWait();
+                        return;
+                    }
+                    refresh();
+                }
+            });
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell ;
+        });
+
+    }
+    /**
      * Creates a right-click context popup for the note text input.
      */
     private void createNoteTextInputContextMenu() {
@@ -1198,6 +1210,12 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void askUserToSaveEmbeddedFile(EmbeddedFile file) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
         alert.initModality(Modality.APPLICATION_MODAL);
+        ((Button) alert.getDialogPane().lookupButton(ButtonType.YES))
+                .setText(resourceBundle.getString("button.yes"));
+        ((Button) alert.getDialogPane().lookupButton(ButtonType.NO))
+                .setText(resourceBundle.getString("button.no"));
+        alert.setTitle(resourceBundle.getString("confirmation.title"));
+        alert.setHeaderText(resourceBundle.getString("confirmation.header"));
         alert.setContentText(MessageFormat.format(
                 resourceBundle.getString("alert.file.askDownload"), file.getFilename()));
         Optional<ButtonType> result = alert.showAndWait();
@@ -1219,6 +1237,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             } catch (Exception ex) {
                 Alert alertError = new Alert(Alert.AlertType.ERROR);
                 alertError.initModality(Modality.APPLICATION_MODAL);
+                alert.setTitle(resourceBundle.getString("error.title"));
+                alert.setHeaderText(resourceBundle.getString("error.header"));
                 alertError.setContentText(MessageFormat.format(
                         resourceBundle.getString("alert.file.writeFail"), file.getFilename()));
                 alert.showAndWait();
@@ -1245,6 +1265,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         String fileName = file.getName();
         if(getSelectedNote() == null){
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(resourceBundle.getString("alert.no.note"));
             alert.showAndWait();
@@ -1257,6 +1279,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 .anyMatch(name -> name.toLowerCase().equals(fileName.toLowerCase()))
         ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.exists"), fileName));
@@ -1268,6 +1292,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             contents = Files.toByteArray(file);
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.readFail"), fileName));
