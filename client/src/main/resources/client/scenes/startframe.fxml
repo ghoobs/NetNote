@@ -18,6 +18,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.web.WebView?>
 
+<?import javafx.scene.control.ContextMenu?>
 <AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" styleClass="light-mode" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.NoteOverviewCtrl">
     <children>
         <HBox layoutY="33.0" prefHeight="340.0" prefWidth="139.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="461.0" AnchorPane.topAnchor="-1.0">
@@ -39,8 +40,9 @@
                         <SplitPane dividerPositions="0.754180602006689, 0.5" orientation="VERTICAL" prefHeight="252.0" prefWidth="187.0">
                           <items>
                                     <TextArea fx:id="noteWriting" onKeyReleased="#editedTheNote" prefHeight="185.0" prefWidth="226.0" />
-                              <Label fx:id="labelEF" prefHeight="17.0" prefWidth="228.0" text="Embedded Files:" />
-                              <ListView fx:id="listEmbeddedFiles" maxHeight="400.0" prefHeight="85.0" prefWidth="224.0" />
+                              <Label fx:id="labelEF" prefHeight="17.0" prefWidth="228.0" text="label.embeddedFiles"/>
+                              <ListView fx:id="listEmbeddedFiles" maxHeight="400.0" prefHeight="85.0" prefWidth="224.0">
+                              </ListView>
                           </items>
                         </SplitPane>
                     </items>

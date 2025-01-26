@@ -90,6 +90,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     @FXML
     private Button refreshButton;
     @FXML
+    private Label labelEF;
+    @FXML
     private Button editCollectionButton;
     @FXML
     private HBox tagField;
@@ -101,7 +103,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private ToggleButton themeToggleButton;
     @FXML
     private ComboBox<Collection> collectionMenu;
-
     private boolean isDarkMode = false;
 
     private Set<String> activeTagFilters = new LinkedHashSet<>(); // Stores currently selected tags
@@ -235,9 +236,15 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             menuItemDelete.setOnAction((_) -> {
                 EmbeddedFile file = cell.itemProperty().getValue();
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
+                alert.setTitle(resourceBundle.getString("confirmation.title"));
+                alert.setHeaderText(resourceBundle.getString("confirmation.header"));
                 alert.initModality(Modality.APPLICATION_MODAL);
                 alert.setContentText(MessageFormat.format(
                         resourceBundle.getString("alert.file.askDelete"), file.getFilename()));
+                ((Button) alert.getDialogPane().lookupButton(ButtonType.YES))
+                        .setText(resourceBundle.getString("button.yes"));
+                ((Button) alert.getDialogPane().lookupButton(ButtonType.NO))
+                        .setText(resourceBundle.getString("button.no"));
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isEmpty() || result.get() != ButtonType.YES) {
                     return;
@@ -255,7 +262,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                     refresh();
                 }
             });
-
+        //    renameFileMenuItem.setText(resourceBundle.getString("menu.listembeds.rename"));
+         //   deleteFileMenuItem.setText(resourceBundle.getString("menu.listembeds.delete"));
             cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
                 if (isNowEmpty) {
                     cell.setContextMenu(null);
@@ -824,6 +832,7 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         propertyThemeButton.set(rb.getString("button.theme"));
         propertyCollectionMenuPrompt.set(rb.getString("selectCollection"));
         propertyTagComboBoxPrompt.set(rb.getString("selectTagPrompt"));
+        labelEF.setText(resourceBundle.getString("label.embeddedFiles"));
         switch (locale.getLanguage()) {
             case "en":
                 currentLanguage.set("🇬🇧");

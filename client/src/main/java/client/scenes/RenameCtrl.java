@@ -9,7 +9,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.*;
 import javafx.stage.Modality;
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -24,6 +23,18 @@ public class RenameCtrl {
     @FXML
     private TextField fileNameInput;
 
+    @FXML
+    private Label enterNewNameLabel;
+
+    @FXML
+    private Button renameFileCancelButton;
+
+    @FXML
+    private Button renameFileOkButton;
+
+    @FXML
+    private TitledPane renamePane;
+
     private Note currentNote;
     private EmbeddedFile currentFile;
 
@@ -32,7 +43,7 @@ public class RenameCtrl {
     private ResourceBundle resourceBundle;
 
     /**
-     * Constructs a new NoteOverviewCtrl with the specified server and main controller.
+     * Constructs a new RenameCtrl with the specified server and main controller.
      *
      * @param server    the server utils instance for interacting with the server
      * @param mainCtrl  the main controller of the application
@@ -42,15 +53,20 @@ public class RenameCtrl {
         this.server = server;
         this.mainCtrl = mainCtrl;
     }
+    @FXML
+    public void initialize() {
+        setLocale(loadSavedLocale());
+    }
 
 
-    /** 
+    /**
      * called when clicked on ok button
      */
     public void ok() {
         String fullFileName = fileNameInput.getText() + "." + currentFile.getFiletype();
         if (!fullFileName.matches(EmbeddedFile.REGEX_URL_NAMING_FORMAT)) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error");
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.renameInvalid"), fullFileName));
@@ -67,6 +83,8 @@ public class RenameCtrl {
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.renameError"), fullFileName));
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.showAndWait();
             return;
         }
@@ -85,7 +103,7 @@ public class RenameCtrl {
     }
     /**
      *  called when clicked on cancel button
-    */
+     */
     public void cancel() {
         mainCtrl.showOverview();
     }
@@ -98,7 +116,6 @@ public class RenameCtrl {
         fileNameInput.setText(fileNameNoExt);
     }
 
-    
     /**
      * Sets the locale for the application and updates all UI properties with localized strings.
      *
@@ -106,6 +123,7 @@ public class RenameCtrl {
      */
     public void setLocale(Locale locale) {
         this.resourceBundle = ResourceBundle.getBundle("bundle", locale);
+        refreshTexts();
     }
 
     /**
@@ -122,6 +140,16 @@ public class RenameCtrl {
         } catch (IOException e) {
             return Locale.ENGLISH;
         }
+    }
+
+    /**
+     * Refreshes the text of all translatable elements in the UI.
+     */
+    private void refreshTexts() {
+        renamePane.setText(resourceBundle.getString("renamePane.title"));
+        enterNewNameLabel.setText(resourceBundle.getString("enterNewNameLabel"));
+        renameFileCancelButton.setText(resourceBundle.getString("renameFileCancelButton"));
+        renameFileOkButton.setText(resourceBundle.getString("renameFileOkButton"));
     }
 
     /**
