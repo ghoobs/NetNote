@@ -539,9 +539,6 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 case D:
                     deleteNote();
                     break;
-                case M:
-                    editCollections();
-                    break;
             }
             keyEvent.consume();
         }
@@ -1125,6 +1122,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                     } catch (WebApplicationException e) {
                         Alert alert2 = new Alert(Alert.AlertType.ERROR);
                         alert2.initModality(Modality.APPLICATION_MODAL);
+                        alert.setTitle(resourceBundle.getString("error.title"));
+                        alert.setHeaderText(resourceBundle.getString("error.header"));
                         alert2.setContentText(e.getMessage());
                         alert2.showAndWait();
                         return;
@@ -1211,6 +1210,12 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
     private void askUserToSaveEmbeddedFile(EmbeddedFile file) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
         alert.initModality(Modality.APPLICATION_MODAL);
+        ((Button) alert.getDialogPane().lookupButton(ButtonType.YES))
+                .setText(resourceBundle.getString("button.yes"));
+        ((Button) alert.getDialogPane().lookupButton(ButtonType.NO))
+                .setText(resourceBundle.getString("button.no"));
+        alert.setTitle(resourceBundle.getString("confirmation.title"));
+        alert.setHeaderText(resourceBundle.getString("confirmation.header"));
         alert.setContentText(MessageFormat.format(
                 resourceBundle.getString("alert.file.askDownload"), file.getFilename()));
         Optional<ButtonType> result = alert.showAndWait();
@@ -1232,6 +1237,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             } catch (Exception ex) {
                 Alert alertError = new Alert(Alert.AlertType.ERROR);
                 alertError.initModality(Modality.APPLICATION_MODAL);
+                alert.setTitle(resourceBundle.getString("error.title"));
+                alert.setHeaderText(resourceBundle.getString("error.header"));
                 alertError.setContentText(MessageFormat.format(
                         resourceBundle.getString("alert.file.writeFail"), file.getFilename()));
                 alert.showAndWait();
@@ -1258,6 +1265,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
         String fileName = file.getName();
         if(getSelectedNote() == null){
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(resourceBundle.getString("alert.no.note"));
             alert.showAndWait();
@@ -1270,6 +1279,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
                 .anyMatch(name -> name.toLowerCase().equals(fileName.toLowerCase()))
         ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.exists"), fileName));
@@ -1281,6 +1292,8 @@ public class NoteOverviewCtrl implements Initializable, IMarkdownEvents {
             contents = Files.toByteArray(file);
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.readFail"), fileName));

@@ -66,7 +66,8 @@ public class RenameCtrl {
         String fullFileName = fileNameInput.getText() + "." + currentFile.getFiletype();
         if (!fullFileName.matches(EmbeddedFile.REGEX_URL_NAMING_FORMAT)) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Error");
+            alert.setTitle(resourceBundle.getString("error.title"));
+            alert.setHeaderText(resourceBundle.getString("error.header"));
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(MessageFormat.format(
                     resourceBundle.getString("alert.file.renameInvalid"), fullFileName));
