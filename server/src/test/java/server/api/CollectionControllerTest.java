@@ -33,7 +33,7 @@ class CollectionControllerTest {
 
     @Test
     void getAll() {
-        assertEquals(List.of("Standard Collection", "Test Collection", "Test Collection 2"),
+        assertEquals(List.of("default", "Test Collection", "Test Collection 2"),
                 collectionController.getAll().stream().map(x -> x.name).toList());
     }
 

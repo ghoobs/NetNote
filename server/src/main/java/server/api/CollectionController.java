@@ -41,7 +41,7 @@ public class CollectionController {
 
     private void initializeStandardCollection() {
         if (collectionService.getAllCollections().isEmpty()) {
-            Collection collection = new Collection("Standard Collection");
+            Collection collection = new Collection("default");
             collectionService.saveCollection(collection);
         }
     }
